@@ -501,16 +501,23 @@ export const getAdminDashboardData = createServerFn({ method: "POST" })
       return { isStaff: false, sessions: [], scorecards: [] };
     }
 
-    // 2. Fetch all sessions and scorecards as admin (bypassing RLS)
+    // 2. Fetch all sessions, profiles, and scorecards as admin (bypassing RLS)
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: sessions }, { data: scorecards }] = await Promise.all([
-      supabaseAdmin.from("interview_sessions").select("*, profiles(full_name, email)").order("created_at", { ascending: false }).limit(100),
+    const [{ data: sessions }, { data: profiles }, { data: scorecards }] = await Promise.all([
+      supabaseAdmin.from("interview_sessions").select("*").order("created_at", { ascending: false }).limit(100),
+      supabaseAdmin.from("profiles").select("id, full_name, email"),
       supabaseAdmin.from("scorecards").select("*"),
     ]);
 
+    const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
+    const enrichedSessions = sessions?.map((s) => ({
+      ...s,
+      profiles: profileMap.get(s.user_id) || null
+    })) ?? [];
+
     return {
       isStaff: true,
-      sessions: sessions ?? [],
+      sessions: enrichedSessions,
       scorecards: scorecards ?? []
     };
   });
