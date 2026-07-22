@@ -18,6 +18,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedScorecardIdRouteImport } from './routes/_authenticated/scorecard.$id'
 import { Route as AuthenticatedInterviewIdRouteImport } from './routes/_authenticated/interview.$id'
+import { Route as AuthenticatedGuesstimateIdRouteImport } from './routes/_authenticated/guesstimate.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -65,6 +66,12 @@ const AuthenticatedInterviewIdRoute =
     path: '/interview/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGuesstimateIdRoute =
+  AuthenticatedGuesstimateIdRouteImport.update({
+    id: '/guesstimate/$id',
+    path: '/guesstimate/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new': typeof AuthenticatedNewRoute
+  '/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/scorecard/$id': typeof AuthenticatedScorecardIdRoute
 }
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new': typeof AuthenticatedNewRoute
+  '/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/scorecard/$id': typeof AuthenticatedScorecardIdRoute
 }
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/new': typeof AuthenticatedNewRoute
+  '/_authenticated/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/_authenticated/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/_authenticated/scorecard/$id': typeof AuthenticatedScorecardIdRoute
 }
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/new'
+    | '/guesstimate/$id'
     | '/interview/$id'
     | '/scorecard/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/new'
+    | '/guesstimate/$id'
     | '/interview/$id'
     | '/scorecard/$id'
   id:
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/history'
     | '/_authenticated/new'
+    | '/_authenticated/guesstimate/$id'
     | '/_authenticated/interview/$id'
     | '/_authenticated/scorecard/$id'
   fileRoutesById: FileRoutesById
@@ -203,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInterviewIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/guesstimate/$id': {
+      id: '/_authenticated/guesstimate/$id'
+      path: '/guesstimate/$id'
+      fullPath: '/guesstimate/$id'
+      preLoaderRoute: typeof AuthenticatedGuesstimateIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -211,6 +231,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNewRoute: typeof AuthenticatedNewRoute
+  AuthenticatedGuesstimateIdRoute: typeof AuthenticatedGuesstimateIdRoute
   AuthenticatedInterviewIdRoute: typeof AuthenticatedInterviewIdRoute
   AuthenticatedScorecardIdRoute: typeof AuthenticatedScorecardIdRoute
 }
@@ -220,6 +241,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNewRoute: AuthenticatedNewRoute,
+  AuthenticatedGuesstimateIdRoute: AuthenticatedGuesstimateIdRoute,
   AuthenticatedInterviewIdRoute: AuthenticatedInterviewIdRoute,
   AuthenticatedScorecardIdRoute: AuthenticatedScorecardIdRoute,
 }

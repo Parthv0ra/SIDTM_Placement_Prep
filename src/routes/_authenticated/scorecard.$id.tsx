@@ -89,7 +89,7 @@ function Scorecard() {
                 {r?.transcript && <p className="mt-2 rounded bg-secondary/40 p-2 text-xs text-muted-foreground">{r.transcript}</p>}
                 {scores && (
                   <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                    {Object.entries(scores).map(([k, v]) => (
+                    {Object.entries(scores).filter(([k, v]) => typeof v === "number").map(([k, v]) => (
                       <span key={k} className="rounded-full bg-secondary px-2 py-0.5 capitalize">{k.replace("_", " ")}: <b>{v}</b></span>
                     ))}
                   </div>

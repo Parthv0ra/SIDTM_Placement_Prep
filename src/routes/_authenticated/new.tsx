@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { parseResume, parsePastedResume, parseJdFile, startSession } from "@/lib/interview.functions";
+import { parseResume, parsePastedResume, parseJdFile, startSession, startGuesstimate } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -341,12 +341,40 @@ const isCourseCovered = (courseName: string, parsedSkills: string[]) => {
   return words.some(w => normalizedSkills.some(s => s.includes(w)));
 };
 
+const GUESSTIMATES = [
+  {
+    id: "g1",
+    title: "Pune Phone Sales",
+    question: "Calculate the number of mobile phones sold in Pune in one day and explain your driver logic.",
+    description: "Tests logical structuring, driver identification, and basic calculation flow relevant to retail tech."
+  },
+  {
+    id: "g2",
+    title: "Tea Shop Revenue (Pune)",
+    question: "Estimate the monthly revenue of a local tea shop (Amruttulya) in Pune. Walk through your footfall and pricing assumptions.",
+    description: "Tests local context pricing, footfall estimation, and basic unit economics."
+  },
+  {
+    id: "g3",
+    title: "EV Two-Wheeler Sales",
+    question: "Estimate the annual sales volume of Electric Two-Wheelers in India. Detail your adoption rate framework.",
+    description: "Tests market sizing, adoption rates, policy factors, and emerging tech trends."
+  },
+  {
+    id: "g4",
+    title: "SIDTM Network Peak Load",
+    question: "Estimate the peak internet bandwidth requirement for the SIDTM campus during placement week.",
+    description: "Tests technical network sizing, student concurrency, and data traffic estimation."
+  }
+];
+
 function NewInterview() {
   const router = useRouter();
   const parseFn = useServerFn(parseResume);
   const parsePastedResumeFn = useServerFn(parsePastedResume);
   const parseJdFileFn = useServerFn(parseJdFile);
   const startFn = useServerFn(startSession);
+  const startGuesstimateFn = useServerFn(startGuesstimate);
 
   const [file, setFile] = useState<File | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
@@ -358,6 +386,9 @@ function NewInterview() {
   const [roleCustom, setRoleCustom] = useState("");
   const [uploading, setUploading] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [practiceMode, setPracticeMode] = useState<"interview" | "guesstimate">("interview");
+  const [selectedGuesstimate, setSelectedGuesstimate] = useState<string>("");
+  const [guesstimateStarting, setGuesstimateStarting] = useState(false);
 
   // Resume pasting states
   const [pastedResumeText, setPastedResumeText] = useState("");
@@ -555,9 +586,34 @@ function NewInterview() {
     }
   }
 
+  async function handleStartGuesstimate(g: typeof GUESSTIMATES[number]) {
+    setGuesstimateStarting(true);
+    try {
+      const { sessionId } = await startGuesstimateFn({
+        data: {
+          questionText: g.question,
+          title: g.title
+        }
+      });
+      toast.success("Guesstimate practice ready!");
+      router.navigate({ to: "/guesstimate/$id", params: { id: sessionId } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to start guesstimate");
+    } finally {
+      setGuesstimateStarting(false);
+    }
+  }
+
   return (
-    <AppShell title="New mock interview" subtitle="Upload your resume, paste the JD, and target a role.">
-      <div className="grid gap-6 md:grid-cols-2">
+    <AppShell title="Placement Prep Hub" subtitle="Practice role-specific mock interviews or solve logical guesstimates.">
+      <Tabs value={practiceMode} onValueChange={(val: any) => setPracticeMode(val)} className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+          <TabsTrigger value="interview">Mock Interview (Webcam/Audio)</TabsTrigger>
+          <TabsTrigger value="guesstimate">Guesstimate & Case Practice</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="interview" className="mt-6">
+          <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">1. Resume</CardTitle>
@@ -774,6 +830,81 @@ function NewInterview() {
           </CardContent>
         </Card>
       </div>
+      </TabsContent>
+
+      <TabsContent value="guesstimate" className="mt-6">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {GUESSTIMATES.map((g) => (
+                <Card 
+                  key={g.id} 
+                  className={`cursor-pointer border transition-all hover:border-primary/50 hover:shadow-md ${
+                    selectedGuesstimate === g.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                  }`}
+                  onClick={() => setSelectedGuesstimate(g.id)}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold">{g.title}</CardTitle>
+                    <CardDescription className="text-xs leading-normal">{g.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+
+            {selectedGuesstimate && (
+              <Card className="border-primary/30">
+                <CardHeader className="pb-2 bg-primary/5 border-b">
+                  <CardTitle className="text-sm text-primary">Selected Case</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                    {GUESSTIMATES.find(g => g.id === selectedGuesstimate)?.question}
+                  </p>
+                  <Button 
+                    className="w-full" 
+                    disabled={guesstimateStarting}
+                    onClick={() => {
+                      const g = GUESSTIMATES.find(x => x.id === selectedGuesstimate);
+                      if (g) handleStartGuesstimate(g);
+                    }}
+                  >
+                    {guesstimateStarting ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparing scratchpad…</>
+                    ) : (
+                      "Start Case Practice Workspace"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div className="md:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-semibold">Logical Breakdown Drivers</CardTitle>
+                <CardDescription className="text-xs">Frameworks for guesstimating at SIDTM</CardDescription>
+              </CardHeader>
+              <CardContent className="text-xs text-muted-foreground space-y-4 leading-relaxed font-normal">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Population & Demographics</h4>
+                  <p>Start with total geographic population (e.g. Pune ~4M, India ~1.4B) and segment by age, gender, rural vs urban, income level, or digital literacy.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Replacement & Lifespan Levers</h4>
+                  <p>For sales estimation (like phones sold daily), calculate replacement rate: total active user base divided by the average device lifespan (e.g. 2 years = 730 days).</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Logical Formulas</h4>
+                  <p>Interviews test if your formula scales cleanly. Always write out your logical formula before picking assumptions or doing arithmetic!</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </TabsContent>
+      </Tabs>
     </AppShell>
   );
 }

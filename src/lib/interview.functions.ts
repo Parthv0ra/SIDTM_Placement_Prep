@@ -149,11 +149,22 @@ export const startSession = createServerFn({ method: "POST" })
 
     const { chatJSON } = await import("./ai-gateway.server");
 
-    const parsedResume = (resume.parsed as any) || {};
-    const certifications = parsedResume.certifications || [];
-    const certPrompt = certifications.length > 0
-      ? `\n\nCertifications Claimed: ${certifications.join(", ")}. Note: Since certifications are listed, the 2 resume-specific questions MUST serve as a 5-minute Certification Viva, probing the core concepts, syllabus, and practical knowledge of these specific certifications to verify depth of knowledge.`
-      : "";
+    // Seed with real past questions
+    let seedPrompt = "";
+    try {
+      const qBank = await import("./question-bank.json");
+      const getRandomElement = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+      const seedHr = qBank.hr && qBank.hr.length > 0 ? getRandomElement(qBank.hr) : "";
+      const seedTech = qBank.technical && qBank.technical.length > 0 ? getRandomElement(qBank.technical) : "";
+      const seedTelecom = qBank.telecom && qBank.telecom.length > 0 ? getRandomElement(qBank.telecom) : "";
+
+      if (seedHr || seedTech || seedTelecom) {
+        seedPrompt = `\n\nYou MUST seed the interview by incorporating the following real past questions (adjusting details to match context if needed, but retaining their core concepts):
+${seedTech ? `- Technical question: "${seedTech}"\n` : ""}${seedHr ? `- Behavioral question: "${seedHr}"\n` : ""}${seedTelecom ? `- Role-specific / Telecom question: "${seedTelecom}"\n` : ""}`;
+      }
+    } catch (e) {
+      console.warn("Failed to load question bank for seeding:", e);
+    }
 
     const analysis = await chatJSON<{
       match_score: number;
@@ -167,7 +178,7 @@ export const startSession = createServerFn({ method: "POST" })
         "You are a senior placement coach. Given a resume and target job description (JD) within a specific Domain, produce a match analysis and a personalized set of 6 interview questions (mix of technical, behavioral (STAR), role-specific, and resume-specific). Return JSON only.",
       messages: [{
         role: "user",
-        content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.${certPrompt}`,
+        content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.${certPrompt}${seedPrompt}`,
       }],
     });
 
@@ -231,22 +242,18 @@ export const scoreResponse = createServerFn({ method: "POST" })
     const { data: q } = await supabase.from("questions").select("*").eq("id", resp.question_id).single();
     const { data: session } = await supabase.from("interview_sessions").select("*, resumes(parsed), job_descriptions(raw_text)").eq("id", resp.session_id).single();
 
-    const scores = await chatJSON<{
-      relevance: number;
-      technical_accuracy: number;
-      communication: number;
-      fluency: number;
-      confidence: number;
-      structure: number;
-      filler_words: number;
-      feedback: string;
-    }>({
-      system:
-        "You are an expert interviewer scoring one interview response on multiple dimensions (0-100 integers). Consider the target role and domain, the question category, and STAR structure for behavioral answers. Return JSON only.",
-      messages: [{
-        role: "user",
-        content: `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: relevance, technical_accuracy, communication, fluency, confidence, structure, filler_words (count of filler words like um/uh/like), feedback (2-3 sentences of actionable feedback).`,
-      }],
+    const isGuesstimate = q?.category === "guesstimate";
+    const promptSystem = isGuesstimate
+      ? "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Evaluate how logically they structured their formula, how explicit their driver assumptions are, and if they performed a sanity check on the final number. Return JSON only."
+      : "You are an expert interviewer scoring one interview response on multiple dimensions (0-100 integers). Consider the target role and domain, the question category, and STAR structure for behavioral answers. Return JSON only.";
+
+    const promptUser = isGuesstimate
+      ? `Guesstimate Case: ${q?.question_text}\nStudent Scratchpad Solution:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback analyzing their driver tree, assumptions, and final sanity check).`
+      : `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: relevance, technical_accuracy, communication, fluency, confidence, structure, filler_words (count of filler words like um/uh/like), feedback (2-3 sentences of actionable feedback).`;
+
+    const scores = await chatJSON<any>({
+      system: promptSystem,
+      messages: [{ role: "user", content: promptUser }],
     });
 
     await supabase.from("responses").update({ transcript, scores }).eq("id", resp.id);
@@ -266,15 +273,34 @@ export const finalizeSession = createServerFn({ method: "POST" })
       .select("*, questions(question_text,category)")
       .eq("session_id", data.sessionId);
 
-    const cats = ["relevance","technical_accuracy","communication","fluency","confidence","structure"] as const;
-    const category_scores: Record<string, number> = {};
-    for (const c of cats) {
-      const vals = (responses ?? []).map((r) => (r.scores as Record<string, number> | null)?.[c]).filter((v): v is number => typeof v === "number");
-      category_scores[c] = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-    }
-    const overall = Math.round(Object.values(category_scores).reduce((a, b) => a + b, 0) / cats.length);
-
+    const count = responses?.length || 1;
     const { chatJSON } = await import("./ai-gateway.server");
+    const isGuesstimate = session.company === "Guesstimate";
+
+    let overall = 0;
+    let category_scores: any = {};
+
+    if (isGuesstimate) {
+      const driver = responses!.reduce((acc, r) => acc + ((r.scores as any)?.driver_breakdown ?? 0), 0) / count;
+      const assumptions = responses!.reduce((acc, r) => acc + ((r.scores as any)?.assumptions ?? 0), 0) / count;
+      const sanity = responses!.reduce((acc, r) => acc + ((r.scores as any)?.sanity_check ?? 0), 0) / count;
+      const overall_logic = responses!.reduce((acc, r) => acc + ((r.scores as any)?.overall_logic ?? 0), 0) / count;
+      const struct = responses!.reduce((acc, r) => acc + ((r.scores as any)?.structure ?? 0), 0) / count;
+      const tech = responses!.reduce((acc, r) => acc + ((r.scores as any)?.technical_accuracy ?? 0), 0) / count;
+
+      overall = Math.round((driver + assumptions + sanity + overall_logic + struct + tech) / 6);
+      category_scores = { driver_breakdown: driver, assumptions, sanity_check: sanity, overall_logic, structure: struct, technical_accuracy: tech };
+    } else {
+      const cats = ["relevance","technical_accuracy","communication","fluency","confidence","structure"] as const;
+      const scores: Record<string, number> = {};
+      for (const c of cats) {
+        const vals = (responses ?? []).map((r) => (r.scores as Record<string, number> | null)?.[c]).filter((v): v is number => typeof v === "number");
+        scores[c] = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+      }
+      category_scores = scores;
+      overall = Math.round(Object.values(category_scores).reduce((a, b) => a + b, 0) / cats.length);
+    }
+
     const summary = await chatJSON<{ strengths: string[]; improvements: string[]; recommendations: string[] }>({
       system: "You are a placement coach summarizing an interview session. Return JSON only.",
       messages: [{
@@ -299,4 +325,53 @@ export const finalizeSession = createServerFn({ method: "POST" })
     }).eq("id", session.id);
 
     return card;
+  });
+
+export const startGuesstimate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      questionText: z.string().min(10),
+      title: z.string().min(1),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // 1. Create a placeholder JD
+    const { data: jd, error: jdErr } = await supabase
+      .from("job_descriptions")
+      .insert({
+        user_id: userId,
+        company: "Guesstimate",
+        role: data.title,
+        raw_text: data.questionText
+      })
+      .select().single();
+
+    if (jdErr || !jd) throw new Error(jdErr?.message ?? "JD insert failed");
+
+    // 2. Create interview session
+    const { data: session, error: sErr } = await supabase.from("interview_sessions").insert({
+      user_id: userId,
+      company: "Guesstimate",
+      role: data.title,
+      jd_id: jd.id,
+      status: "pending",
+    }).select().single();
+
+    if (sErr || !session) throw new Error(sErr?.message ?? "Session insert failed");
+
+    // 3. Create the single question
+    const { error: qErr } = await supabase.from("questions").insert({
+      session_id: session.id,
+      question_text: data.questionText,
+      category: "guesstimate",
+      order_index: 0,
+      time_limit_sec: 600, // 10 minutes limit
+    });
+
+    if (qErr) throw new Error(qErr.message);
+
+    return { sessionId: session.id };
   });
