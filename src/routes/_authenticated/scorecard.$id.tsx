@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lightbulb, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/scorecard/$id")({
   component: Scorecard,
@@ -75,6 +75,31 @@ function Scorecard() {
           </CardContent>
         </Card>
       </div>
+
+      {data.session?.company === "Guesstimate" && data.card.improvements && (
+        <Card className="mt-6 border-primary/30">
+          <CardHeader className="bg-primary/5 pb-3 border-b">
+            <CardTitle className="text-base text-primary flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-primary animate-pulse" />
+              Ideal Approach & Solution Key
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            <div className="space-y-1">
+              <h4 className="text-xs font-semibold text-foreground">Recommended Logical Approach</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap rounded-md bg-secondary/30 p-3 border">
+                {(data.card.improvements as any).guesstimate_ideal_approach}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-semibold text-foreground">Expected Value Range & Sanity Check</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap rounded-md bg-secondary/30 p-3 border">
+                {(data.card.improvements as any).guesstimate_expected_value}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="mt-6">
         <CardHeader><CardTitle className="text-base">Per-question feedback</CardTitle></CardHeader>

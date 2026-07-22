@@ -341,13 +341,29 @@ export const finalizeSession = createServerFn({ method: "POST" })
       overall = Math.round(Object.values(category_scores).reduce((a, b) => a + b, 0) / cats.length);
     }
 
-    const summary = await chatJSON<{ strengths: string[]; improvements: string[]; recommendations: string[] }>({
-      system: "You are a placement coach summarizing an interview session. Return JSON only.",
-      messages: [{
-        role: "user",
-        content: `Target Domain: ${session.company} — Role: ${session.role}\nCategory scores: ${JSON.stringify(category_scores)}\n\nResponses:\n${(responses ?? []).map((r) => `Q(${(r as any).questions?.category}): ${(r as any).questions?.question_text}\nA: ${r.transcript ?? ""}\nScores: ${JSON.stringify(r.scores)}`).join("\n\n")}\n\nReturn JSON: { strengths: string[3-5], improvements: string[3-5], recommendations: string[3-5] }`,
-      }],
-    });
+    let summary: any = {};
+    if (isGuesstimate) {
+      summary = await chatJSON<{ strengths: string[]; recommendations: string[]; guesstimate_ideal_approach: string; guesstimate_expected_value: string }>({
+        system: "You are a senior placement coach and management consultant summarizing a Guesstimate case practice. Return JSON only.",
+        messages: [{
+          role: "user",
+          content: `Target: ${session.role}\nQuestion: ${(responses ?? [])[0]?.questions?.question_text}\nStudent Response:\n${(responses ?? [])[0]?.transcript ?? ""}\nStudent Scores: ${JSON.stringify(category_scores)}\n\nReturn JSON: {
+            strengths: string[2-3],
+            recommendations: string[2-3],
+            guesstimate_ideal_approach: string (detailed step-by-step driver formula, key assumptions to use, and logical calculation tree recommended to solve this case),
+            guesstimate_expected_value: string (the expected numerical range or scale of the final answer, explaining why that scale is a reasonable sanity check)
+          }`
+        }]
+      });
+    } else {
+      summary = await chatJSON<{ strengths: string[]; improvements: string[]; recommendations: string[] }>({
+        system: "You are a placement coach summarizing an interview session. Return JSON only.",
+        messages: [{
+          role: "user",
+          content: `Target Domain: ${session.company} — Role: ${session.role}\nCategory scores: ${JSON.stringify(category_scores)}\n\nResponses:\n${(responses ?? []).map((r) => `Q(${(r as any).questions?.category}): ${(r as any).questions?.question_text}\nA: ${r.transcript ?? ""}\nScores: ${JSON.stringify(r.scores)}`).join("\n\n")}\n\nReturn JSON: { strengths: string[3-5], improvements: string[3-5], recommendations: string[3-5] }`,
+        }],
+      });
+    }
 
     const { data: card, error } = await supabase.from("scorecards").upsert({
       session_id: session.id,
@@ -355,7 +371,10 @@ export const finalizeSession = createServerFn({ method: "POST" })
       overall_score: overall,
       category_scores,
       strengths: summary.strengths,
-      improvements: summary.improvements,
+      improvements: isGuesstimate ? {
+        guesstimate_ideal_approach: summary.guesstimate_ideal_approach,
+        guesstimate_expected_value: summary.guesstimate_expected_value
+      } as any : summary.improvements,
       recommendations: summary.recommendations,
     }, { onConflict: "session_id" }).select().single();
     if (error) throw new Error(error.message);
