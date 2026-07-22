@@ -857,6 +857,7 @@ function NewInterview() {
                     selectedGuesstimate === g.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
                   }`}
                   onClick={() => setSelectedGuesstimate(g.id)}
+                  onDoubleClick={() => handleStartGuesstimate(g)}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-semibold leading-snug">{g.title}</CardTitle>
