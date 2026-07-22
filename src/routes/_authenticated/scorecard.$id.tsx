@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { getScorecardData } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -13,27 +14,12 @@ export const Route = createFileRoute("/_authenticated/scorecard/$id")({
 
 function Scorecard() {
   const { id } = Route.useParams();
+  const getScorecardDataFn = useServerFn(getScorecardData);
+
   const { data, isLoading } = useQuery({
     queryKey: ["scorecard", id],
     queryFn: async () => {
-      const [sessionRes, cardRes, responsesRes, questionsRes] = await Promise.all([
-        supabase.from("interview_sessions").select("*").eq("id", id).single(),
-        supabase.from("scorecards").select("*").eq("session_id", id).single(),
-        supabase.from("responses").select("*").eq("session_id", id),
-        supabase.from("questions").select("*").eq("session_id", id).order("order_index"),
-      ]);
-
-      if (sessionRes.error) console.error("Scorecard View: Session query error:", sessionRes.error);
-      if (cardRes.error) console.error("Scorecard View: Scorecard query error:", cardRes.error);
-      if (responsesRes.error) console.error("Scorecard View: Responses query error:", responsesRes.error);
-      if (questionsRes.error) console.error("Scorecard View: Questions query error:", questionsRes.error);
-
-      return {
-        session: sessionRes.data,
-        card: cardRes.data,
-        responses: responsesRes.data ?? [],
-        questions: questionsRes.data ?? []
-      };
+      return getScorecardDataFn({ data: { sessionId: id } });
     },
   });
 

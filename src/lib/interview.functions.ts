@@ -451,3 +451,39 @@ export const startGuesstimate = createServerFn({ method: "POST" })
 
     return { sessionId: session.id };
   });
+
+export const getScorecardData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // 1. Fetch user roles using user's client
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isStaff = roles?.some((r) => r.role === "admin" || r.role === "faculty") ?? false;
+
+    // 2. Fetch the session (using supabaseAdmin to bypass RLS)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: session } = await supabaseAdmin.from("interview_sessions").select("*").eq("id", data.sessionId).single();
+
+    if (!session) throw new Error("Session not found");
+
+    // 3. Security check: User must own the session or be an admin/faculty staff member!
+    if (session.user_id !== userId && !isStaff) {
+      throw new Error("Unauthorized access to this report");
+    }
+
+    // 4. Query all scorecard data as admin (to bypass any local RLS issues for the staff member)
+    const [{ data: card }, { data: responses }, { data: questions }] = await Promise.all([
+      supabaseAdmin.from("scorecards").select("*").eq("session_id", data.sessionId).maybeSingle(),
+      supabaseAdmin.from("responses").select("*").eq("session_id", data.sessionId),
+      supabaseAdmin.from("questions").select("*").eq("session_id", data.sessionId).order("order_index"),
+    ]);
+
+    return {
+      session,
+      card: card || null,
+      responses: responses ?? [],
+      questions: questions ?? []
+    };
+  });
