@@ -1,0 +1,451 @@
+Transaction_ID,Date,Sales_Rep,City,Channel,Category,Product_Name,Quantity,Unit_Price,Total_Sales,Cost_Price,Customer_Type,Payment_Method
+T001,17-Nov-24,Meera Joshi,Bangalore,Online,Smartwatch,Noise ColorFit,2,3711,7422,2700,New,Credit Card
+T002,30-Nov-24,Meera Joshi,Pune,Offline,Tablet,Lenovo Tab P12,2,37927,75854,30105,Existing,Credit Card
+T003,15-Nov-24,Rohit Das,Chennai,Online,Tablet,Xiaomi Pad 6,1,24294,24294,18542,Existing,Credit Card
+T004,04-Dec-24,Ritu Agarwal,Delhi,Offline,Smartwatch,Apple Watch SE,3,83840,251520,63814,Existing,Cash
+T005,28-Nov-24,Pooja Sharma,Delhi,Online,Smartwatch,Apple Watch SE,2,22716,45432,16324,Existing,Debit Card
+T006,25-Nov-24,Karan Mehta,Bangalore,Offline,Tablet,iPad Air,2,9574,19148,7062,Existing,UPI
+T007,07-Nov-24,Anjali Reddy,Delhi,Offline,Laptop,Gigabyte Aorus,2,92436,184872,74280,New,UPI
+T008,13-Oct-24,Kavya Nair,Pune,Online,Tablet,OnePlus Pad,1,27922,27922,22997,New,Credit Card
+T009,12-Nov-24,Vikash Singh,Delhi,Offline,Accessories,JBL Headphones,1,83543,83543,61087,New,Cash
+T010,27-Oct-24,Ritu Agarwal,Chennai,Online,Tablet,Microsoft Surface,1,31299,31299,25179,Existing,Credit Card
+T011,06-Nov-24,Suresh Kumar,Pune,Offline,Smartphone,ASUS ROG Phone 8,2,159937,319874,128303,New,Cash
+T012,27-Nov-24,Anjali Reddy,Delhi,Offline,Smartwatch,Noise ColorFit,3,61733,185199,47885,Existing,Credit Card
+T013,08-Dec-24,Arjun Yadav,Chennai,Offline,Accessories,AirPods Pro,3,20111,60333,14765,Existing,Debit Card
+T014,09-Dec-24,Priya Singh,Bangalore,Online,Smartphone,Nothing Phone 2,2,156719,313438,111057,New,Credit Card
+T015,19-Dec-24,Amit Kumar,Mumbai,Online,Smartwatch,Apple Watch SE,1,9570,9570,7907,New,UPI
+T016,22-Nov-24,Sneha Patel,Pune,Online,Laptop,Lenovo ThinkPad,1,73082,73082,56683,New,UPI
+T017,13-Nov-24,Rohit Das,Chennai,Offline,Laptop,HP Pavilion,1,58190,58190,46358,New,Credit Card
+T018,09-Dec-24,Meera Joshi,Delhi,Online,Accessories,AirPods Pro,3,26890,80670,19641,Existing,UPI
+T019,29-Nov-24,Meera Joshi,Bangalore,Online,Tablet,Huawei MatePad,2,6621,13242,5243,Existing,Debit Card
+T020,26-Nov-24,Meera Joshi,Pune,Online,Accessories,Sony WH-1000XM4,3,24794,74382,19799,New,Credit Card
+T021,16-Dec-24,Kavya Nair,Chennai,Online,Tablet,Samsung Tab S9,3,73479,220437,54721,New,Debit Card
+T022,13-Dec-24,Kavya Nair,Bangalore,Offline,Smartwatch,Noise ColorFit,3,9094,27282,7631,New,Cash
+T023,09-Dec-24,Vikash Singh,Bangalore,Online,Accessories,AirPods Pro,2,71625,143250,58247,New,Cash
+T024,25-Oct-24,Suresh Kumar,Pune,Offline,Laptop,Alienware M15,3,80497,241491,62085,Existing,Credit Card
+T025,05-Oct-24,Vikash Singh,Delhi,Online,Smartphone,iPhone 15 Pro,2,147237,294474,113266,Existing,Cash
+T026,11-Nov-24,Amit Kumar,Chennai,Offline,Smartphone,Motorola Edge 40,2,27160,54320,20722,Existing,UPI
+T027,06-Oct-24,Sneha Patel,Delhi,Online,Smartwatch,Fitbit Versa 4,3,80525,241575,67905,New,Credit Card
+T028,27-Oct-24,Arjun Yadav,Mumbai,Online,Laptop,HP Omen,2,31286,62572,24816,New,Cash
+T029,23-Dec-24,Ritu Agarwal,Pune,Online,Smartwatch,Apple Watch SE,2,69976,139952,56565,New,UPI
+T030,06-Oct-24,Anjali Reddy,Bangalore,Offline,Tablet,iPad Air,3,10029,30087,7461,New,Debit Card
+T031,01-Nov-24,Kavya Nair,Chennai,Offline,Laptop,MacBook Air M2,2,179285,358570,151250,New,Credit Card
+T032,06-Dec-24,Suresh Kumar,Bangalore,Online,Tablet,Amazon Fire HD 2,2,49654,99308,39175,New,Cash
+T033,05-Dec-24,Sneha Patel,Mumbai,Online,Accessories,JBL Headphones,2,87712,175424,63654,Existing,Debit Card
+T034,30-Oct-24,Suresh Kumar,Delhi,Offline,Laptop,Dell XPS 13,2,26740,53480,18822,New,Credit Card
+T035,11-Nov-24,Karan Mehta,Delhi,Online,Smartphone,ASUS ROG Phone 8,3,147322,441966,103353,Existing,UPI
+T036,18-Oct-24,Karan Mehta,Pune,Offline,Tablet,Lenovo Tab P12,1,41270,41270,30607,Existing,UPI
+T037,15-Dec-24,Vikash Singh,Delhi,Offline,Accessories,Corsair Headset,2,9090,18180,7378,Existing,Cash
+T038,11-Oct-24,Sneha Patel,Delhi,Online,Laptop,Lenovo ThinkPad,1,143845,143845,102943,New,Cash
+T039,07-Nov-24,Rahul Sharma,Chennai,Offline,Laptop,Legion 5 Pro,1,149758,149758,113654,New,Cash
+T040,22-Dec-24,Ritu Agarwal,Bangalore,Online,Laptop,Surface Laptop 5,3,23284,69852,18691,Existing,Debit Card
+T041,04-Dec-24,Anjali Reddy,Delhi,Offline,Smartphone,Redmi Note 13,3,161199,483597,121139,New,Cash
+T042,29-Oct-24,Rahul Sharma,Bangalore,Offline,Accessories,Logitech Mouse,3,7696,23088,6326,New,Debit Card
+T043,11-Nov-24,Ritu Agarwal,Chennai,Offline,Tablet,iPad Air,1,77417,77417,58547,New,Debit Card
+T044,20-Oct-24,Meera Joshi,Pune,Offline,Accessories,Razer Mousepad,1,75175,75175,59811,New,Cash
+T045,11-Nov-24,Suresh Kumar,Bangalore,Online,Laptop,HP Omen,3,69627,208881,55183,Existing,Debit Card
+T046,20-Oct-24,Kavya Nair,Mumbai,Offline,Smartphone,ASUS ROG Phone 8,2,20947,41894,15671,Existing,Debit Card
+T047,29-Oct-24,Rajesh Gupta,Delhi,Offline,Smartphone,Vivo X90 Pro,2,101772,203544,85945,Existing,Cash
+T048,17-Oct-24,Pooja Sharma,Pune,Offline,Tablet,Xiaomi Pad 6,2,9452,18904,7749,New,Cash
+T049,05-Dec-24,Pooja Sharma,Bangalore,Online,Accessories,Creative Speakers,1,63694,63694,46089,New,UPI
+T050,03-Dec-24,Rahul Sharma,Mumbai,Online,Laptop,Surface Laptop 5,1,144709,144709,121179,New,UPI
+T051,03-Dec-24,Meera Joshi,Bangalore,Offline,Laptop,Gigabyte Aorus,3,174334,523002,137488,Existing,UPI
+T052,20-Dec-24,Meera Joshi,Chennai,Offline,Smartphone,Nothing Phone 2,3,18011,54033,15095,New,Credit Card
+T053,13-Dec-24,Amit Kumar,Mumbai,Online,Laptop,HP Pavilion,3,97639,292917,74975,Existing,Credit Card
+T054,17-Oct-24,Amit Kumar,Chennai,Offline,Accessories,JBL Headphones,1,41315,41315,32985,New,UPI
+T055,23-Nov-24,Meera Joshi,Bangalore,Online,Laptop,Alienware M15,2,112873,225746,87443,Existing,Credit Card
+T056,22-Dec-24,Rajesh Gupta,Delhi,Online,Laptop,Acer Predator,2,97451,194902,76072,Existing,Cash
+T057,26-Oct-24,Vikash Singh,Pune,Offline,Laptop,MSI Gaming,1,86628,86628,72805,Existing,Debit Card
+T058,08-Oct-24,Meera Joshi,Delhi,Online,Laptop,MacBook Air M2,1,54921,54921,45722,Existing,Credit Card
+T059,27-Nov-24,Rahul Sharma,Bangalore,Offline,Smartphone,Google Pixel 8,2,16235,32470,12168,New,Credit Card
+T060,24-Nov-24,Rohit Das,Delhi,Offline,Smartphone,Realme GT 3,2,66259,132518,47190,New,Cash
+T061,16-Nov-24,Rajesh Gupta,Pune,Offline,Smartphone,Realme GT 3,2,43349,86698,32786,New,Credit Card
+T062,08-Dec-24,Sneha Patel,Delhi,Online,Smartphone,Samsung Galaxy S24,2,140659,281318,111256,New,UPI
+T063,30-Dec-24,Rohit Das,Pune,Offline,Tablet,Samsung Tab S9,3,62065,186195,45094,New,Debit Card
+T064,20-Nov-24,Priya Singh,Chennai,Offline,Laptop,Gigabyte Aorus,3,121735,365205,91303,Existing,Debit Card
+T065,20-Oct-24,Amit Kumar,Bangalore,Online,Smartwatch,Apple Watch SE,1,89266,89266,62830,Existing,Cash
+T066,21-Oct-24,Ritu Agarwal,Bangalore,Online,Smartphone,Samsung Galaxy S24,2,32599,65198,26439,New,Cash
+T067,06-Nov-24,Sneha Patel,Pune,Offline,Laptop,MSI Gaming,1,91412,91412,66342,New,Debit Card
+T068,30-Oct-24,Meera Joshi,Delhi,Offline,Tablet,Xiaomi Pad 6,3,5701,17103,4784,New,Cash
+T069,13-Dec-24,Pooja Sharma,Chennai,Online,Smartphone,Samsung Galaxy S24,1,117267,117267,98755,New,UPI
+T070,07-Nov-24,Ritu Agarwal,Mumbai,Offline,Laptop,Dell XPS 13,2,54162,108324,40960,New,Debit Card
+T071,14-Dec-24,Ritu Agarwal,Chennai,Offline,Accessories,AirPods Pro,1,81675,81675,59766,New,Debit Card
+T072,20-Nov-24,Kavya Nair,Pune,Offline,Accessories,AirPods Pro,3,70098,210294,58238,Existing,Cash
+T073,03-Dec-24,Rajesh Gupta,Bangalore,Online,Laptop,HP Omen,1,151960,151960,127777,Existing,Debit Card
+T074,23-Dec-24,Ritu Agarwal,Pune,Online,Smartphone,Xiaomi 13 Pro,1,34472,34472,26991,Existing,Credit Card
+T075,16-Nov-24,Amit Kumar,Chennai,Online,Accessories,Bose Speaker,1,69299,69299,57920,Existing,Cash
+T076,01-Nov-24,Meera Joshi,Mumbai,Offline,Smartphone,OnePlus 12,2,35566,71132,29178,New,Credit Card
+T077,26-Dec-24,Suresh Kumar,Chennai,Online,Smartwatch,Garmin Forerunner,1,82506,82506,66390,New,Debit Card
+T078,29-Oct-24,Vikash Singh,Mumbai,Online,Laptop,Surface Laptop 5,2,165921,331842,136450,New,Debit Card
+T079,12-Oct-24,Pooja Sharma,Bangalore,Online,Smartwatch,Garmin Forerunner,3,86176,258528,68666,New,Cash
+T080,16-Oct-24,Karan Mehta,Pune,Online,Smartwatch,Garmin Forerunner,2,67348,134696,55371,Existing,Cash
+T081,29-Dec-24,Arjun Yadav,Pune,Offline,Tablet,Lenovo Tab P12,1,39617,39617,29503,Existing,UPI
+T082,17-Oct-24,Priya Singh,Mumbai,Offline,Smartwatch,Fitbit Versa 4,2,47157,94314,40063,New,UPI
+T083,24-Nov-24,Amit Kumar,Mumbai,Offline,Smartphone,OnePlus 12,1,131609,131609,97244,Existing,Cash
+T084,05-Oct-24,Arjun Yadav,Bangalore,Offline,Accessories,Bose Speaker,2,70904,141808,57779,New,Cash
+T085,06-Nov-24,Arjun Yadav,Delhi,Online,Laptop,Lenovo ThinkPad,2,120072,240144,88931,New,Cash
+T086,17-Dec-24,Rajesh Gupta,Chennai,Offline,Accessories,Sony WH-1000XM4,2,85295,170590,72230,New,Credit Card
+T087,05-Dec-24,Sneha Patel,Chennai,Online,Accessories,AirPods Pro,3,77106,231318,55082,New,Cash
+T088,27-Oct-24,Suresh Kumar,Chennai,Offline,Smartwatch,Garmin Forerunner,1,45494,45494,35113,New,Cash
+T089,07-Oct-24,Meera Joshi,Chennai,Online,Smartwatch,Samsung Galaxy Watch 6,3,17407,52221,13156,Existing,Cash
+T090,12-Oct-24,Vikash Singh,Delhi,Offline,Laptop,HP Pavilion,1,14801,14801,10696,Existing,Credit Card
+T091,19-Nov-24,Karan Mehta,Mumbai,Offline,Accessories,JBL Headphones,1,17493,17493,12924,Existing,Cash
+T092,10-Oct-24,Arjun Yadav,Delhi,Online,Smartwatch,Fitbit Versa 4,2,64419,128838,51193,Existing,UPI
+T093,20-Nov-24,Rohit Das,Bangalore,Offline,Tablet,OnePlus Pad,2,30968,61936,22453,Existing,Cash
+T094,08-Nov-24,Meera Joshi,Chennai,Online,Accessories,Logitech Mouse,2,58765,117530,44079,Existing,Debit Card
+T095,15-Oct-24,Suresh Kumar,Delhi,Online,Laptop,MacBook Air M2,2,136348,272696,100946,Existing,UPI
+T096,06-Oct-24,Vikash Singh,Chennai,Offline,Laptop,MacBook Air M2,3,128057,384171,97997,New,Credit Card
+T097,04-Oct-24,Rahul Sharma,Mumbai,Offline,Laptop,HP Omen,1,60494,60494,48482,Existing,Cash
+T098,30-Dec-24,Karan Mehta,Chennai,Offline,Accessories,AirPods Pro,1,5882,5882,4501,Existing,Debit Card
+T099,10-Nov-24,Ritu Agarwal,Pune,Offline,Accessories,Steelseries Mouse,1,54017,54017,43094,New,UPI
+T100,02-Oct-24,Rahul Sharma,Pune,Online,Accessories,Corsair Headset,1,70861,70861,58420,Existing,Cash
+T101,10-Oct-24,Anjali Reddy,Pune,Online,Tablet,iPad Air,3,44442,133326,37427,Existing,Credit Card
+T102,21-Nov-24,Arjun Yadav,Chennai,Online,Smartwatch,Noise ColorFit,1,37007,37007,26301,Existing,Debit Card
+T103,09-Oct-24,Vikash Singh,Mumbai,Offline,Tablet,iPad Air,2,40342,80684,30443,Existing,Credit Card
+T104,29-Oct-24,Suresh Kumar,Pune,Offline,Smartphone,Xiaomi 13 Pro,2,90191,180382,64270,Existing,UPI
+T105,11-Nov-24,Rohit Das,Delhi,Online,Tablet,Nokia T21,3,35807,107421,26819,New,Debit Card
+T106,22-Nov-24,Rohit Das,Delhi,Online,Smartphone,Oppo Reno 10,2,137454,274908,102762,Existing,Debit Card
+T107,16-Oct-24,Arjun Yadav,Pune,Offline,Laptop,Surface Laptop 5,2,18035,36070,14453,New,Cash
+T108,13-Oct-24,Vikash Singh,Pune,Online,Smartwatch,Fitbit Versa 4,1,20173,20173,16464,Existing,UPI
+T109,19-Nov-24,Suresh Kumar,Pune,Online,Smartwatch,Samsung Galaxy Watch 6,2,16882,33764,13654,New,UPI
+T110,26-Oct-24,Ritu Agarwal,Pune,Online,Accessories,Razer Keyboard,2,58627,117254,46607,New,Credit Card
+T111,24-Oct-24,Vikash Singh,Bangalore,Online,Tablet,Xiaomi Pad 6,1,13256,13256,9432,Existing,Cash
+T112,25-Dec-24,Kavya Nair,Chennai,Online,Tablet,Microsoft Surface,2,88248,176496,72884,New,UPI
+T113,20-Oct-24,Meera Joshi,Delhi,Offline,Laptop,Gigabyte Aorus,2,91977,183954,77397,New,Cash
+T114,16-Dec-24,Vikash Singh,Mumbai,Offline,Accessories,Hyperx Gaming Kit,2,47915,95830,36704,New,Debit Card
+T115,28-Nov-24,Ritu Agarwal,Delhi,Offline,Tablet,Nokia T21,3,72879,218637,56569,Existing,Cash
+T116,17-Dec-24,Pooja Sharma,Pune,Online,Smartwatch,Noise ColorFit,2,44754,89508,37775,New,Debit Card
+T117,25-Dec-24,Karan Mehta,Chennai,Offline,Tablet,OnePlus Pad,2,4081,8162,3344,New,Cash
+T118,12-Nov-24,Pooja Sharma,Pune,Offline,Smartwatch,Noise ColorFit,2,72946,145892,59761,New,Debit Card
+T119,07-Dec-24,Meera Joshi,Chennai,Online,Smartwatch,Noise ColorFit,3,48304,144912,34866,Existing,UPI
+T120,06-Oct-24,Suresh Kumar,Chennai,Online,Accessories,Steelseries Mouse,1,36799,36799,26738,Existing,Credit Card
+T121,12-Dec-24,Arjun Yadav,Chennai,Offline,Smartwatch,Apple Watch SE,1,7867,7867,6107,Existing,Credit Card
+T122,13-Nov-24,Ritu Agarwal,Chennai,Offline,Smartwatch,Apple Watch SE,3,59706,179118,47243,Existing,Credit Card
+T123,02-Dec-24,Suresh Kumar,Pune,Online,Smartwatch,Fitbit Versa 4,2,20489,40978,16283,New,UPI
+T124,08-Dec-24,Kavya Nair,Mumbai,Offline,Tablet,Microsoft Surface,2,34495,68990,27034,New,Cash
+T125,29-Nov-24,Rajesh Gupta,Chennai,Online,Laptop,Dell XPS 13,1,155964,155964,123565,Existing,Debit Card
+T126,15-Oct-24,Rahul Sharma,Mumbai,Online,Smartwatch,Noise ColorFit,1,87784,87784,70237,Existing,Credit Card
+T127,10-Dec-24,Rohit Das,Delhi,Offline,Tablet,iPad Air,2,75009,150018,54176,Existing,Debit Card
+T128,05-Nov-24,Arjun Yadav,Chennai,Online,Smartwatch,Garmin Forerunner,3,59014,177042,42849,Existing,UPI
+T129,10-Dec-24,Pooja Sharma,Pune,Online,Accessories,Bose Speaker,2,30311,60622,21225,Existing,UPI
+T130,02-Oct-24,Amit Kumar,Chennai,Offline,Tablet,iPad Air,1,40684,40684,34405,Existing,UPI
+T131,20-Nov-24,Vikash Singh,Chennai,Offline,Smartwatch,Samsung Galaxy Watch 6,3,73791,221373,59569,New,UPI
+T132,03-Nov-24,Vikash Singh,Bangalore,Online,Accessories,Sony WH-1000XM4,2,34073,68146,27200,New,Debit Card
+T133,05-Dec-24,Rajesh Gupta,Mumbai,Online,Laptop,HP Omen,2,88859,177718,66925,Existing,Credit Card
+T134,12-Nov-24,Amit Kumar,Delhi,Offline,Tablet,Samsung Tab S9,3,61237,183711,47437,Existing,UPI
+T135,20-Oct-24,Priya Singh,Delhi,Online,Tablet,Huawei MatePad,1,20146,20146,14619,Existing,UPI
+T136,11-Oct-24,Priya Singh,Mumbai,Offline,Smartwatch,Samsung Galaxy Watch 6,1,19797,19797,14360,New,Credit Card
+T137,09-Dec-24,Amit Kumar,Delhi,Online,Laptop,HP Omen,1,174422,174422,142559,New,Credit Card
+T138,14-Oct-24,Suresh Kumar,Pune,Offline,Laptop,Alienware M15,2,113774,227548,86434,New,Credit Card
+T139,24-Nov-24,Anjali Reddy,Delhi,Offline,Laptop,Alienware M15,2,167276,334552,124796,Existing,UPI
+T140,04-Nov-24,Sneha Patel,Bangalore,Online,Accessories,JBL Headphones,3,60009,180027,45323,New,UPI
+T141,05-Oct-24,Ritu Agarwal,Delhi,Online,Smartphone,Honor 90,1,173814,173814,134640,New,Cash
+T142,17-Dec-24,Anjali Reddy,Chennai,Online,Smartwatch,Noise ColorFit,3,72894,218682,61186,New,UPI
+T143,26-Oct-24,Rajesh Gupta,Mumbai,Offline,Laptop,Gigabyte Aorus,3,46492,139476,37274,Existing,Credit Card
+T144,09-Dec-24,Rahul Sharma,Delhi,Online,Smartwatch,Noise ColorFit,3,52705,158115,39805,New,Credit Card
+T145,24-Dec-24,Priya Singh,Pune,Offline,Tablet,Amazon Fire HD 2,1,6015,6015,4705,New,UPI
+T146,28-Nov-24,Sneha Patel,Delhi,Offline,Laptop,Surface Laptop 5,3,161686,485058,136720,New,Debit Card
+T147,24-Oct-24,Karan Mehta,Bangalore,Online,Laptop,Legion 5 Pro,3,114933,344799,88558,New,Cash
+T148,15-Oct-24,Pooja Sharma,Mumbai,Offline,Accessories,Logitech Mouse,1,39937,39937,30803,Existing,Credit Card
+T149,30-Dec-24,Pooja Sharma,Mumbai,Offline,Tablet,Samsung Tab S9,3,17804,53412,12618,Existing,Credit Card
+T150,01-Dec-24,Arjun Yadav,Pune,Offline,Smartwatch,Garmin Forerunner,1,13803,13803,11409,Existing,UPI
+T151,01-Dec-24,Vikash Singh,Chennai,Online,Laptop,Surface Laptop 5,1,106886,106886,88260,Existing,Credit Card
+T152,11-Nov-24,Vikash Singh,Delhi,Offline,Smartphone,Honor 90,3,95382,286146,77368,New,Credit Card
+T153,23-Dec-24,Sneha Patel,Bangalore,Online,Tablet,Samsung Tab S9,2,73429,146858,54311,Existing,Credit Card
+T154,13-Nov-24,Rajesh Gupta,Bangalore,Offline,Laptop,Gigabyte Aorus,1,118029,118029,97121,New,Credit Card
+T155,04-Nov-24,Rajesh Gupta,Delhi,Offline,Tablet,OnePlus Pad,3,25107,75321,19288,Existing,Debit Card
+T156,06-Oct-24,Rohit Das,Delhi,Online,Accessories,JBL Headphones,2,26378,52756,20325,Existing,UPI
+T157,26-Oct-24,Suresh Kumar,Mumbai,Online,Smartphone,OnePlus 12,2,27772,55544,22332,Existing,Debit Card
+T158,27-Oct-24,Anjali Reddy,Pune,Offline,Smartwatch,Fitbit Versa 4,1,86564,86564,70545,Existing,UPI
+T159,06-Oct-24,Rajesh Gupta,Bangalore,Online,Tablet,OnePlus Pad,2,6249,12498,5100,New,Debit Card
+T160,20-Nov-24,Arjun Yadav,Bangalore,Offline,Accessories,Bose Speaker,3,61896,185688,44139,New,Debit Card
+T161,02-Oct-24,Vikash Singh,Bangalore,Online,Laptop,Gigabyte Aorus,2,93962,187924,72456,New,Credit Card
+T162,11-Oct-24,Vikash Singh,Pune,Offline,Smartwatch,Apple Watch SE,2,72337,144674,54542,New,Debit Card
+T163,12-Oct-24,Rohit Das,Pune,Offline,Smartphone,Redmi Note 13,3,157204,471612,111698,Existing,Debit Card
+T164,24-Nov-24,Pooja Sharma,Bangalore,Offline,Smartwatch,Noise ColorFit,1,59841,59841,44487,New,Cash
+T165,30-Dec-24,Pooja Sharma,Bangalore,Online,Accessories,Sony WH-1000XM4,2,17111,34222,12408,Existing,UPI
+T166,17-Dec-24,Karan Mehta,Chennai,Online,Tablet,OnePlus Pad,2,56860,113720,43023,Existing,Cash
+T167,15-Dec-24,Suresh Kumar,Delhi,Online,Smartwatch,Noise ColorFit,1,18674,18674,13640,New,Credit Card
+T168,02-Nov-24,Rohit Das,Mumbai,Offline,Smartphone,Samsung Galaxy S24,1,49759,49759,34901,New,Cash
+T169,12-Oct-24,Priya Singh,Mumbai,Online,Smartphone,Xiaomi 13 Pro,3,19959,59877,13979,New,Debit Card
+T170,05-Dec-24,Arjun Yadav,Delhi,Offline,Tablet,iPad Air,2,70805,141610,49749,New,Cash
+T171,08-Dec-24,Suresh Kumar,Delhi,Offline,Laptop,Gigabyte Aorus,3,150773,452319,110339,Existing,Cash
+T172,03-Nov-24,Suresh Kumar,Mumbai,Online,Smartphone,Vivo X90 Pro,3,22355,67065,17629,New,UPI
+T173,08-Dec-24,Arjun Yadav,Mumbai,Offline,Accessories,Corsair Headset,1,3130,3130,2250,Existing,Cash
+T174,08-Dec-24,Arjun Yadav,Pune,Offline,Smartwatch,Noise ColorFit,3,85448,256344,61096,Existing,Cash
+T175,03-Nov-24,Vikash Singh,Mumbai,Online,Tablet,Xiaomi Pad 6,2,83940,167880,68329,New,UPI
+T176,13-Oct-24,Arjun Yadav,Pune,Offline,Laptop,Alienware M15,2,57941,115882,42723,Existing,Debit Card
+T177,16-Dec-24,Vikash Singh,Pune,Online,Laptop,MSI Gaming,2,51258,102516,42309,Existing,Credit Card
+T178,28-Oct-24,Anjali Reddy,Mumbai,Offline,Smartwatch,Garmin Forerunner,2,48273,96546,36858,New,Credit Card
+T179,05-Nov-24,Rohit Das,Chennai,Online,Tablet,Huawei MatePad,2,42399,84798,32145,New,Debit Card
+T180,03-Dec-24,Karan Mehta,Bangalore,Online,Tablet,Lenovo Tab P12,1,48676,48676,34728,Existing,Cash
+T181,15-Nov-24,Sneha Patel,Chennai,Offline,Tablet,Samsung Tab S9,1,5733,5733,4331,New,UPI
+T182,06-Nov-24,Kavya Nair,Mumbai,Offline,Laptop,Legion 5 Pro,2,88206,176412,71372,Existing,Credit Card
+T183,30-Nov-24,Rajesh Gupta,Delhi,Offline,Accessories,Logitech Mouse,3,37963,113889,32102,Existing,UPI
+T184,24-Oct-24,Priya Singh,Chennai,Offline,Laptop,Legion 5 Pro,3,40297,120891,30969,Existing,Debit Card
+T185,11-Nov-24,Arjun Yadav,Pune,Online,Smartwatch,Noise ColorFit,2,30467,60934,21698,Existing,Debit Card
+T186,04-Dec-24,Arjun Yadav,Chennai,Offline,Tablet,Samsung Tab S9,3,20427,61281,15018,Existing,Credit Card
+T187,06-Nov-24,Suresh Kumar,Delhi,Offline,Laptop,HP Omen,1,59670,59670,42540,New,UPI
+T188,14-Dec-24,Ritu Agarwal,Delhi,Offline,Tablet,Samsung Tab S9,2,87300,174600,63660,New,UPI
+T189,02-Nov-24,Priya Singh,Delhi,Offline,Laptop,Lenovo ThinkPad,2,122158,244316,89613,New,Cash
+T190,26-Nov-24,Arjun Yadav,Mumbai,Online,Accessories,Razer Mousepad,3,7994,23982,6428,Existing,Credit Card
+T191,25-Dec-24,Ritu Agarwal,Pune,Online,Tablet,Samsung Tab S9,2,66336,132672,53452,New,Debit Card
+T192,11-Dec-24,Sneha Patel,Pune,Offline,Accessories,Creative Speakers,3,36426,109278,30555,Existing,Credit Card
+T193,20-Nov-24,Arjun Yadav,Delhi,Online,Accessories,Razer Keyboard,2,12565,25130,8937,Existing,UPI
+T194,21-Dec-24,Suresh Kumar,Mumbai,Online,Tablet,Nokia T21,1,39667,39667,29480,Existing,Credit Card
+T195,12-Nov-24,Priya Singh,Delhi,Offline,Accessories,Razer Mousepad,1,86530,86530,69867,New,Debit Card
+T196,13-Nov-24,Karan Mehta,Pune,Offline,Smartwatch,Fitbit Versa 4,2,12155,24310,8608,New,Cash
+T197,11-Oct-24,Sneha Patel,Pune,Offline,Tablet,Nokia T21,1,80553,80553,62857,Existing,Debit Card
+T198,29-Nov-24,Arjun Yadav,Delhi,Offline,Smartwatch,Garmin Forerunner,2,88076,176152,69026,Existing,Cash
+T199,29-Nov-24,Rahul Sharma,Pune,Offline,Accessories,AirPods Pro,3,75129,225387,59013,New,UPI
+T200,29-Nov-24,Rajesh Gupta,Chennai,Offline,Accessories,Logitech Mouse,1,81618,81618,59092,Existing,Debit Card
+T201,28-Oct-24,Pooja Sharma,Mumbai,Online,Smartwatch,Fitbit Versa 4,1,54415,54415,38205,Existing,Credit Card
+T202,23-Nov-24,Anjali Reddy,Bangalore,Offline,Accessories,Hyperx Gaming Kit,1,89549,89549,74489,Existing,Debit Card
+T203,19-Nov-24,Arjun Yadav,Bangalore,Online,Accessories,Hyperx Gaming Kit,3,60097,180291,44263,New,Cash
+T204,16-Oct-24,Rohit Das,Bangalore,Online,Accessories,Corsair Headset,2,68048,136096,48321,Existing,Credit Card
+T205,18-Dec-24,Arjun Yadav,Chennai,Online,Tablet,iPad Air,1,41848,41848,33497,Existing,UPI
+T206,13-Oct-24,Rahul Sharma,Pune,Online,Smartwatch,Garmin Forerunner,2,89677,179354,66403,Existing,UPI
+T207,28-Dec-24,Priya Singh,Bangalore,Offline,Smartphone,Google Pixel 8,1,141585,141585,101223,Existing,Debit Card
+T208,07-Nov-24,Arjun Yadav,Mumbai,Offline,Accessories,Sony WH-1000XM4,1,56987,56987,43060,Existing,Cash
+T209,27-Dec-24,Suresh Kumar,Pune,Online,Accessories,Logitech Mouse,1,8404,8404,6210,New,UPI
+T210,11-Oct-24,Karan Mehta,Pune,Offline,Tablet,Nokia T21,2,20529,41058,14599,Existing,Credit Card
+T211,26-Nov-24,Sneha Patel,Mumbai,Offline,Smartwatch,Fitbit Versa 4,3,12628,37884,10335,New,Debit Card
+T212,29-Oct-24,Suresh Kumar,Mumbai,Online,Smartwatch,Noise ColorFit,1,72129,72129,54386,New,Credit Card
+T213,11-Nov-24,Arjun Yadav,Chennai,Offline,Laptop,Alienware M15,2,156872,313744,127639,Existing,Debit Card
+T214,08-Oct-24,Ritu Agarwal,Pune,Online,Smartphone,iPhone 15 Pro,1,116135,116135,97347,New,Debit Card
+T215,02-Oct-24,Rajesh Gupta,Delhi,Offline,Tablet,Microsoft Surface,1,15427,15427,11510,Existing,Debit Card
+T216,06-Nov-24,Karan Mehta,Delhi,Online,Tablet,Microsoft Surface,3,68207,204621,52576,New,Credit Card
+T217,05-Oct-24,Sneha Patel,Bangalore,Offline,Tablet,OnePlus Pad,3,80290,240870,66513,Existing,Debit Card
+T218,04-Oct-24,Rohit Das,Delhi,Online,Tablet,Huawei MatePad,1,58457,58457,48128,New,Credit Card
+T219,03-Dec-24,Vikash Singh,Bangalore,Offline,Tablet,Amazon Fire HD 2,3,14540,43620,11791,New,UPI
+T220,07-Oct-24,Priya Singh,Chennai,Online,Accessories,Creative Speakers,3,35715,107145,30343,Existing,Cash
+T221,09-Nov-24,Suresh Kumar,Delhi,Online,Smartwatch,Samsung Galaxy Watch 6,2,51440,102880,36899,Existing,UPI
+T222,16-Oct-24,Arjun Yadav,Chennai,Online,Tablet,Xiaomi Pad 6,1,51113,51113,38127,Existing,Debit Card
+T223,22-Nov-24,Ritu Agarwal,Mumbai,Online,Tablet,iPad Air,3,61006,183018,48508,Existing,Credit Card
+T224,07-Oct-24,Karan Mehta,Chennai,Offline,Smartphone,Google Pixel 8,1,66380,66380,47120,Existing,Cash
+T225,24-Nov-24,Arjun Yadav,Bangalore,Offline,Smartphone,Samsung Galaxy S24,3,118103,354309,94515,New,Cash
+T226,09-Oct-24,Rohit Das,Delhi,Offline,Laptop,Surface Laptop 5,3,166218,498654,128265,Existing,Debit Card
+T227,18-Oct-24,Pooja Sharma,Mumbai,Online,Smartphone,Google Pixel 8,3,120845,362535,100627,New,UPI
+T228,17-Dec-24,Rahul Sharma,Pune,Online,Smartphone,Vivo X90 Pro,3,42059,126177,33786,New,Credit Card
+T229,02-Nov-24,Pooja Sharma,Mumbai,Online,Smartphone,OnePlus 12,1,46933,46933,35424,Existing,Credit Card
+T230,24-Nov-24,Meera Joshi,Pune,Offline,Smartphone,iPhone 15 Pro,3,144683,434049,118108,Existing,UPI
+T231,14-Oct-24,Ritu Agarwal,Bangalore,Online,Smartwatch,Fitbit Versa 4,2,68674,137348,50332,Existing,Cash
+T232,27-Nov-24,Karan Mehta,Bangalore,Online,Laptop,Asus ROG Strix,2,132655,265310,106485,Existing,UPI
+T233,30-Dec-24,Sneha Patel,Mumbai,Offline,Smartphone,Honor 90,3,65133,195399,53141,New,UPI
+T234,29-Nov-24,Sneha Patel,Delhi,Online,Smartphone,iPhone 15 Pro,1,162221,162221,115147,Existing,Cash
+T235,15-Dec-24,Amit Kumar,Pune,Online,Smartphone,iPhone 15 Pro,1,121143,121143,86612,New,Debit Card
+T236,20-Oct-24,Priya Singh,Pune,Offline,Smartphone,Vivo X90 Pro,2,43617,87234,33620,Existing,Credit Card
+T237,30-Oct-24,Sneha Patel,Mumbai,Online,Laptop,MSI Gaming,1,95874,95874,69670,New,UPI
+T238,01-Nov-24,Kavya Nair,Delhi,Offline,Tablet,Xiaomi Pad 6,1,87227,87227,63791,Existing,UPI
+T239,13-Oct-24,Meera Joshi,Bangalore,Offline,Laptop,Surface Laptop 5,3,138696,416088,103544,Existing,Debit Card
+T240,20-Nov-24,Rohit Das,Delhi,Online,Tablet,Microsoft Surface,1,75333,75333,57445,New,Credit Card
+T241,02-Dec-24,Arjun Yadav,Mumbai,Online,Accessories,Steelseries Mouse,1,83981,83981,66003,New,Credit Card
+T242,17-Dec-24,Suresh Kumar,Chennai,Online,Laptop,Gigabyte Aorus,1,48212,48212,35332,Existing,Cash
+T243,28-Oct-24,Sneha Patel,Chennai,Online,Smartphone,Oppo Reno 10,1,165844,165844,130465,New,Cash
+T244,10-Nov-24,Vikash Singh,Pune,Online,Accessories,Hyperx Gaming Kit,2,65319,130638,46140,Existing,Cash
+T245,23-Nov-24,Priya Singh,Bangalore,Offline,Smartphone,Oppo Reno 10,3,73149,219447,59848,New,UPI
+T246,16-Oct-24,Amit Kumar,Bangalore,Online,Laptop,Acer Predator,2,129902,259804,97468,Existing,Cash
+T247,31-Oct-24,Ritu Agarwal,Delhi,Online,Smartphone,OnePlus 12,2,167142,334284,141707,New,Cash
+T248,21-Nov-24,Suresh Kumar,Bangalore,Offline,Laptop,Dell XPS 13,3,27965,83895,19964,New,UPI
+T249,17-Dec-24,Priya Singh,Mumbai,Online,Smartphone,ASUS ROG Phone 8,2,165685,331370,137892,New,UPI
+T250,19-Oct-24,Pooja Sharma,Mumbai,Offline,Tablet,Nokia T21,1,3052,3052,2432,Existing,Debit Card
+T251,13-Oct-24,Rajesh Gupta,Mumbai,Offline,Laptop,Gigabyte Aorus,2,97273,194546,79212,Existing,UPI
+T252,02-Oct-24,Rahul Sharma,Bangalore,Online,Laptop,HP Omen,3,26655,79965,21261,Existing,UPI
+T253,05-Dec-24,Sneha Patel,Pune,Offline,Smartphone,iPhone 15 Pro,1,134336,134336,109313,Existing,Cash
+T254,04-Dec-24,Rahul Sharma,Chennai,Offline,Smartwatch,Samsung Galaxy Watch 6,3,55943,167829,43471,New,Debit Card
+T255,28-Nov-24,Rahul Sharma,Pune,Online,Accessories,Logitech Webcam,1,77406,77406,55084,New,UPI
+T256,20-Nov-24,Arjun Yadav,Delhi,Online,Smartphone,Nothing Phone 2,3,145513,436539,111667,Existing,Credit Card
+T257,14-Oct-24,Amit Kumar,Bangalore,Online,Tablet,Samsung Tab S9,1,28355,28355,21568,Existing,Cash
+T258,31-Oct-24,Ritu Agarwal,Chennai,Offline,Smartphone,Motorola Edge 40,1,30242,30242,24787,Existing,Credit Card
+T259,07-Oct-24,Vikash Singh,Delhi,Online,Laptop,HP Pavilion,3,148062,444186,119568,Existing,UPI
+T260,12-Oct-24,Rajesh Gupta,Mumbai,Online,Tablet,Nokia T21,2,26745,53490,19840,Existing,Cash
+T261,12-Oct-24,Amit Kumar,Chennai,Online,Smartphone,Honor 90,3,24210,72630,17434,New,Debit Card
+T262,26-Nov-24,Arjun Yadav,Chennai,Offline,Tablet,Samsung Tab S9,1,77618,77618,55270,Existing,Cash
+T263,05-Dec-24,Ritu Agarwal,Pune,Offline,Accessories,JBL Headphones,2,33815,67630,24900,Existing,Cash
+T264,28-Oct-24,Arjun Yadav,Delhi,Online,Accessories,Logitech Mouse,1,59434,59434,42259,Existing,Credit Card
+T265,05-Dec-24,Kavya Nair,Chennai,Online,Laptop,Acer Predator,2,174906,349812,141895,New,Debit Card
+T266,15-Dec-24,Arjun Yadav,Bangalore,Offline,Tablet,Huawei MatePad,2,35866,71732,26183,Existing,Credit Card
+T267,20-Nov-24,Suresh Kumar,Chennai,Offline,Accessories,Razer Keyboard,3,61995,185985,47129,New,Cash
+T268,05-Nov-24,Ritu Agarwal,Bangalore,Online,Tablet,Lenovo Tab P12,3,57234,171702,42625,Existing,Debit Card
+T269,08-Oct-24,Karan Mehta,Chennai,Online,Accessories,AirPods Pro,2,55580,111160,40653,New,Credit Card
+T270,21-Oct-24,Rajesh Gupta,Pune,Online,Laptop,Gigabyte Aorus,1,13464,13464,10962,Existing,Cash
+T271,17-Oct-24,Amit Kumar,Mumbai,Offline,Laptop,Asus ROG Strix,1,159142,159142,122702,Existing,Credit Card
+T272,07-Oct-24,Rohit Das,Bangalore,Online,Tablet,Amazon Fire HD 2,3,31478,94434,22904,New,UPI
+T273,20-Nov-24,Ritu Agarwal,Chennai,Offline,Laptop,Legion 5 Pro,3,107653,322959,79775,New,Cash
+T274,05-Dec-24,Vikash Singh,Delhi,Online,Laptop,MSI Gaming,3,78242,234726,57202,Existing,Debit Card
+T275,06-Nov-24,Ritu Agarwal,Pune,Offline,Tablet,OnePlus Pad,1,38367,38367,31844,Existing,Cash
+T276,07-Oct-24,Pooja Sharma,Mumbai,Offline,Tablet,Microsoft Surface,2,71889,143778,60037,New,Debit Card
+T277,22-Dec-24,Sneha Patel,Delhi,Online,Smartwatch,Apple Watch SE,3,58726,176178,46076,New,UPI
+T278,18-Oct-24,Priya Singh,Mumbai,Offline,Tablet,Nokia T21,1,69942,69942,50860,New,Credit Card
+T279,08-Dec-24,Amit Kumar,Mumbai,Online,Smartphone,Redmi Note 13,1,97698,97698,75308,Existing,UPI
+T280,24-Dec-24,Rajesh Gupta,Mumbai,Online,Laptop,Dell XPS 13,1,178445,178445,148032,New,Debit Card
+T281,05-Dec-24,Rajesh Gupta,Delhi,Online,Accessories,JBL Headphones,2,61287,122574,46168,Existing,UPI
+T282,02-Nov-24,Sneha Patel,Bangalore,Online,Accessories,Hyperx Gaming Kit,1,81004,81004,61978,New,UPI
+T283,05-Nov-24,Meera Joshi,Bangalore,Offline,Accessories,Hyperx Gaming Kit,3,8562,25686,7124,Existing,Credit Card
+T284,20-Oct-24,Suresh Kumar,Mumbai,Online,Smartphone,Honor 90,3,85381,256143,63665,Existing,Credit Card
+T285,07-Oct-24,Meera Joshi,Pune,Offline,Smartwatch,Apple Watch SE,1,60919,60919,43994,New,Cash
+T286,08-Oct-24,Amit Kumar,Mumbai,Offline,Accessories,Bose Speaker,3,49089,147267,35117,New,Credit Card
+T287,30-Dec-24,Meera Joshi,Pune,Online,Laptop,Legion 5 Pro,1,137449,137449,98044,Existing,Debit Card
+T288,11-Dec-24,Anjali Reddy,Pune,Offline,Accessories,Razer Keyboard,1,7427,7427,5855,Existing,Cash
+T289,25-Oct-24,Vikash Singh,Delhi,Online,Laptop,Lenovo ThinkPad,2,138095,276190,104197,New,Debit Card
+T290,06-Oct-24,Karan Mehta,Pune,Online,Laptop,Legion 5 Pro,2,41208,82416,32339,New,UPI
+T291,20-Dec-24,Rajesh Gupta,Mumbai,Online,Accessories,Corsair Headset,1,14970,14970,11429,New,Credit Card
+T292,16-Oct-24,Priya Singh,Bangalore,Online,Smartwatch,Samsung Galaxy Watch 6,2,16753,33506,13014,New,Debit Card
+T293,07-Nov-24,Pooja Sharma,Pune,Online,Tablet,Samsung Tab S9,2,76072,152144,60512,Existing,Credit Card
+T294,01-Dec-24,Sneha Patel,Bangalore,Offline,Laptop,MSI Gaming,1,119701,119701,94366,New,Credit Card
+T295,22-Dec-24,Priya Singh,Mumbai,Online,Smartwatch,Noise ColorFit,1,76180,76180,56268,Existing,UPI
+T296,03-Nov-24,Arjun Yadav,Delhi,Online,Smartwatch,Apple Watch SE,2,45209,90418,38204,Existing,UPI
+T297,12-Dec-24,Vikash Singh,Mumbai,Offline,Smartwatch,Apple Watch SE,3,72593,217779,51095,New,Debit Card
+T298,27-Oct-24,Vikash Singh,Pune,Online,Tablet,Amazon Fire HD 2,2,69060,138120,52327,Existing,Credit Card
+T299,03-Oct-24,Suresh Kumar,Mumbai,Online,Smartphone,Nothing Phone 2,1,145997,145997,102616,New,Credit Card
+T300,28-Dec-24,Rohit Das,Chennai,Offline,Accessories,Logitech Webcam,1,81285,81285,66613,Existing,Credit Card
+T301,28-Nov-24,Arjun Yadav,Mumbai,Offline,Tablet,iPad Air,2,9555,19110,7502,New,Credit Card
+T302,08-Oct-24,Rahul Sharma,Chennai,Offline,Laptop,Lenovo ThinkPad,3,75263,225789,58038,New,Credit Card
+T303,28-Dec-24,Meera Joshi,Mumbai,Offline,Smartwatch,Samsung Galaxy Watch 6,3,44532,133596,36685,Existing,Debit Card
+T304,10-Oct-24,Anjali Reddy,Chennai,Offline,Smartwatch,Apple Watch SE,3,19810,59430,16466,Existing,Cash
+T305,11-Oct-24,Vikash Singh,Bangalore,Offline,Smartphone,Honor 90,2,36238,72476,25762,Existing,Credit Card
+T306,07-Dec-24,Anjali Reddy,Bangalore,Online,Smartwatch,Apple Watch SE,3,56757,170271,45712,Existing,UPI
+T307,26-Dec-24,Vikash Singh,Chennai,Offline,Smartwatch,Apple Watch SE,2,39489,78978,30553,Existing,Cash
+T308,01-Dec-24,Kavya Nair,Bangalore,Online,Smartphone,Redmi Note 13,1,46882,46882,33035,New,UPI
+T309,04-Dec-24,Kavya Nair,Delhi,Online,Smartwatch,Apple Watch SE,3,33078,99234,27039,New,Credit Card
+T310,13-Oct-24,Suresh Kumar,Bangalore,Offline,Accessories,Steelseries Mouse,3,89402,268206,63392,New,Credit Card
+T311,07-Dec-24,Ritu Agarwal,Chennai,Offline,Laptop,HP Omen,1,143291,143291,114777,New,Debit Card
+T312,13-Nov-24,Meera Joshi,Pune,Online,Tablet,Samsung Tab S9,3,26695,80085,18946,New,Debit Card
+T313,06-Nov-24,Rohit Das,Pune,Online,Smartwatch,Noise ColorFit,1,48384,48384,36724,New,Debit Card
+T314,15-Nov-24,Pooja Sharma,Mumbai,Online,Smartphone,Samsung Galaxy S24,1,27480,27480,20824,Existing,Debit Card
+T315,19-Nov-24,Rohit Das,Pune,Offline,Smartphone,Samsung Galaxy S24,3,20149,60447,16532,Existing,Cash
+T316,19-Nov-24,Amit Kumar,Mumbai,Offline,Tablet,iPad Air,3,43447,130341,31725,Existing,UPI
+T317,28-Dec-24,Vikash Singh,Mumbai,Offline,Smartwatch,Apple Watch SE,1,85386,85386,62356,Existing,UPI
+T318,29-Oct-24,Ritu Agarwal,Pune,Offline,Laptop,HP Pavilion,3,156729,470187,124214,New,Cash
+T319,09-Nov-24,Vikash Singh,Bangalore,Online,Smartwatch,Noise ColorFit,2,71077,142154,57588,New,UPI
+T320,13-Dec-24,Rohit Das,Bangalore,Offline,Accessories,Razer Keyboard,3,17355,52065,13928,New,Debit Card
+T321,11-Nov-24,Vikash Singh,Delhi,Online,Smartphone,ASUS ROG Phone 8,1,98941,98941,77883,Existing,Debit Card
+T322,19-Oct-24,Sneha Patel,Bangalore,Offline,Smartphone,ASUS ROG Phone 8,3,109416,328248,87959,Existing,Cash
+T323,20-Nov-24,Pooja Sharma,Chennai,Online,Laptop,Surface Laptop 5,2,133739,267478,110235,New,Debit Card
+T324,25-Nov-24,Ritu Agarwal,Bangalore,Offline,Tablet,Samsung Tab S9,3,73890,221670,59752,Existing,Debit Card
+T325,05-Dec-24,Arjun Yadav,Delhi,Online,Accessories,Creative Speakers,1,31586,31586,24354,New,Debit Card
+T326,29-Nov-24,Amit Kumar,Mumbai,Online,Smartphone,Honor 90,2,151944,303888,124790,Existing,UPI
+T327,02-Dec-24,Suresh Kumar,Delhi,Online,Tablet,OnePlus Pad,1,18063,18063,12928,Existing,Credit Card
+T328,22-Oct-24,Karan Mehta,Bangalore,Online,Tablet,Samsung Tab S9,3,32124,96372,25644,New,Credit Card
+T329,23-Dec-24,Rahul Sharma,Chennai,Online,Smartwatch,Garmin Forerunner,1,43052,43052,31053,New,UPI
+T330,21-Oct-24,Rajesh Gupta,Pune,Offline,Tablet,Microsoft Surface,3,40935,122805,30312,New,Cash
+T331,28-Dec-24,Amit Kumar,Bangalore,Online,Accessories,Sony WH-1000XM4,1,4551,4551,3702,New,UPI
+T332,01-Oct-24,Sneha Patel,Pune,Online,Smartphone,Xiaomi 13 Pro,3,43472,130416,35144,New,UPI
+T333,05-Oct-24,Meera Joshi,Chennai,Offline,Laptop,MacBook Air M2,3,97203,291609,81701,New,Debit Card
+T334,11-Dec-24,Pooja Sharma,Bangalore,Offline,Accessories,Razer Mousepad,3,39780,119340,28367,Existing,Debit Card
+T335,06-Nov-24,Vikash Singh,Pune,Online,Tablet,Nokia T21,3,89989,269967,65839,Existing,UPI
+T336,16-Oct-24,Meera Joshi,Delhi,Offline,Smartphone,Nothing Phone 2,3,154276,462828,120863,Existing,Debit Card
+T337,24-Nov-24,Rohit Das,Chennai,Online,Smartwatch,Noise ColorFit,2,83515,167030,62852,New,Cash
+T338,23-Oct-24,Ritu Agarwal,Delhi,Offline,Smartphone,ASUS ROG Phone 8,2,29866,59732,24806,Existing,Debit Card
+T339,01-Nov-24,Sneha Patel,Chennai,Online,Smartphone,Motorola Edge 40,2,95010,190020,77589,New,Cash
+T340,06-Oct-24,Amit Kumar,Mumbai,Online,Smartphone,Xiaomi 13 Pro,3,15971,47913,12417,New,Debit Card
+T341,21-Oct-24,Amit Kumar,Delhi,Online,Tablet,OnePlus Pad,3,55808,167424,41534,Existing,Debit Card
+T342,15-Oct-24,Arjun Yadav,Mumbai,Online,Smartphone,OnePlus 12,2,96177,192354,80425,Existing,Cash
+T343,04-Oct-24,Rajesh Gupta,Bangalore,Offline,Tablet,Microsoft Surface,2,47757,95514,37485,New,Debit Card
+T344,28-Dec-24,Meera Joshi,Bangalore,Offline,Tablet,OnePlus Pad,3,86719,260157,70650,Existing,UPI
+T345,24-Dec-24,Rajesh Gupta,Mumbai,Offline,Accessories,Logitech Webcam,1,14723,14723,10931,Existing,Debit Card
+T346,28-Nov-24,Arjun Yadav,Delhi,Offline,Laptop,Alienware M15,1,101798,101798,79522,New,Cash
+T347,21-Nov-24,Amit Kumar,Bangalore,Online,Accessories,Steelseries Mouse,2,11259,22518,9380,New,Debit Card
+T348,11-Dec-24,Rajesh Gupta,Pune,Offline,Smartwatch,Noise ColorFit,1,45127,45127,33518,Existing,Debit Card
+T349,27-Nov-24,Anjali Reddy,Delhi,Offline,Laptop,HP Omen,1,64269,64269,45009,New,Credit Card
+T350,17-Dec-24,Pooja Sharma,Chennai,Offline,Smartphone,iPhone 15 Pro,1,88943,88943,71492,New,Credit Card
+T351,29-Oct-24,Vikash Singh,Mumbai,Online,Accessories,Razer Keyboard,1,67333,67333,54827,Existing,Debit Card
+T352,29-Nov-24,Amit Kumar,Chennai,Online,Tablet,Nokia T21,3,3024,9072,2352,Existing,UPI
+T353,29-Dec-24,Kavya Nair,Chennai,Offline,Accessories,Razer Keyboard,2,48521,97042,38103,Existing,Cash
+T354,14-Oct-24,Meera Joshi,Pune,Offline,Smartwatch,Apple Watch SE,2,73664,147328,60464,New,UPI
+T355,04-Dec-24,Karan Mehta,Mumbai,Online,Accessories,Bose Speaker,2,27261,54522,21141,New,Cash
+T356,06-Nov-24,Ritu Agarwal,Mumbai,Offline,Smartwatch,Garmin Forerunner,2,9405,18810,7553,Existing,Debit Card
+T357,25-Nov-24,Karan Mehta,Delhi,Offline,Laptop,HP Omen,2,93657,187314,69295,New,Cash
+T358,22-Oct-24,Priya Singh,Bangalore,Online,Laptop,Lenovo ThinkPad,3,136440,409320,103336,New,UPI
+T359,18-Oct-24,Rajesh Gupta,Chennai,Online,Accessories,Logitech Webcam,1,72612,72612,57198,New,Cash
+T360,01-Nov-24,Kavya Nair,Bangalore,Offline,Laptop,MacBook Air M2,3,147503,442509,110217,Existing,Debit Card
+T361,04-Oct-24,Suresh Kumar,Bangalore,Offline,Smartphone,Google Pixel 8,1,120488,120488,88695,New,Debit Card
+T362,22-Oct-24,Amit Kumar,Chennai,Offline,Smartphone,Motorola Edge 40,3,86577,259731,64211,New,Debit Card
+T363,13-Oct-24,Arjun Yadav,Mumbai,Online,Smartwatch,Noise ColorFit,2,32752,65504,27619,New,Cash
+T364,12-Oct-24,Sneha Patel,Mumbai,Offline,Smartwatch,Noise ColorFit,3,7971,23913,5953,New,Debit Card
+T365,26-Dec-24,Suresh Kumar,Pune,Offline,Laptop,Lenovo ThinkPad,3,61359,184077,43747,Existing,Debit Card
+T366,21-Oct-24,Vikash Singh,Chennai,Offline,Smartwatch,Fitbit Versa 4,3,45307,135921,37225,Existing,Cash
+T367,20-Nov-24,Rahul Sharma,Mumbai,Offline,Tablet,OnePlus Pad,3,13123,39369,9350,Existing,UPI
+T368,26-Dec-24,Rahul Sharma,Delhi,Online,Accessories,Razer Mousepad,3,32949,98847,25402,New,Cash
+T369,19-Nov-24,Karan Mehta,Pune,Online,Laptop,Dell XPS 13,1,137939,137939,110761,New,Cash
+T370,02-Oct-24,Meera Joshi,Delhi,Offline,Tablet,Nokia T21,2,47472,94944,36337,Existing,Credit Card
+T371,17-Dec-24,Rajesh Gupta,Delhi,Online,Smartphone,Realme GT 3,3,78522,235566,57040,Existing,UPI
+T372,17-Dec-24,Amit Kumar,Pune,Offline,Laptop,HP Pavilion,2,178322,356644,139129,Existing,Debit Card
+T373,02-Nov-24,Rajesh Gupta,Bangalore,Offline,Smartwatch,Noise ColorFit,2,64341,128682,53957,Existing,Credit Card
+T374,29-Nov-24,Karan Mehta,Chennai,Offline,Smartwatch,Fitbit Versa 4,1,46867,46867,34028,New,Credit Card
+T375,07-Dec-24,Arjun Yadav,Delhi,Offline,Laptop,Lenovo ThinkPad,3,170556,511668,127889,New,UPI
+T376,10-Oct-24,Rohit Das,Mumbai,Offline,Smartwatch,Garmin Forerunner,3,62844,188532,45350,New,Debit Card
+T377,16-Oct-24,Rajesh Gupta,Delhi,Offline,Accessories,Steelseries Mouse,3,87103,261309,65798,New,Cash
+T378,29-Dec-24,Ritu Agarwal,Pune,Offline,Tablet,OnePlus Pad,1,24882,24882,17607,Existing,Debit Card
+T379,30-Nov-24,Pooja Sharma,Mumbai,Online,Accessories,Logitech Mouse,3,44623,133869,31460,Existing,UPI
+T380,15-Oct-24,Arjun Yadav,Pune,Online,Smartwatch,Noise ColorFit,2,47219,94438,34746,New,Debit Card
+T381,07-Oct-24,Vikash Singh,Mumbai,Online,Tablet,Huawei MatePad,2,12212,24424,9300,Existing,UPI
+T382,26-Dec-24,Rajesh Gupta,Delhi,Offline,Smartphone,OnePlus 12,1,101073,101073,82237,New,Credit Card
+T383,25-Oct-24,Karan Mehta,Bangalore,Offline,Tablet,Huawei MatePad,1,8479,8479,6753,Existing,Cash
+T384,28-Nov-24,Anjali Reddy,Pune,Online,Smartphone,Honor 90,3,127556,382668,96632,New,Debit Card
+T385,25-Dec-24,Ritu Agarwal,Bangalore,Offline,Smartphone,Nothing Phone 2,2,151594,303188,126799,Existing,UPI
+T386,23-Oct-24,Ritu Agarwal,Bangalore,Offline,Accessories,Razer Keyboard,3,77002,231006,56470,New,Cash
+T387,30-Dec-24,Rajesh Gupta,Bangalore,Offline,Smartwatch,Fitbit Versa 4,3,48149,144447,38864,New,UPI
+T388,10-Dec-24,Priya Singh,Delhi,Offline,Laptop,Alienware M15,1,152498,152498,120235,Existing,Credit Card
+T389,26-Nov-24,Suresh Kumar,Mumbai,Online,Smartphone,Vivo X90 Pro,3,173106,519318,136821,Existing,Debit Card
+T390,30-Nov-24,Meera Joshi,Mumbai,Online,Accessories,AirPods Pro,1,49962,49962,41480,Existing,Debit Card
+T391,10-Dec-24,Karan Mehta,Chennai,Offline,Tablet,Amazon Fire HD 2,3,71436,214308,51601,Existing,Cash
+T392,29-Nov-24,Ritu Agarwal,Bangalore,Offline,Laptop,Lenovo ThinkPad,1,50445,50445,39823,Existing,Credit Card
+T393,15-Nov-24,Amit Kumar,Mumbai,Online,Tablet,Microsoft Surface,3,80724,242172,60744,Existing,Cash
+T394,26-Nov-24,Ritu Agarwal,Bangalore,Online,Smartphone,Google Pixel 8,3,61401,184203,44223,New,Cash
+T395,10-Nov-24,Rahul Sharma,Delhi,Online,Laptop,MSI Gaming,1,176666,176666,149151,New,Cash
+T396,28-Nov-24,Karan Mehta,Delhi,Offline,Tablet,Lenovo Tab P12,1,60825,60825,51565,New,Debit Card
+T397,14-Nov-24,Meera Joshi,Mumbai,Offline,Smartphone,Xiaomi 13 Pro,3,142075,426225,106990,Existing,Credit Card
+T398,03-Nov-24,Karan Mehta,Delhi,Offline,Accessories,Razer Mousepad,3,11354,34062,8449,New,Credit Card
+T399,09-Nov-24,Suresh Kumar,Bangalore,Online,Smartwatch,Apple Watch SE,3,49104,147312,37682,New,Debit Card
+T400,16-Nov-24,Suresh Kumar,Mumbai,Offline,Accessories,Hyperx Gaming Kit,1,28105,28105,21258,Existing,Credit Card
+T401,24-Nov-24,Ritu Agarwal,Chennai,Online,Laptop,Acer Predator,3,99350,298050,76433,New,Credit Card
+T402,07-Dec-24,Priya Singh,Pune,Offline,Smartphone,Nothing Phone 2,2,121726,243452,91937,New,Credit Card
+T403,30-Dec-24,Anjali Reddy,Pune,Offline,Accessories,Sony WH-1000XM4,3,85296,255888,69578,New,UPI
+T404,14-Oct-24,Meera Joshi,Mumbai,Online,Tablet,Nokia T21,2,58474,116948,41162,Existing,Debit Card
+T405,25-Dec-24,Rajesh Gupta,Chennai,Online,Laptop,Lenovo ThinkPad,1,41186,41186,31765,New,Credit Card
+T406,20-Oct-24,Rahul Sharma,Mumbai,Offline,Accessories,JBL Headphones,1,35870,35870,28310,New,Credit Card
+T407,07-Nov-24,Kavya Nair,Chennai,Online,Accessories,Logitech Webcam,3,50511,151533,37217,Existing,Cash
+T408,17-Dec-24,Rohit Das,Delhi,Online,Laptop,HP Omen,1,59048,59048,45313,Existing,Credit Card
+T409,15-Oct-24,Rahul Sharma,Mumbai,Online,Smartphone,iQOO 11,2,46824,93648,34922,Existing,Cash
+T410,02-Oct-24,Amit Kumar,Chennai,Online,Accessories,Creative Speakers,2,57873,115746,44083,New,Cash
+T411,03-Dec-24,Meera Joshi,Pune,Offline,Tablet,Samsung Tab S9,1,24860,24860,20873,New,Cash
+T412,03-Dec-24,Rohit Das,Pune,Online,Tablet,OnePlus Pad,3,5945,17835,4935,Existing,Credit Card
+T413,08-Nov-24,Ritu Agarwal,Mumbai,Online,Smartphone,iPhone 15 Pro,3,115968,347904,83281,New,Cash
+T414,20-Nov-24,Pooja Sharma,Chennai,Online,Smartphone,Vivo X90 Pro,1,18631,18631,15093,New,UPI
+T415,27-Nov-24,Kavya Nair,Bangalore,Offline,Laptop,Asus ROG Strix,1,42867,42867,34667,New,Credit Card
+T416,21-Nov-24,Rohit Das,Chennai,Online,Tablet,Samsung Tab S9,3,76046,228138,54099,New,Debit Card
+T417,16-Oct-24,Meera Joshi,Pune,Offline,Tablet,iPad Air,2,33492,66984,27443,New,Debit Card
+T418,20-Nov-24,Rajesh Gupta,Mumbai,Online,Accessories,Logitech Webcam,2,63009,126018,53551,New,UPI
+T419,15-Oct-24,Karan Mehta,Chennai,Offline,Smartphone,Vivo X90 Pro,3,71551,214653,57779,Existing,Credit Card
+T420,01-Nov-24,Pooja Sharma,Chennai,Online,Tablet,Amazon Fire HD 2,2,4081,8162,2912,Existing,Credit Card
+T421,23-Dec-24,Rahul Sharma,Pune,Offline,Accessories,Bose Speaker,1,35450,35450,27157,Existing,Debit Card
+T422,09-Dec-24,Suresh Kumar,Bangalore,Online,Tablet,Huawei MatePad,2,17802,35604,14514,New,Debit Card
+T423,04-Nov-24,Meera Joshi,Chennai,Online,Laptop,HP Omen,3,81322,243966,66590,New,Cash
+T424,20-Oct-24,Rahul Sharma,Delhi,Online,Accessories,Corsair Headset,1,85675,85675,63814,New,Debit Card
+T425,30-Oct-24,Kavya Nair,Pune,Online,Smartwatch,Samsung Galaxy Watch 6,1,14652,14652,10882,New,UPI
+T426,26-Nov-24,Anjali Reddy,Pune,Online,Laptop,Legion 5 Pro,3,92206,276618,72249,Existing,UPI
+T427,04-Dec-24,Suresh Kumar,Delhi,Offline,Tablet,Nokia T21,3,63629,190887,49639,Existing,Credit Card
+T428,14-Oct-24,Arjun Yadav,Chennai,Offline,Tablet,Amazon Fire HD 2,1,86946,86946,64461,Existing,UPI
+T429,12-Dec-24,Pooja Sharma,Bangalore,Offline,Smartphone,Oppo Reno 10,3,21091,63273,15137,Existing,Credit Card
+T430,13-Nov-24,Vikash Singh,Mumbai,Offline,Smartphone,Oppo Reno 10,2,35781,71562,26468,Existing,Cash
+T431,27-Oct-24,Rohit Das,Bangalore,Offline,Smartwatch,Samsung Galaxy Watch 6,3,78150,234450,65216,New,Cash
+T432,10-Dec-24,Arjun Yadav,Delhi,Offline,Laptop,Asus ROG Strix,2,165467,330934,136912,Existing,Credit Card
+T433,06-Dec-24,Rajesh Gupta,Pune,Offline,Tablet,Microsoft Surface,3,61396,184188,51033,Existing,UPI
+T434,09-Oct-24,Kavya Nair,Chennai,Offline,Accessories,JBL Headphones,1,54025,54025,38719,New,UPI
+T435,26-Dec-24,Meera Joshi,Mumbai,Online,Accessories,Razer Mousepad,2,80256,160512,68184,Existing,Cash
+T436,22-Nov-24,Amit Kumar,Mumbai,Online,Tablet,Nokia T21,1,9176,9176,6447,Existing,Debit Card
+T437,23-Dec-24,Karan Mehta,Pune,Online,Tablet,Huawei MatePad,2,29011,58022,23305,Existing,UPI
+T438,20-Nov-24,Rajesh Gupta,Bangalore,Online,Smartwatch,Noise ColorFit,1,28628,28628,20621,Existing,Credit Card
+T439,04-Nov-24,Suresh Kumar,Bangalore,Offline,Tablet,Nokia T21,3,21497,64491,17532,Existing,Cash
+T440,27-Nov-24,Suresh Kumar,Bangalore,Online,Smartwatch,Noise ColorFit,2,7214,14428,5122,Existing,UPI
+T441,03-Dec-24,Meera Joshi,Pune,Offline,Laptop,Surface Laptop 5,2,57941,115882,41228,New,Debit Card
+T442,14-Dec-24,Kavya Nair,Bangalore,Offline,Smartwatch,Noise ColorFit,2,63048,126096,50076,New,UPI
+T443,20-Oct-24,Rajesh Gupta,Mumbai,Online,Tablet,OnePlus Pad,3,6946,20838,5775,New,Credit Card
+T444,25-Nov-24,Karan Mehta,Chennai,Online,Laptop,Surface Laptop 5,3,138904,416712,97482,New,Credit Card
+T445,05-Dec-24,Amit Kumar,Pune,Offline,Laptop,HP Pavilion,3,17466,52398,14544,New,Credit Card
+T446,27-Nov-24,Arjun Yadav,Pune,Online,Laptop,Acer Predator,1,158393,158393,113947,New,Debit Card
+T447,24-Nov-24,Ritu Agarwal,Mumbai,Offline,Smartwatch,Noise ColorFit,2,82775,165550,68147,New,UPI
+T448,26-Nov-24,Ritu Agarwal,Chennai,Online,Smartwatch,Samsung Galaxy Watch 6,3,22127,66381,18262,New,Credit Card
+T449,04-Dec-24,Rahul Sharma,Mumbai,Offline,Laptop,Alienware M15,3,32431,97293,27132,New,Debit Card
+T450,02-Oct-24,Arjun Yadav,Chennai,Offline,Smartwatch,Garmin Forerunner,2,13334,26668,9948,Existing,UPI
