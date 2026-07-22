@@ -16,13 +16,24 @@ function Scorecard() {
   const { data, isLoading } = useQuery({
     queryKey: ["scorecard", id],
     queryFn: async () => {
-      const [{ data: session }, { data: card }, { data: responses }, { data: questions }] = await Promise.all([
+      const [sessionRes, cardRes, responsesRes, questionsRes] = await Promise.all([
         supabase.from("interview_sessions").select("*").eq("id", id).single(),
         supabase.from("scorecards").select("*").eq("session_id", id).single(),
         supabase.from("responses").select("*").eq("session_id", id),
         supabase.from("questions").select("*").eq("session_id", id).order("order_index"),
       ]);
-      return { session, card, responses: responses ?? [], questions: questions ?? [] };
+
+      if (sessionRes.error) console.error("Scorecard View: Session query error:", sessionRes.error);
+      if (cardRes.error) console.error("Scorecard View: Scorecard query error:", cardRes.error);
+      if (responsesRes.error) console.error("Scorecard View: Responses query error:", responsesRes.error);
+      if (questionsRes.error) console.error("Scorecard View: Questions query error:", questionsRes.error);
+
+      return {
+        session: sessionRes.data,
+        card: cardRes.data,
+        responses: responsesRes.data ?? [],
+        questions: questionsRes.data ?? []
+      };
     },
   });
 
