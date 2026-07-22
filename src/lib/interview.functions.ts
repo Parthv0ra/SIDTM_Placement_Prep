@@ -243,13 +243,43 @@ export const scoreResponse = createServerFn({ method: "POST" })
     const { data: session } = await supabase.from("interview_sessions").select("*, resumes(parsed), job_descriptions(raw_text)").eq("id", resp.session_id).single();
 
     const isGuesstimate = q?.category === "guesstimate";
-    const promptSystem = isGuesstimate
-      ? "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Evaluate how logically they structured their formula, how explicit their driver assumptions are, and if they performed a sanity check on the final number. Return JSON only."
-      : "You are an expert interviewer scoring one interview response on multiple dimensions (0-100 integers). Consider the target role and domain, the question category, and STAR structure for behavioral answers. Return JSON only.";
+    const isBehavioral = q?.category === "behavioral";
 
-    const promptUser = isGuesstimate
-      ? `Guesstimate Case: ${q?.question_text}\nStudent Scratchpad Solution:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback analyzing their driver tree, assumptions, and final sanity check).`
-      : `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: relevance, technical_accuracy, communication, fluency, confidence, structure, filler_words (count of filler words like um/uh/like), feedback (2-3 sentences of actionable feedback).`;
+    let promptSystem = "";
+    let promptUser = "";
+
+    if (isGuesstimate) {
+      promptSystem = "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Evaluate how logically they structured their formula, how explicit their driver assumptions are, and if they performed a sanity check on the final number. Return JSON only.";
+      promptUser = `Guesstimate Case: ${q?.question_text}\nStudent Scratchpad Solution:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback analyzing their driver tree, assumptions, and final sanity check).`;
+    } else if (isBehavioral) {
+      promptSystem = "You are an expert interviewer scoring a behavioral interview response. Specifically analyze the candidate's transcript for the STAR framework structure signature (Situation, Task, Action, Result) and professional vocabulary. Return JSON only.";
+      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON: {
+        relevance: 0-100,
+        domain_framework_knowledge: 0-100,
+        general_technical_accuracy: 0-100,
+        communication: 0-100,
+        fluency: 0-100,
+        confidence: 0-100,
+        structure: 0-100,
+        star_structure: { situation: boolean, task: boolean, action: boolean, result: boolean },
+        star_feedback: string,
+        vocab_nudges: [ { generic: string, professional: string, explanation: string } ],
+        feedback: string
+      }`;
+    } else {
+      promptSystem = "You are an expert interviewer scoring a technical or role-specific interview response. Specifically evaluate domain framework depth (eTOM, ITIL, BSS/OSS, Cloud, etc. where applicable) and general technical correctness. Return JSON only.";
+      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON: {
+        relevance: 0-100,
+        domain_framework_knowledge: 0-100 (rate specifically on awareness of eTOM, ITIL, SD-WAN, BSS/OSS, etc. relevant to target domain),
+        general_technical_accuracy: 0-100,
+        communication: 0-100,
+        fluency: 0-100,
+        confidence: 0-100,
+        structure: 0-100,
+        vocab_nudges: [ { generic: string, professional: string, explanation: string } ],
+        feedback: string
+      }`;
+    }
 
     const scores = await chatJSON<any>({
       system: promptSystem,
@@ -291,10 +321,15 @@ export const finalizeSession = createServerFn({ method: "POST" })
       overall = Math.round((driver + assumptions + sanity + overall_logic + struct + tech) / 6);
       category_scores = { driver_breakdown: driver, assumptions, sanity_check: sanity, overall_logic, structure: struct, technical_accuracy: tech };
     } else {
-      const cats = ["relevance","technical_accuracy","communication","fluency","confidence","structure"] as const;
+      const cats = ["relevance", "domain_framework_knowledge", "general_technical_accuracy", "communication", "fluency", "confidence", "structure"] as const;
       const scores: Record<string, number> = {};
       for (const c of cats) {
-        const vals = (responses ?? []).map((r) => (r.scores as Record<string, number> | null)?.[c]).filter((v): v is number => typeof v === "number");
+        const vals = (responses ?? []).map((r) => {
+          if (c === "domain_framework_knowledge" || c === "general_technical_accuracy") {
+            return (r.scores as any)?.[c] ?? (r.scores as any)?.technical_accuracy ?? 0;
+          }
+          return (r.scores as Record<string, number> | null)?.[c];
+        }).filter((v): v is number => typeof v === "number");
         scores[c] = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
       }
       category_scores = scores;
