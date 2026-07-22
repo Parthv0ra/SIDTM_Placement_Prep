@@ -343,7 +343,7 @@ const isCourseCovered = (courseName: string, parsedSkills: string[]) => {
   return words.some(w => normalizedSkills.some(s => s.includes(w)));
 };
 
-const GUESSTIMATES = casebooks.filter((c: any) => c.category === "guesstimate");
+const GUESSTIMATES = casebooks.filter((c: any) => c.category === "guesstimate" || c.category === "case_study");
 
 function NewInterview() {
   const router = useRouter();
@@ -365,6 +365,7 @@ function NewInterview() {
   const [starting, setStarting] = useState(false);
   const [practiceMode, setPracticeMode] = useState<"interview" | "guesstimate">("interview");
   const [selectedGuesstimate, setSelectedGuesstimate] = useState<string>("");
+  const [selectedCaseDomain, setSelectedCaseDomain] = useState<string>("All");
   const [guesstimateStarting, setGuesstimateStarting] = useState(false);
 
   // Resume pasting states
@@ -822,10 +823,34 @@ function NewInterview() {
       </TabsContent>
 
       <TabsContent value="guesstimate" className="mt-6">
+        {/* Domain Filter Badges */}
+        <div className="mb-4">
+          <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by Domain:</p>
+          <div className="flex flex-wrap gap-1.5">
+            {["All", ...Array.from(new Set(GUESSTIMATES.map((g: any) => g.domain || "Consulting")))].map((domain) => (
+              <Button
+                key={domain}
+                variant={selectedCaseDomain === domain ? "default" : "outline"}
+                size="xs"
+                className="h-7 text-xs rounded-full px-3.5"
+                onClick={() => {
+                  setSelectedCaseDomain(domain);
+                  setSelectedGuesstimate(""); // Reset selection on filter change
+                }}
+              >
+                {domain}
+              </Button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 max-h-[480px] overflow-y-auto pr-2">
-              {GUESSTIMATES.map((g) => (
+              {GUESSTIMATES.filter((g: any) => {
+                if (selectedCaseDomain === "All") return true;
+                return (g.domain || "Consulting") === selectedCaseDomain;
+              }).map((g) => (
                 <Card 
                   key={g.id} 
                   className={`cursor-pointer border transition-all hover:border-primary/50 hover:shadow-md ${
@@ -833,9 +858,16 @@ function NewInterview() {
                   }`}
                   onClick={() => setSelectedGuesstimate(g.id)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-semibold">{g.title}</CardTitle>
-                    <CardDescription className="text-xs leading-normal">Source: {g.source}</CardDescription>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold leading-snug">{g.title}</CardTitle>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                        {g.domain || "Consulting"}
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        {g.category === "case_study" ? "Case Study" : "Guesstimate"}
+                      </span>
+                    </div>
                   </CardHeader>
                 </Card>
               ))}

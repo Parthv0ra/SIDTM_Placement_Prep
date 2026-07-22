@@ -480,11 +480,23 @@ export const getScorecardData = createServerFn({ method: "POST" })
       supabaseAdmin.from("questions").select("*").eq("session_id", data.sessionId).order("order_index"),
     ]);
 
+    // Look up matching casebook item for the reference solution
+    const { default: casebooks } = await import("./casebook.json");
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const casebookItem = session.role ? casebooks.find((c: any) => normalize(c.title) === normalize(session.role)) : null;
+
     return {
       session,
       card: card || null,
       responses: responses ?? [],
-      questions: questions ?? []
+      questions: questions ?? [],
+      referenceSolution: casebookItem ? {
+        title: casebookItem.title,
+        category: casebookItem.category,
+        domain: casebookItem.domain,
+        solution_approach: casebookItem.solution_approach,
+        full_text: casebookItem.full_text
+      } : null
     };
   });
 
