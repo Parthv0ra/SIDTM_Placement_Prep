@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
@@ -62,7 +63,7 @@ function Admin() {
         <CardContent>
           <Table>
             <TableHeader><TableRow>
-              <TableHead>Student</TableHead><TableHead>Domain</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
+              <TableHead>Student</TableHead><TableHead>Domain</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Actions</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {data.sessions.map((s: any) => (
@@ -72,6 +73,17 @@ function Admin() {
                   <TableCell>{s.role}</TableCell>
                   <TableCell className="capitalize">{s.status}</TableCell>
                   <TableCell className="text-xs">{new Date(s.created_at).toLocaleString()}</TableCell>
+                  <TableCell className="text-right">
+                    {s.status === "completed" ? (
+                      <Button asChild size="xs" variant="outline" className="h-7 px-2.5 text-[11px] font-medium">
+                        <Link to="/scorecard/$id" params={{ id: s.id }}>
+                          View Report
+                        </Link>
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic capitalize">{s.status}</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
