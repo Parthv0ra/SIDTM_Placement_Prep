@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { getAdminDashboardData } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
@@ -12,19 +13,11 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function Admin() {
+  const getAdminDashboardDataFn = useServerFn(getAdminDashboardData);
   const { data, isLoading } = useQuery({
     queryKey: ["admin"],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
-      const uid = user.user!.id;
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-      const isStaff = roles?.some((r) => r.role === "admin" || r.role === "faculty") ?? false;
-      if (!isStaff) return { isStaff: false, sessions: [] as any[], scorecards: [] as any[] };
-      const [{ data: sessions }, { data: scorecards }] = await Promise.all([
-        supabase.from("interview_sessions").select("*, profiles(full_name, email)").order("created_at", { ascending: false }).limit(50),
-        supabase.from("scorecards").select("*"),
-      ]);
-      return { isStaff: true, sessions: sessions ?? [], scorecards: scorecards ?? [] };
+      return getAdminDashboardDataFn();
     },
   });
 

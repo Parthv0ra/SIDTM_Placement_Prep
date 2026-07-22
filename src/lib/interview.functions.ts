@@ -487,3 +487,30 @@ export const getScorecardData = createServerFn({ method: "POST" })
       questions: questions ?? []
     };
   });
+
+export const getAdminDashboardData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+
+    // 1. Fetch user roles using user's client
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const isStaff = roles?.some((r) => r.role === "admin" || r.role === "faculty") ?? false;
+
+    if (!isStaff) {
+      return { isStaff: false, sessions: [], scorecards: [] };
+    }
+
+    // 2. Fetch all sessions and scorecards as admin (bypassing RLS)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: sessions }, { data: scorecards }] = await Promise.all([
+      supabaseAdmin.from("interview_sessions").select("*, profiles(full_name, email)").order("created_at", { ascending: false }).limit(100),
+      supabaseAdmin.from("scorecards").select("*"),
+    ]);
+
+    return {
+      isStaff: true,
+      sessions: sessions ?? [],
+      scorecards: scorecards ?? []
+    };
+  });
