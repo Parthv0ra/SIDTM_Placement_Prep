@@ -149,6 +149,13 @@ export const startSession = createServerFn({ method: "POST" })
 
     const { chatJSON } = await import("./ai-gateway.server");
 
+    const resumeParsed = (resume.parsed as any) || {};
+    const certs = resumeParsed.certifications || [];
+    let certPrompt = "";
+    if (certs.length > 0) {
+      certPrompt = `\n\nActive certification list: ${JSON.stringify(certs)}. Since the candidate lists professional certifications, you MUST run a Certification Viva Mode for the 2 resume-specific questions. Make these 2 questions deeply test claimed certification concepts to check their actual knowledge depth.`;
+    }
+
     // Seed with real past questions
     let seedPrompt = "";
     try {
