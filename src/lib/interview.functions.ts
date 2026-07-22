@@ -27,14 +27,15 @@ export const parseResume = createServerFn({ method: "POST" })
       skills: string[]; projects: Array<{ name: string; description: string }>;
       education: Array<{ degree: string; institution: string; year?: string }>;
       experience: Array<{ title: string; company: string; duration?: string; description?: string }>;
+      certifications?: string[];
       quality_score: number;
       suggestions: string[];
       summary: string;
     }>({
       system:
-        "You are an expert resume reviewer. Extract structured info from the attached resume and evaluate quality on a 0-100 scale based on clarity, quantified achievements, relevance, and completeness. Respond ONLY with JSON matching the schema.",
+        "You are an expert resume reviewer. Extract structured info from the attached resume and evaluate quality on a 0-100 scale based on clarity, quantified achievements (especially checking if accomplishments are quantified with metrics/numbers), relevance, and completeness. Dock the quality score significantly (e.g., -5 points per unquantified item) for achievements lacking numbers/percentages. Respond ONLY with JSON matching the schema.",
       prompt:
-        `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100), summary (2-3 sentences).`,
+        `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100; explicitly list unquantified points), summary (2-3 sentences).`,
       filename: resume.file_name,
       mime: resume.file_name.toLowerCase().endsWith(".pdf")
         ? "application/pdf"
@@ -74,15 +75,16 @@ export const parsePastedResume = createServerFn({ method: "POST" })
       skills: string[]; projects: Array<{ name: string; description: string }>;
       education: Array<{ degree: string; institution: string; year?: string }>;
       experience: Array<{ title: string; company: string; duration?: string; description?: string }>;
+      certifications?: string[];
       quality_score: number;
       suggestions: string[];
       summary: string;
     }>({
       system:
-        "You are an expert resume reviewer. Extract structured info from the provided resume text and evaluate quality on a 0-100 scale based on clarity, quantified achievements, relevance, and completeness. Respond ONLY with JSON matching the schema.",
+        "You are an expert resume reviewer. Extract structured info from the provided resume text and evaluate quality on a 0-100 scale based on clarity, quantified achievements (especially checking if accomplishments are quantified with metrics/numbers), relevance, and completeness. Dock the quality score significantly (e.g., -5 points per unquantified item) for achievements lacking numbers/percentages. Respond ONLY with JSON matching the schema.",
       messages: [{
         role: "user",
-        content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100), summary (2-3 sentences).`
+        content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100; explicitly list unquantified points), summary (2-3 sentences).`
       }],
     });
 
@@ -147,6 +149,12 @@ export const startSession = createServerFn({ method: "POST" })
 
     const { chatJSON } = await import("./ai-gateway.server");
 
+    const parsedResume = (resume.parsed as any) || {};
+    const certifications = parsedResume.certifications || [];
+    const certPrompt = certifications.length > 0
+      ? `\n\nCertifications Claimed: ${certifications.join(", ")}. Note: Since certifications are listed, the 2 resume-specific questions MUST serve as a 5-minute Certification Viva, probing the core concepts, syllabus, and practical knowledge of these specific certifications to verify depth of knowledge.`
+      : "";
+
     const analysis = await chatJSON<{
       match_score: number;
       matched_skills: string[];
@@ -159,7 +167,7 @@ export const startSession = createServerFn({ method: "POST" })
         "You are a senior placement coach. Given a resume and target job description (JD) within a specific Domain, produce a match analysis and a personalized set of 6 interview questions (mix of technical, behavioral (STAR), role-specific, and resume-specific). Return JSON only.",
       messages: [{
         role: "user",
-        content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.`,
+        content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.${certPrompt}`,
       }],
     });
 

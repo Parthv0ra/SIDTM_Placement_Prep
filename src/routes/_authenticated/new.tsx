@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Upload, CheckCircle2, Loader2 } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/new")({
   component: NewInterview,
@@ -57,6 +57,288 @@ const DOMAIN_ROLES_MAP: Record<string, string[]> = {
   "Custom": [
     "Custom"
   ]
+};
+
+const ROLE_COURSES_MAP: Record<string, string[]> = {
+  "Management Consultant, Management Consulting Analyst": [
+    "Strategic Management",
+    "Digital Technology Transformation",
+    "ICT Consulting",
+    "Business Modeling and Planning",
+    "Managerial Economics",
+    "Macroeconomics for Managers",
+    "Research Methodology",
+    "Business Statistics",
+    "Visual Analytics",
+    "Generative AI Tools",
+    "Supply Chain Management",
+    "Internet of Things"
+  ],
+  "Technology Consultant Analyst, Technology Consultant": [
+    "ICT Architectures and Frameworks",
+    "ICT Consulting",
+    "Cloud-based Solution Architecture",
+    "Advanced Cloud-Based Solution Architecture",
+    "Digital Technology Transformation",
+    "Information Systems for Telecom Business",
+    "OSS/BSS Frameworx",
+    "Strategic Management",
+    "Business Modeling and Planning",
+    "Generative AI Tools",
+    "Supply Chain Management"
+  ],
+  "Data Management Senior Analyst": [
+    "Python for Data Science",
+    "Advanced Programming in Python",
+    "Data Mining for Decision Making",
+    "Advanced Big Data Analytics Telecom",
+    "Visual Analytics",
+    "AI and ML for Business Management",
+    "Governance Risk and Compliance",
+    "Digital Regulations",
+    "Cloud-based Solution Architecture",
+    "Business Statistics"
+  ],
+  "Business Architecture Associate Manager": [
+    "Information Systems for Telecom Business",
+    "ICT Architectures and Frameworks",
+    "Digital Technology Transformation",
+    "Project Management",
+    "Business Modeling and Planning",
+    "Strategic Management",
+    "Supply Chain Management",
+    "Marketing Analytics and CRM",
+    "Data Mining for Decision Making",
+    "OSS/BSS Frameworx",
+    "ICT Consulting"
+  ],
+  "Business Senior Analyst": [
+    "Python for Data Science",
+    "Advanced Programming in Python",
+    "Information Systems for Telecom Business",
+    "Data Mining for Decision Making",
+    "Digital Technology Transformation",
+    "Project Management",
+    "Business Modeling and Planning",
+    "Strategic Management",
+    "Marketing Analytics and CRM",
+    "AI and ML for Business Management",
+    "Generative AI Tools"
+  ],
+  "Business & System Integration Senior Analyst": [
+    "Information Systems for Telecom Business",
+    "ICT Architectures and Frameworks",
+    "Digital Technology Transformation",
+    "Project Management",
+    "Product Management",
+    "Visual Analytics",
+    "Business Modeling and Planning",
+    "Strategic Management",
+    "Generative AI Tools",
+    "OSS/BSS Frameworx",
+    "Data Mining for Decision Making"
+  ],
+  "Associate Technical Program Manager": [
+    "Project Management",
+    "Principles and Practices of Management",
+    "Business Communication",
+    "Strategic Management",
+    "Digital Technology Transformation",
+    "Information Systems for Telecom Business",
+    "Generative AI Tools",
+    "Business Statistics"
+  ],
+  "Application & Data Modernization & Migration Consultant": [
+    "Python for Data Science",
+    "Advanced Programming in Python",
+    "Advanced Big Data Analytics Telecom",
+    "Data Mining for Decision Making",
+    "Cloud-based Solution Architecture",
+    "Advanced Cloud-Based Solution Architecture",
+    "Visual Analytics",
+    "AI and ML for Business Management",
+    "Applications of AI and ML in Telecom",
+    "Digital Technology Transformation",
+    "Information Systems for Telecom Business"
+  ],
+  "Customer Strategy & Applied Design Consultant": [
+    "Strategic Management",
+    "Digital Technology Transformation",
+    "Consumer Behaviour and Insights",
+    "Marketing Management",
+    "Marketing Research",
+    "Services Marketing",
+    "Marketing Analytics and CRM",
+    "Managing Pre-Sales",
+    "Business Modeling and Planning",
+    "ICT Consulting",
+    "Data Mining for Decision Making"
+  ],
+  "Advertising, Marketing & Commerce Consultant": [
+    "Digital Marketing",
+    "E Commerce and D2C Marketing",
+    "Marketing Management",
+    "Marketing Analytics and CRM",
+    "Brand Management",
+    "Social Media Analytics",
+    "Consumer Behaviour and Insights",
+    "Digital Technology Transformation",
+    "ICT Architectures and Frameworks",
+    "Product Management",
+    "Strategic Management",
+    "Generative AI Tools"
+  ],
+  "SAP Consultant": [
+    "ICT Architectures and Frameworks",
+    "ICT Consulting",
+    "Cloud-based Solution Architecture",
+    "Advanced Cloud-Based Solution Architecture",
+    "Digital Technology Transformation",
+    "Information Systems for Telecom Business",
+    "OSS/BSS Frameworx",
+    "Supply Chain Management",
+    "Business Modeling and Planning",
+    "Generative AI Tools"
+  ],
+  "Supply Chain & Network Operations Consultant": [
+    "Supply Chain Management",
+    "Strategic Management",
+    "Business Modeling and Planning",
+    "Convergence of Telecom Networks",
+    "Designing Telecom Networks: Wireless and Optical",
+    "Network Concepts and Components",
+    "Digital Technology Transformation",
+    "Data Mining for Decision Making",
+    "Visual Analytics",
+    "ICT Consulting"
+  ],
+  "Finance Transformation Consultant": [
+    "Financial Management",
+    "Management Accounting",
+    "Advanced Corporate Finance",
+    "Management of Financial Technologies",
+    "Business Modeling and Planning",
+    "Financial Risk Management",
+    "Digital Technology Transformation",
+    "Generative AI Tools",
+    "AI and ML for Business Management",
+    "Strategic Management",
+    "Project Management"
+  ],
+  "Finance Transformation GBS Consultant": [
+    "Financial Management",
+    "Management Accounting",
+    "Advanced Corporate Finance",
+    "Management of Financial Technologies",
+    "Business Modeling and Planning",
+    "Financial Risk Management",
+    "Digital Technology Transformation",
+    "Generative AI Tools",
+    "AI and ML for Business Management",
+    "Strategic Management",
+    "Project Management"
+  ],
+  "Digital Risk Consultant": [
+    "Governance Risk and Compliance",
+    "Digital Risk Management",
+    "Digital Regulations",
+    "Information Systems for Telecom Business",
+    "Digital Technology Transformation",
+    "ICT Architectures and Frameworks",
+    "Cloud-based Solution Architecture",
+    "Financial Risk Management",
+    "Digital Forensics"
+  ],
+  "Cyber Risk Consultant": [
+    "Digital Forensics",
+    "Digital Risk Management",
+    "Governance Risk and Compliance",
+    "Network Concepts and Components",
+    "Convergence of Telecom Networks",
+    "Cloud-based Solution Architecture",
+    "Advanced Cloud-Based Solution Architecture",
+    "Digital Regulations",
+    "Advanced Programming in Python",
+    "Information Systems for Telecom Business"
+  ],
+  "Enterprise Risk Consultant": [
+    "Governance Risk and Compliance",
+    "Digital Risk Management",
+    "Financial Risk Management",
+    "Business Modeling and Planning",
+    "ICT Architectures and Frameworks",
+    "ICT Consulting",
+    "Information Systems for Telecom Business",
+    "Project Management",
+    "Digital Regulations"
+  ],
+  "Management Trainee – Product Management": [
+    "Product Management",
+    "Managing Pre-Sales",
+    "Marketing Management",
+    "Consumer Behaviour and Insights",
+    "Marketing Research",
+    "Services Marketing",
+    "Introduction to Telecom Technologies",
+    "Services and Technology Trends in Telecom (STTT)",
+    "Convergence of Telecom Networks",
+    "Generative AI Tools",
+    "Visual Analytics"
+  ],
+  "Management Trainee – Operations": [
+    "Introduction to Telecom Technologies",
+    "Network Concepts and Components",
+    "Services and Technology Trends in Telecom (STTT)",
+    "OSS/BSS Frameworx",
+    "Information Systems for Telecom Business",
+    "Project Management",
+    "Supply Chain Management",
+    "Principles and Practices of Management",
+    "Business Communication"
+  ],
+  "Digital Assurance (Associate – Assurance)": [
+    "Governance Risk and Compliance",
+    "Digital Risk Management",
+    "Information Systems for Telecom Business",
+    "Management Accounting",
+    "Financial Management",
+    "Cloud-based Solution Architecture",
+    "Block Chain Technology",
+    "Network Concepts and Components",
+    "Digital Regulations",
+    "Financial Risk Management"
+  ],
+  "Associate – Consulting (Advisory)": [
+    "Strategic Management",
+    "Research Methodology",
+    "Business Statistics",
+    "Managerial Economics",
+    "Macroeconomics for Managers",
+    "Business Modeling and Planning",
+    "Visual Analytics",
+    "Digital Technology Transformation",
+    "Supply Chain Management",
+    "ICT Consulting",
+    "Generative AI Tools"
+  ],
+  "Emerging Solution Engineer (Pre-Sales Consulting)": [
+    "Managing Pre-Sales",
+    "Marketing Analytics and CRM",
+    "Cloud-based Solution Architecture",
+    "Product Management",
+    "Information Systems for Telecom Business",
+    "Digital Technology Transformation",
+    "ICT Architectures and Frameworks",
+    "Strategic Management",
+    "Generative AI Tools",
+    "Business Communication"
+  ]
+};
+
+const isCourseCovered = (courseName: string, parsedSkills: string[]) => {
+  const normalizedSkills = (parsedSkills ?? []).map(s => s.toLowerCase());
+  const words = courseName.toLowerCase().replace(/and|for|in|of|to|the|&/g, "").split(/\s+/).filter(w => w.length > 2);
+  return words.some(w => normalizedSkills.some(s => s.includes(w)));
 };
 
 function NewInterview() {
@@ -324,16 +606,53 @@ function NewInterview() {
             </Tabs>
             
             {parsed && (
-              <div className="rounded-md border bg-secondary/30 p-3 text-sm">
-                <div className="mb-2 flex items-center gap-2 text-primary"><CheckCircle2 className="h-4 w-4" /> Quality: {parsed.quality_score}/100</div>
+              <div className="rounded-md border bg-secondary/30 p-3 text-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <CheckCircle2 className="h-4 w-4" /> Quality: {parsed.quality_score}/100
+                  </div>
+                  {parsed.quality_score < 70 && (
+                    <span className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                      Blocked: Under 70
+                    </span>
+                  )}
+                </div>
+                {parsed.quality_score < 70 && (
+                  <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive space-y-1">
+                    <div className="font-semibold flex items-center gap-1">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Action Required: Quantification Gate
+                    </div>
+                    <p className="text-muted-foreground leading-normal">
+                      Your resume quality score is below 70 due to achievements lacking metrics. You must quantify your bullet points with concrete numbers, percentages, or metrics and re-upload before you can start an interview.
+                    </p>
+                  </div>
+                )}
                 <p className="text-muted-foreground">{parsed.summary}</p>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {(parsed.skills ?? []).slice(0, 10).map((s: string) => (
                     <span key={s} className="rounded-full bg-secondary px-2 py-0.5 text-xs">{s}</span>
                   ))}
                 </div>
+
+                {parsed.certifications && parsed.certifications.length > 0 && (
+                  <div className="mt-3 border-t border-border/60 pt-3 space-y-1">
+                    <div className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                      Certifications Claimed:
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {parsed.certifications.map((c: string) => (
+                        <span key={c} className="rounded-md bg-violet-500/10 text-violet-600 px-2 py-0.5 text-xs font-medium border border-violet-500/20">{c}</span>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-normal mt-1">
+                      ⚠️ Certification Viva Active: You will be tested on these certification concepts during the interview to verify depth of knowledge.
+                    </p>
+                  </div>
+                )}
+
                 {parsed.suggestions && parsed.suggestions.length > 0 && (
-                  <div className="mt-4 border-t border-border/60 pt-3">
+                  <div className="mt-3 border-t border-border/60 pt-3">
                     <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                       Improvements
@@ -383,6 +702,31 @@ function NewInterview() {
                 {role === "Custom" && <Input className="mt-2" placeholder="Role" value={roleCustom} onChange={(e) => setRoleCustom(e.target.value)} />}
               </div>
             </div>
+
+            {role && ROLE_COURSES_MAP[role] && (
+              <div className="mt-4 border-t border-border/60 pt-3 space-y-2">
+                <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  SIDTM Curriculum Mapping for this Role:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                  {ROLE_COURSES_MAP[role].map((c) => {
+                    const covered = parsed ? isCourseCovered(c, parsed.skills) : false;
+                    return (
+                      <div key={c} className="flex items-center gap-1.5 text-xs text-muted-foreground p-1 rounded-md bg-secondary/20 hover:bg-secondary/40 transition-colors">
+                        {covered ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 rounded-full border border-amber-500/40 bg-amber-500/10 flex items-center justify-center text-[9px] font-bold text-amber-600 shrink-0">!</span>
+                        )}
+                        <span className={covered ? "text-foreground font-medium" : "text-muted-foreground"}>{c}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Job description</Label>
               <label
@@ -419,8 +763,13 @@ function NewInterview() {
                 className="mt-1"
               />
             </div>
-            <Button className="w-full" onClick={handleStart} disabled={starting}>
-              {starting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating questions…</> : "Generate interview"}
+            <Button 
+              className="w-full" 
+              onClick={handleStart} 
+              disabled={starting || (parsed && parsed.quality_score < 70)}
+            >
+              {starting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating questions…</> : 
+               (parsed && parsed.quality_score < 70) ? "Resume Quality Gate Active (Under 70)" : "Generate interview"}
             </Button>
           </CardContent>
         </Card>
