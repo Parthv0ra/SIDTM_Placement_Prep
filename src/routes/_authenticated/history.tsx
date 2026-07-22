@@ -33,7 +33,7 @@ function History() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Company</TableHead>
+                  <TableHead>Domain</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Score</TableHead>

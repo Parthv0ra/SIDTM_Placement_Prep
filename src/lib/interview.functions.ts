@@ -34,7 +34,7 @@ export const parseResume = createServerFn({ method: "POST" })
       system:
         "You are an expert resume reviewer. Extract structured info from the attached resume and evaluate quality on a 0-100 scale based on clarity, quantified achievements, relevance, and completeness. Respond ONLY with JSON matching the schema.",
       prompt:
-        `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] with 3-6 concrete improvements), summary (2-3 sentences).`,
+        `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100), summary (2-3 sentences).`,
       filename: resume.file_name,
       mime: resume.file_name.toLowerCase().endsWith(".pdf")
         ? "application/pdf"
@@ -82,7 +82,7 @@ export const parsePastedResume = createServerFn({ method: "POST" })
         "You are an expert resume reviewer. Extract structured info from the provided resume text and evaluate quality on a 0-100 scale based on clarity, quantified achievements, relevance, and completeness. Respond ONLY with JSON matching the schema.",
       messages: [{
         role: "user",
-        content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] with 3-6 concrete improvements), summary (2-3 sentences).`
+        content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100), summary (2-3 sentences).`
       }],
     });
 
@@ -153,13 +153,13 @@ export const startSession = createServerFn({ method: "POST" })
       missing_skills: string[];
       keywords: string[];
       gap_analysis: string;
-      questions: Array<{ text: string; category: "technical" | "behavioral" | "role-specific"; time_limit_sec: number }>;
+      questions: Array<{ text: string; category: "technical" | "behavioral" | "role-specific" | "resume-specific"; time_limit_sec: number }>;
     }>({
       system:
-        "You are a senior placement coach. Given a resume and target JD, produce a match analysis and a personalized set of 6 interview questions (mix of technical, behavioral (STAR), and role-specific). Return JSON only.",
+        "You are a senior placement coach. Given a resume and target job description (JD) within a specific Domain, produce a match analysis and a personalized set of 6 interview questions (mix of technical, behavioral (STAR), role-specific, and resume-specific). Return JSON only.",
       messages: [{
         role: "user",
-        content: `Company: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific), time_limit_sec (60-180)] }`,
+        content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.`,
       }],
     });
 
@@ -234,10 +234,10 @@ export const scoreResponse = createServerFn({ method: "POST" })
       feedback: string;
     }>({
       system:
-        "You are an expert interviewer scoring one interview response on multiple dimensions (0-100 integers). Consider the target role/company, the question category, and STAR structure for behavioral answers. Return JSON only.",
+        "You are an expert interviewer scoring one interview response on multiple dimensions (0-100 integers). Consider the target role and domain, the question category, and STAR structure for behavioral answers. Return JSON only.",
       messages: [{
         role: "user",
-        content: `Target: ${session?.company} — ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: relevance, technical_accuracy, communication, fluency, confidence, structure, filler_words (count of filler words like um/uh/like), feedback (2-3 sentences of actionable feedback).`,
+        content: `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: relevance, technical_accuracy, communication, fluency, confidence, structure, filler_words (count of filler words like um/uh/like), feedback (2-3 sentences of actionable feedback).`,
       }],
     });
 
@@ -271,7 +271,7 @@ export const finalizeSession = createServerFn({ method: "POST" })
       system: "You are a placement coach summarizing an interview session. Return JSON only.",
       messages: [{
         role: "user",
-        content: `Target: ${session.company} — ${session.role}\nCategory scores: ${JSON.stringify(category_scores)}\n\nResponses:\n${(responses ?? []).map((r) => `Q(${(r as any).questions?.category}): ${(r as any).questions?.question_text}\nA: ${r.transcript ?? ""}\nScores: ${JSON.stringify(r.scores)}`).join("\n\n")}\n\nReturn JSON: { strengths: string[3-5], improvements: string[3-5], recommendations: string[3-5] }`,
+        content: `Target Domain: ${session.company} — Role: ${session.role}\nCategory scores: ${JSON.stringify(category_scores)}\n\nResponses:\n${(responses ?? []).map((r) => `Q(${(r as any).questions?.category}): ${(r as any).questions?.question_text}\nA: ${r.transcript ?? ""}\nScores: ${JSON.stringify(r.scores)}`).join("\n\n")}\n\nReturn JSON: { strengths: string[3-5], improvements: string[3-5], recommendations: string[3-5] }`,
       }],
     });
 

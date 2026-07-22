@@ -18,8 +18,46 @@ export const Route = createFileRoute("/_authenticated/new")({
   component: NewInterview,
 });
 
-const COMPANIES = ["TCS","Infosys","Wipro","Accenture","Deloitte","EY","KPMG","JPMorgan Chase","Goldman Sachs","Microsoft","Amazon","Google","Flipkart","HDFC Bank","ICICI Bank","Custom"] as const;
-const ROLES = ["Business Analyst","Data Analyst","Product Manager","Marketing Associate","Consultant","Software Engineer","Operations Analyst","HR Associate","Finance Analyst","Custom"] as const;
+const DOMAINS = ["BFSI", "Consulting", "IT/ITES", "Marketing", "Custom"] as const;
+const DOMAIN_ROLES_MAP: Record<string, string[]> = {
+  "BFSI": [
+    "Finance Transformation Consultant",
+    "Finance Transformation GBS Consultant",
+    "Enterprise Risk Consultant",
+    "Digital Assurance (Associate – Assurance)",
+    "Custom"
+  ],
+  "Consulting": [
+    "Management Consultant, Management Consulting Analyst",
+    "Business Architecture Associate Manager",
+    "Customer Strategy & Applied Design Consultant",
+    "Supply Chain & Network Operations Consultant",
+    "Digital Risk Consultant",
+    "Associate – Consulting (Advisory)",
+    "Custom"
+  ],
+  "IT/ITES": [
+    "Technology Consultant Analyst, Technology Consultant",
+    "Data Management Senior Analyst",
+    "Business Senior Analyst",
+    "Business & System Integration Senior Analyst",
+    "Associate Technical Program Manager",
+    "Application & Data Modernization & Migration Consultant",
+    "SAP Consultant",
+    "Cyber Risk Consultant",
+    "Management Trainee – Operations",
+    "Emerging Solution Engineer (Pre-Sales Consulting)",
+    "Custom"
+  ],
+  "Marketing": [
+    "Advertising, Marketing & Commerce Consultant",
+    "Management Trainee – Product Management",
+    "Custom"
+  ],
+  "Custom": [
+    "Custom"
+  ]
+};
 
 function NewInterview() {
   const router = useRouter();
@@ -32,8 +70,8 @@ function NewInterview() {
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [parsed, setParsed] = useState<any>(null);
   const [jd, setJd] = useState("");
-  const [company, setCompany] = useState("");
-  const [companyCustom, setCompanyCustom] = useState("");
+  const [domain, setDomain] = useState("");
+  const [domainCustom, setDomainCustom] = useState("");
   const [role, setRole] = useState("");
   const [roleCustom, setRoleCustom] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -211,15 +249,21 @@ function NewInterview() {
     }
   }
 
+  const handleDomainChange = (val: string) => {
+    setDomain(val);
+    setRole("");
+    setRoleCustom("");
+  };
+
   async function handleStart() {
     if (!resumeId) return toast.error("Upload your resume first.");
-    const finalCompany = company === "Custom" ? companyCustom.trim() : company;
+    const finalDomain = domain === "Custom" ? domainCustom.trim() : domain;
     const finalRole = role === "Custom" ? roleCustom.trim() : role;
-    if (!finalCompany || !finalRole) return toast.error("Pick a target company and role.");
+    if (!finalDomain || !finalRole) return toast.error("Pick a target domain and role.");
     if (jd.trim().length < 30) return toast.error("Paste a longer job description.");
     setStarting(true);
     try {
-      const { sessionId } = await startFn({ data: { resumeId, jdText: jd, company: finalCompany, role: finalRole } });
+      const { sessionId } = await startFn({ data: { resumeId, jdText: jd, company: finalDomain, role: finalRole } });
       toast.success("Interview ready.");
       router.navigate({ to: "/interview/$id", params: { id: sessionId } });
     } catch (e) {
@@ -288,6 +332,22 @@ function NewInterview() {
                     <span key={s} className="rounded-full bg-secondary px-2 py-0.5 text-xs">{s}</span>
                   ))}
                 </div>
+                {parsed.suggestions && parsed.suggestions.length > 0 && (
+                  <div className="mt-4 border-t border-border/60 pt-3">
+                    <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      Improvements
+                    </div>
+                    <ul className="space-y-1.5 text-xs text-muted-foreground">
+                      {parsed.suggestions.map((s: string, idx: number) => (
+                        <li key={idx} className="flex gap-2 items-start">
+                          <span className="text-amber-500 font-medium select-none">{idx + 1}.</span>
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -296,23 +356,29 @@ function NewInterview() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">2. Target role & JD</CardTitle>
-            <CardDescription>Select or type your target company and role, then paste or drop the JD.</CardDescription>
+            <CardDescription>Select or type your target domain and role, then paste or drop the JD.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label>Company</Label>
-                <Select value={company} onValueChange={setCompany}>
+                <Label>Domain</Label>
+                <Select value={domain} onValueChange={handleDomainChange}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>{COMPANIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  <SelectContent>
+                    {DOMAINS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                  </SelectContent>
                 </Select>
-                {company === "Custom" && <Input className="mt-2" placeholder="Company name" value={companyCustom} onChange={(e) => setCompanyCustom(e.target.value)} />}
+                {domain === "Custom" && <Input className="mt-2" placeholder="Domain name" value={domainCustom} onChange={(e) => setDomainCustom(e.target.value)} />}
               </div>
               <div>
                 <Label>Role</Label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>{ROLES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                <Select value={role} onValueChange={setRole} disabled={!domain}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder={domain ? "Select" : "Choose domain first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(DOMAIN_ROLES_MAP[domain] || []).map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  </SelectContent>
                 </Select>
                 {role === "Custom" && <Input className="mt-2" placeholder="Role" value={roleCustom} onChange={(e) => setRoleCustom(e.target.value)} />}
               </div>

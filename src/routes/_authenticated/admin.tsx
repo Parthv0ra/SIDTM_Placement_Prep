@@ -62,7 +62,7 @@ function Admin() {
         <CardContent>
           <Table>
             <TableHeader><TableRow>
-              <TableHead>Student</TableHead><TableHead>Company</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
+              <TableHead>Student</TableHead><TableHead>Domain</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {data.sessions.map((s: any) => (

@@ -1,19 +1,51 @@
-// Lovable AI Gateway helper (server-only). Read LOVABLE_API_KEY inside handlers.
+// Groq AI Gateway helper (server-only). Read GROQ_API_KEY inside handlers.
+import { PDFParse } from "pdf-parse";
+import mammoth from "mammoth";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1";
+const GROQ_API_URL = "https://api.groq.com/openai/v1";
 
-function useGeminiFallback() {
-  return !process.env.LOVABLE_API_KEY && !!process.env.GEMINI_API_KEY;
+function getApiKey() {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) {
+    throw new Error("Missing GROQ_API_KEY in .env");
+  }
+  return key;
 }
 
-function getGeminiModel(requestedModel?: string) {
-  let model = requestedModel ?? "gemini-flash-latest";
-  model = model.replace(/^google\//, "");
-  // Map older/restricted models to gemini-flash-latest
-  if (model === "gemini-1.5-flash" || model === "gemini-2.5-flash" || model === "gemini-2.0-flash" || model === "gemini-3.5-flash" || model === "gemini-2.0-flash-lite") {
-    return "gemini-flash-latest";
+function getGroqModel(requestedModel?: string) {
+  if (!requestedModel) {
+    return "llama-3.3-70b-versatile";
   }
-  return model;
+  const model = requestedModel.toLowerCase();
+  if (model.includes("gemini") || model.includes("flash") || model.includes("8b")) {
+    return "llama-3.1-8b-instant";
+  }
+  return "llama-3.3-70b-versatile";
+}
+
+async function parseDocument(base64: string, mime: string): Promise<string> {
+  try {
+    const buffer = Buffer.from(base64, "base64");
+    
+    if (mime === "application/pdf" || mime.includes("pdf")) {
+      const parser = new PDFParse({ data: new Uint8Array(buffer) });
+      const result = await parser.getText();
+      await parser.destroy();
+      return result.text || "";
+    } else if (
+      mime.includes("word") || 
+      mime.includes("docx") || 
+      mime.includes("officedocument")
+    ) {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value || "";
+    }
+    
+    throw new Error(`Unsupported document mime type: ${mime}`);
+  } catch (error) {
+    console.error("Local document parsing failed:", error);
+    throw new Error(`Failed to parse the file locally: ${(error as Error).message}`);
+  }
 }
 
 function escapeJSONStrings(jsonStr: string): string {
@@ -155,117 +187,40 @@ function safeParseJSON<T>(raw: string): T {
   }
 }
 
-function apiKey() {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) {
-    if (process.env.GEMINI_API_KEY) return ""; // fallback will handle it
-    throw new Error("Missing LOVABLE_API_KEY (or GEMINI_API_KEY in .env)");
-  }
-  return key;
-}
-
-async function fetchGeminiWithFallback(opts: {
-  model: string;
-  body: any;
-  key: string;
-}): Promise<any> {
-  const modelsToTry = [
-    opts.model,
-    ...(opts.model !== "gemini-3.1-flash-lite" ? ["gemini-3.1-flash-lite"] : []),
-    ...(opts.model !== "gemini-flash-latest" ? ["gemini-flash-latest"] : [])
-  ];
-
-  let lastError: Error | null = null;
-
-  for (const currentModel of modelsToTry) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${opts.key}`;
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(opts.body)
-      });
-
-      if (res.status === 429) {
-        const text = await res.text().catch(() => "");
-        console.warn(`Gemini API 429 for model ${currentModel}. Retrying with next fallback model...`);
-        lastError = new Error(`Gemini API 429: ${text}`);
-        continue;
-      }
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Gemini API ${res.status}: ${text}`);
-      }
-
-      return await res.json();
-    } catch (err) {
-      if ((err as Error).message.includes("429")) {
-        lastError = err as Error;
-        continue;
-      }
-      throw err;
-    }
-  }
-
-  throw lastError ?? new Error("All Gemini fallback models exhausted.");
-}
-
 export async function chatJSON<T = unknown>(opts: {
   model?: string;
   system?: string;
   messages: Array<{ role: "system" | "user" | "assistant"; content: unknown }>;
   temperature?: number;
 }): Promise<T> {
-  if (useGeminiFallback()) {
-    const key = process.env.GEMINI_API_KEY || "";
-    const model = getGeminiModel(opts.model);
-    
-    const contents = opts.messages.map(msg => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content) }]
-    }));
-
-    const body: any = {
-      contents,
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: opts.temperature ?? 0.4
-      }
-    };
-
-    if (opts.system) {
-      body.systemInstruction = {
-        parts: [{ text: opts.system }]
-      };
-    }
-
-    const data = await fetchGeminiWithFallback({ model, body, key });
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-    return safeParseJSON<T>(raw);
-  }
-
+  const model = getGroqModel(opts.model);
   const messages = [
     ...(opts.system ? [{ role: "system" as const, content: opts.system }] : []),
-    ...opts.messages,
+    ...opts.messages.map(msg => ({
+      role: msg.role,
+      content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
+    })),
   ];
-  const res = await fetch(`${GATEWAY_URL}/chat/completions`, {
+
+  const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
+      Authorization: `Bearer ${getApiKey()}`,
     },
     body: JSON.stringify({
-      model: opts.model ?? "google/gemini-3.5-flash",
+      model,
       messages,
       response_format: { type: "json_object" },
       temperature: opts.temperature ?? 0.4,
     }),
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`AI gateway ${res.status}: ${text}`);
+    throw new Error(`Groq API ${res.status}: ${text}`);
   }
+
   const data = (await res.json()) as {
     choices: Array<{ message: { content: string } }>;
   };
@@ -274,31 +229,6 @@ export async function chatJSON<T = unknown>(opts: {
 }
 
 export async function transcribeAudio(base64: string, mime: string): Promise<string> {
-  if (useGeminiFallback()) {
-    const key = process.env.GEMINI_API_KEY || "";
-    const model = "gemini-flash-latest";
-
-    const body = {
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: "Transcribe the audio exactly as spoken. Do not add any intro, outro, explanations, or metadata. Output ONLY the transcription text." },
-            {
-              inlineData: {
-                mimeType: mime,
-                data: base64
-              }
-            }
-          ]
-        }
-      ]
-    };
-
-    const data = await fetchGeminiWithFallback({ model, body, key });
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-  }
-
   // Turn base64 into a Blob for multipart upload
   const bin = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
   const ext = mime.includes("mp4") || mime.includes("m4a") ? "m4a"
@@ -306,17 +236,20 @@ export async function transcribeAudio(base64: string, mime: string): Promise<str
     : mime.includes("mp3") ? "mp3"
     : "webm";
   const form = new FormData();
-  form.append("model", "openai/gpt-4o-mini-transcribe");
+  form.append("model", "whisper-large-v3");
   form.append("file", new Blob([bin], { type: mime }), `response.${ext}`);
-  const res = await fetch(`${GATEWAY_URL}/audio/transcriptions`, {
+
+  const res = await fetch(`${GROQ_API_URL}/audio/transcriptions`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey()}` },
+    headers: { Authorization: `Bearer ${getApiKey()}` },
     body: form,
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`STT ${res.status}: ${text}`);
   }
+
   const data = (await res.json()) as { text?: string };
   return data.text ?? "";
 }
@@ -329,72 +262,18 @@ export async function chatWithFile<T = unknown>(opts: {
   base64: string;
   model?: string;
 }): Promise<T> {
-  if (useGeminiFallback()) {
-    const key = process.env.GEMINI_API_KEY || "";
-    const model = getGeminiModel(opts.model);
+  // Parse the document text locally first
+  const text = await parseDocument(opts.base64, opts.mime);
 
-    const body = {
-      systemInstruction: {
-        parts: [{ text: opts.system }]
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: opts.prompt },
-            {
-              inlineData: {
-                mimeType: opts.mime,
-                data: opts.base64
-              }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        responseMimeType: "application/json"
-      }
-    };
+  // Send the extracted text to Groq chat completions
+  const userContent = `${opts.prompt}\n\n=== ATTACHED FILE: ${opts.filename} ===\n${text}\n=== END OF FILE ===`;
 
-    const data = await fetchGeminiWithFallback({ model, body, key });
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-    return safeParseJSON<T>(raw);
-  }
-
-  const res = await fetch(`${GATEWAY_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
-    },
-    body: JSON.stringify({
-      model: opts.model ?? "google/gemini-3.5-flash",
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: opts.system },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: opts.prompt },
-            {
-              type: "file",
-              file: {
-                filename: opts.filename,
-                file_data: `data:${opts.mime};base64,${opts.base64}`,
-              },
-            },
-          ],
-        },
-      ],
-    }),
+  return chatJSON<T>({
+    model: opts.model,
+    system: opts.system,
+    messages: [
+      { role: "user", content: userContent }
+    ],
+    temperature: 0.1, // low temperature for precise extraction
   });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`AI gateway ${res.status}: ${text}`);
-  }
-  const data = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
-  const raw = data.choices?.[0]?.message?.content ?? "{}";
-  return safeParseJSON<T>(raw);
 }
