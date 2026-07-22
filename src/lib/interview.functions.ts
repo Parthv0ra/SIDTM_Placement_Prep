@@ -247,6 +247,10 @@ export const scoreResponse = createServerFn({ method: "POST" })
     const { data: q } = await supabase.from("questions").select("*").eq("id", resp.question_id).single();
     const { data: session } = await supabase.from("interview_sessions").select("*, resumes(parsed), job_descriptions(raw_text)").eq("id", resp.session_id).single();
 
+    const { default: casebooks } = await import("./casebook.json");
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const casebookItem = session?.role ? casebooks.find((c: any) => normalize(c.title) === normalize(session.role)) : null;
+
     const isGuesstimate = q?.category === "guesstimate";
     const isBehavioral = q?.category === "behavioral";
 
@@ -254,8 +258,9 @@ export const scoreResponse = createServerFn({ method: "POST" })
     let promptUser = "";
 
     if (isGuesstimate) {
+      const casebookHelp = casebookItem ? `\n\nOfficial Casebook Reference Solution:\n"""${casebookItem.solution_approach}"""` : "";
       promptSystem = "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Evaluate how logically they structured their formula, how explicit their driver assumptions are, and if they performed a sanity check on the final number. Return JSON only.";
-      promptUser = `Guesstimate Case: ${q?.question_text}\nStudent Scratchpad Solution:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback analyzing their driver tree, assumptions, and final sanity check).`;
+      promptUser = `Guesstimate Case: ${q?.question_text}${casebookHelp}\n\nStudent Scratchpad Solution:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback comparing their drivers, assumptions, and math directly to the official casebook solution).`;
     } else if (isBehavioral) {
       promptSystem = "You are an expert interviewer scoring a behavioral interview response. Specifically analyze the candidate's transcript for the STAR framework structure signature (Situation, Task, Action, Result) and professional vocabulary. Return JSON only.";
       promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON: {
@@ -343,15 +348,20 @@ export const finalizeSession = createServerFn({ method: "POST" })
 
     let summary: any = {};
     if (isGuesstimate) {
+      const { default: casebooks } = await import("./casebook.json");
+      const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const casebookItem = session.role ? casebooks.find((c: any) => normalize(c.title) === normalize(session.role)) : null;
+      const solutionKeyText = casebookItem ? `\n\nOfficial Casebook Reference Solution:\n"""${casebookItem.solution_approach}"""` : "";
+
       summary = await chatJSON<{ strengths: string[]; recommendations: string[]; guesstimate_ideal_approach: string; guesstimate_expected_value: string }>({
         system: "You are a senior placement coach and management consultant summarizing a Guesstimate case practice. Return JSON only.",
         messages: [{
           role: "user",
-          content: `Target: ${session.role}\nQuestion: ${(responses ?? [])[0]?.questions?.question_text}\nStudent Response:\n${(responses ?? [])[0]?.transcript ?? ""}\nStudent Scores: ${JSON.stringify(category_scores)}\n\nReturn JSON: {
+          content: `Target: ${session.role}\nQuestion: ${(responses ?? [])[0]?.questions?.question_text}\nStudent Response:\n${(responses ?? [])[0]?.transcript ?? ""}\nStudent Scores: ${JSON.stringify(category_scores)}${solutionKeyText}\n\nReturn JSON: {
             strengths: string[2-3],
             recommendations: string[2-3],
-            guesstimate_ideal_approach: string (detailed step-by-step driver formula, key assumptions to use, and logical calculation tree recommended to solve this case),
-            guesstimate_expected_value: string (the expected numerical range or scale of the final answer, explaining why that scale is a reasonable sanity check)
+            guesstimate_ideal_approach: string (summarize the official casebook's recommended formula, drivers, and calculations for this case),
+            guesstimate_expected_value: string (the actual final numerical value or range as documented in the casebook solution)
           }`
         }]
       });

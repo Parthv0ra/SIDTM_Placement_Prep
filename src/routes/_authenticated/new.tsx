@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { parseResume, parsePastedResume, parseJdFile, startSession, startGuesstimate } from "@/lib/interview.functions";
+import casebooks from "@/lib/casebook.json";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -341,32 +342,7 @@ const isCourseCovered = (courseName: string, parsedSkills: string[]) => {
   return words.some(w => normalizedSkills.some(s => s.includes(w)));
 };
 
-const GUESSTIMATES = [
-  {
-    id: "g1",
-    title: "Pune Phone Sales",
-    question: "Calculate the number of mobile phones sold in Pune in one day and explain your driver logic.",
-    description: "Tests logical structuring, driver identification, and basic calculation flow relevant to retail tech."
-  },
-  {
-    id: "g2",
-    title: "Tea Shop Revenue (Pune)",
-    question: "Estimate the monthly revenue of a local tea shop (Amruttulya) in Pune. Walk through your footfall and pricing assumptions.",
-    description: "Tests local context pricing, footfall estimation, and basic unit economics."
-  },
-  {
-    id: "g3",
-    title: "EV Two-Wheeler Sales",
-    question: "Estimate the annual sales volume of Electric Two-Wheelers in India. Detail your adoption rate framework.",
-    description: "Tests market sizing, adoption rates, policy factors, and emerging tech trends."
-  },
-  {
-    id: "g4",
-    title: "SIDTM Network Peak Load",
-    question: "Estimate the peak internet bandwidth requirement for the SIDTM campus during placement week.",
-    description: "Tests technical network sizing, student concurrency, and data traffic estimation."
-  }
-];
+const GUESSTIMATES = casebooks.filter((c: any) => c.category === "guesstimate");
 
 function NewInterview() {
   const router = useRouter();
@@ -835,7 +811,7 @@ function NewInterview() {
       <TabsContent value="guesstimate" className="mt-6">
         <div className="grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 max-h-[480px] overflow-y-auto pr-2">
               {GUESSTIMATES.map((g) => (
                 <Card 
                   key={g.id} 
@@ -846,7 +822,7 @@ function NewInterview() {
                 >
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-semibold">{g.title}</CardTitle>
-                    <CardDescription className="text-xs leading-normal">{g.description}</CardDescription>
+                    <CardDescription className="text-xs leading-normal">Source: {g.source}</CardDescription>
                   </CardHeader>
                 </Card>
               ))}
