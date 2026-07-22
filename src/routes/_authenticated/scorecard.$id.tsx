@@ -6,7 +6,7 @@ import { getScorecardData } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Loader2, Lightbulb, CheckCircle2 } from "lucide-react";
+import { Loader2, Lightbulb, CheckCircle2, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/scorecard/$id")({
   component: Scorecard,
@@ -30,7 +30,15 @@ function Scorecard() {
   const radar = Object.entries(cats).map(([k, v]) => ({ category: k.replace("_", " "), score: v }));
 
   return (
-    <AppShell title={`Scorecard · ${data.session?.company} — ${data.session?.role}`} subtitle="Detailed feedback and improvement plan">
+    <AppShell
+      title={`Scorecard · ${data.session?.company} — ${data.session?.role}`}
+      subtitle="Detailed feedback and improvement plan"
+      action={
+        <Button onClick={() => window.print()} className="gap-2">
+          <Download className="h-4 w-4" /> Download PDF
+        </Button>
+      }
+    >
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="md:col-span-1">
           <CardContent className="pt-6 text-center">

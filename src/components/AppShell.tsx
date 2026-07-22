@@ -5,7 +5,7 @@ import { GraduationCap, LayoutDashboard, PlusCircle, History, Shield, LogOut } f
 import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function AppShell({ children, title, subtitle }: { children: ReactNode; title?: string; subtitle?: string }) {
+export function AppShell({ children, title, subtitle, action }: { children: ReactNode; title?: string; subtitle?: string; action?: ReactNode }) {
   const router = useRouter();
   const qc = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
@@ -26,8 +26,8 @@ export function AppShell({ children, title, subtitle }: { children: ReactNode; t
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col bg-sidebar text-sidebar-foreground md:flex">
+    <div className="min-h-screen bg-background print:bg-white">
+      <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col bg-sidebar text-sidebar-foreground md:flex print:hidden">
         <div className="flex items-center gap-2 px-5 py-6">
           <GraduationCap className="h-6 w-6 text-sidebar-primary" />
           <div>
@@ -48,14 +48,17 @@ export function AppShell({ children, title, subtitle }: { children: ReactNode; t
           </Button>
         </div>
       </aside>
-      <div className="md:pl-60">
-        <header className="border-b bg-card">
-          <div className="mx-auto max-w-6xl px-6 py-6">
-            {title && <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>}
-            {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+      <div className="md:pl-60 print:pl-0">
+        <header className="border-b bg-card print:border-b-0 print:bg-transparent">
+          <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between gap-4">
+            <div>
+              {title && <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>}
+              {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+            </div>
+            {action && <div className="flex-shrink-0 print:hidden">{action}</div>}
           </div>
         </header>
-        <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-6 py-8 print:py-0">{children}</main>
       </div>
     </div>
   );
