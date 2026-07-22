@@ -226,18 +226,23 @@ export const scoreResponse = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: resp } = await supabase.from("responses").select("*").eq("id", data.responseId).single();
     if (!resp || resp.user_id !== userId) throw new Error("Response not found");
-    if (!resp.recording_path) throw new Error("No recording");
 
-    const { data: file } = await supabase.storage.from("recordings").download(resp.recording_path);
-    if (!file) throw new Error("Recording download failed");
-    const buf = new Uint8Array(await file.arrayBuffer());
-    let bin = "";
-    for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-    const base64 = btoa(bin);
-    const mime = file.type || "audio/webm";
+    let transcript = resp.transcript || "";
 
-    const { transcribeAudio, chatJSON } = await import("./ai-gateway.server");
-    const transcript = await transcribeAudio(base64, mime);
+    if (resp.recording_path && !transcript) {
+      const { data: file } = await supabase.storage.from("recordings").download(resp.recording_path);
+      if (!file) throw new Error("Recording download failed");
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+      const base64 = btoa(bin);
+      const mime = file.type || "audio/webm";
+
+      const { transcribeAudio } = await import("./ai-gateway.server");
+      transcript = await transcribeAudio(base64, mime);
+    }
+
+    const { chatJSON } = await import("./ai-gateway.server");
 
     const { data: q } = await supabase.from("questions").select("*").eq("id", resp.question_id).single();
     const { data: session } = await supabase.from("interview_sessions").select("*, resumes(parsed), job_descriptions(raw_text)").eq("id", resp.session_id).single();

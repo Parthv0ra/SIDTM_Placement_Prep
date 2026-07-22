@@ -87,11 +87,7 @@ function GuesstimateSession() {
       // 2. Call scoreResponse server function
       await scoreFn({
         data: {
-          session_id: id,
-          question_id: question.id,
-          id: respRow.id,
-          transcriptText: `FINAL ESTIMATE: ${finalValue.trim()}\n\nSCRATCHPAD CALCULATIONS:\n${scratchpad.trim()}`,
-          duration_sec: 300,
+          responseId: respRow.id,
         },
       });
 
