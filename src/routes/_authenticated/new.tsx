@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { parseResume, parsePastedResume, parseJdFile, startSession, startGuesstimate } from "@/lib/interview.functions";
 import casebooks from "@/lib/casebook.json";
+import roleJds from "@/lib/role-jds.json";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -542,6 +543,18 @@ function NewInterview() {
     setDomain(val);
     setRole("");
     setRoleCustom("");
+    setJd("");
+  };
+
+  const handleRoleChange = (val: string) => {
+    setRole(val);
+    setRoleCustom("");
+    if (val === "Custom" || !val) {
+      setJd("");
+    } else {
+      const autofilledJd = roleJds[val as keyof typeof roleJds] || "";
+      setJd(autofilledJd);
+    }
   };
 
   async function handleStart() {
@@ -723,7 +736,7 @@ function NewInterview() {
               </div>
               <div>
                 <Label>Role</Label>
-                <Select value={role} onValueChange={setRole} disabled={!domain}>
+                <Select value={role} onValueChange={handleRoleChange} disabled={!domain}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder={domain ? "Select" : "Choose domain first"} />
                   </SelectTrigger>
