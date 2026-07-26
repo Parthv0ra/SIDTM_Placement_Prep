@@ -256,6 +256,68 @@ export type Database = {
         }
         Relationships: []
       }
+      shortlist_evaluations: {
+        Row: {
+          action_plan: Json
+          evaluation_verdict: string
+          created_at: string
+          domain: string
+          id: string
+          matched_skills: Json
+          missing_skills: Json
+          resume_id: string | null
+          role: string
+          shortlist_score: number
+          status: string
+          suggested_certifications: Json
+          suggested_courses: Json
+          jd_text: string
+          user_id: string
+        }
+        Insert: {
+          action_plan: Json
+          evaluation_verdict: string
+          created_at?: string
+          domain: string
+          id?: string
+          matched_skills: Json
+          missing_skills: Json
+          resume_id?: string | null
+          role: string
+          shortlist_score: number
+          status: string
+          suggested_certifications: Json
+          suggested_courses: Json
+          jd_text: string
+          user_id: string
+        }
+        Update: {
+          action_plan?: Json
+          evaluation_verdict?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          matched_skills?: Json
+          missing_skills?: Json
+          resume_id?: string | null
+          role?: string
+          shortlist_score?: number
+          status?: string
+          suggested_certifications?: Json
+          suggested_courses?: Json
+          jd_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shortlist_evaluations_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scorecards: {
         Row: {
           category_scores: Json

@@ -6,6 +6,14 @@ PlacementPrep is an AI-powered mock interview practice platform designed specifi
 
 ## 🚀 Key Features
 
+*   **Shortlist Evaluator**:
+    *   Upload/paste candidate resumes and target job descriptions (JDs).
+    *   AI-powered ATS matching score, matching/missing skill mapping, and course/certification recommendations.
+    *   Detailed AI suitability verdict.
+*   **Guesstimates & Cases Workspace**:
+    *   Standalone practice dashboard populated with 44 cases from **verified prep sources** (across Profitability, Market Entry, Pricing, Growth, and Miscellaneous frameworks).
+    *   Smooth-scroll details panel and dynamic practice scratchpad environment.
+    *   Quick estimation guidelines (population demographic breakdown drivers, device replacement lifecycle calculations, and formula templates).
 *   **Dual Resume Upload**: Upload resumes as PDF/DOCX or paste text directly. The AI performs an initial analysis, scoring quality and extracting key skills.
 *   **Job Description Extraction**: Drag and drop PDF, DOCX, or TXT JDs. The system extracts requirements using AI to compare with the candidate's profile.
 *   **Dynamic Interview Generation**: Automatically creates mock interviews matching the candidate's resume against the target company and role.
@@ -45,7 +53,15 @@ PlacementPrep is an AI-powered mock interview practice platform designed specifi
 │   │   └── supabase/      # Supabase clients, typings, and auth middlewares
 │   ├── lib/               # Utility functions & AI Gateway server-functions
 │   ├── routes/            # File-based routes (TanStack Router)
-│   │   ├── _authenticated/# Protected routes (Dashboard, New Interview, History, Scorecard)
+│   │   ├── _authenticated/# Protected routes
+│   │   │   ├── admin.tsx               # Reviewer management interface
+│   │   │   ├── dashboard.tsx           # Student home panel
+│   │   │   ├── guesstimate.$id.tsx     # Active case study scratchpad workspace
+│   │   │   ├── guesstimates.tsx        # Case studies index and guidelines
+│   │   │   ├── history.tsx             # Student previous runs log
+│   │   │   ├── shortlist-evaluator.tsx # Resume matching JD evaluator
+│   │   │   ├── new.tsx                 # Launch new mock interview
+│   │   │   └── scorecard.$id.tsx       # AI response grading scorecard
 │   │   ├── auth.tsx       # Auth portal (Login / Register)
 │   │   ├── index.tsx      # Public landing page
 │   │   └── __root.tsx     # App wrapper and viewport shell

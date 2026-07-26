@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, LayoutDashboard, PlusCircle, History, Shield, LogOut } from "lucide-react";
+import { GraduationCap, LayoutDashboard, PlusCircle, History, Shield, LogOut, ClipboardCheck, Calculator } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -37,6 +37,8 @@ export function AppShell({ children, title, subtitle, action }: { children: Reac
         </div>
         <nav className="flex-1 space-y-1 px-3">
           <NavItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" />
+          <NavItem to="/shortlist-evaluator" icon={<ClipboardCheck className="h-4 w-4" />} label="Shortlist Evaluator" />
+          <NavItem to="/guesstimates" icon={<Calculator className="h-4 w-4" />} label="Guesstimates & Cases" />
           <NavItem to="/new" icon={<PlusCircle className="h-4 w-4" />} label="New Interview" />
           <NavItem to="/history" icon={<History className="h-4 w-4" />} label="History" />
           {isAdmin && <NavItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin" />}

@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedShortlistEvaluatorRouteImport } from './routes/_authenticated/shortlist-evaluator'
 import { Route as AuthenticatedNewRouteImport } from './routes/_authenticated/new'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedGuesstimatesRouteImport } from './routes/_authenticated/guesstimates'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedScorecardIdRouteImport } from './routes/_authenticated/scorecard.$id'
@@ -34,6 +36,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedShortlistEvaluatorRoute =
+  AuthenticatedShortlistEvaluatorRouteImport.update({
+    id: '/shortlist-evaluator',
+    path: '/shortlist-evaluator',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNewRoute = AuthenticatedNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -44,6 +52,12 @@ const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGuesstimatesRoute =
+  AuthenticatedGuesstimatesRouteImport.update({
+    id: '/guesstimates',
+    path: '/guesstimates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -78,8 +92,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/guesstimates': typeof AuthenticatedGuesstimatesRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new': typeof AuthenticatedNewRoute
+  '/shortlist-evaluator': typeof AuthenticatedShortlistEvaluatorRoute
   '/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/scorecard/$id': typeof AuthenticatedScorecardIdRoute
@@ -89,8 +105,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/guesstimates': typeof AuthenticatedGuesstimatesRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new': typeof AuthenticatedNewRoute
+  '/shortlist-evaluator': typeof AuthenticatedShortlistEvaluatorRoute
   '/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/scorecard/$id': typeof AuthenticatedScorecardIdRoute
@@ -102,8 +120,10 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/guesstimates': typeof AuthenticatedGuesstimatesRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/new': typeof AuthenticatedNewRoute
+  '/_authenticated/shortlist-evaluator': typeof AuthenticatedShortlistEvaluatorRoute
   '/_authenticated/guesstimate/$id': typeof AuthenticatedGuesstimateIdRoute
   '/_authenticated/interview/$id': typeof AuthenticatedInterviewIdRoute
   '/_authenticated/scorecard/$id': typeof AuthenticatedScorecardIdRoute
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/dashboard'
+    | '/guesstimates'
     | '/history'
     | '/new'
+    | '/shortlist-evaluator'
     | '/guesstimate/$id'
     | '/interview/$id'
     | '/scorecard/$id'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/dashboard'
+    | '/guesstimates'
     | '/history'
     | '/new'
+    | '/shortlist-evaluator'
     | '/guesstimate/$id'
     | '/interview/$id'
     | '/scorecard/$id'
@@ -138,8 +162,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/_authenticated/guesstimates'
     | '/_authenticated/history'
     | '/_authenticated/new'
+    | '/_authenticated/shortlist-evaluator'
     | '/_authenticated/guesstimate/$id'
     | '/_authenticated/interview/$id'
     | '/_authenticated/scorecard/$id'
@@ -174,6 +200,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/shortlist-evaluator': {
+      id: '/_authenticated/shortlist-evaluator'
+      path: '/shortlist-evaluator'
+      fullPath: '/shortlist-evaluator'
+      preLoaderRoute: typeof AuthenticatedShortlistEvaluatorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/new': {
       id: '/_authenticated/new'
       path: '/new'
@@ -186,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/guesstimates': {
+      id: '/_authenticated/guesstimates'
+      path: '/guesstimates'
+      fullPath: '/guesstimates'
+      preLoaderRoute: typeof AuthenticatedGuesstimatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -229,8 +269,10 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGuesstimatesRoute: typeof AuthenticatedGuesstimatesRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNewRoute: typeof AuthenticatedNewRoute
+  AuthenticatedShortlistEvaluatorRoute: typeof AuthenticatedShortlistEvaluatorRoute
   AuthenticatedGuesstimateIdRoute: typeof AuthenticatedGuesstimateIdRoute
   AuthenticatedInterviewIdRoute: typeof AuthenticatedInterviewIdRoute
   AuthenticatedScorecardIdRoute: typeof AuthenticatedScorecardIdRoute
@@ -239,8 +281,10 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGuesstimatesRoute: AuthenticatedGuesstimatesRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNewRoute: AuthenticatedNewRoute,
+  AuthenticatedShortlistEvaluatorRoute: AuthenticatedShortlistEvaluatorRoute,
   AuthenticatedGuesstimateIdRoute: AuthenticatedGuesstimateIdRoute,
   AuthenticatedInterviewIdRoute: AuthenticatedInterviewIdRoute,
   AuthenticatedScorecardIdRoute: AuthenticatedScorecardIdRoute,

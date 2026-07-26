@@ -533,3 +533,102 @@ export const getAdminDashboardData = createServerFn({ method: "POST" })
       scorecards: scorecards ?? []
     };
   });
+
+export const evaluateShortlist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      resumeId: z.string().uuid(),
+      domain: z.string(),
+      role: z.string(),
+      jdText: z.string(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // 1. Fetch the resume
+    const { data: resume, error } = await supabase
+      .from("resumes")
+      .select("*")
+      .eq("id", data.resumeId)
+      .single();
+
+    if (error || !resume) throw new Error("Resume not found");
+    if (resume.user_id !== userId) throw new Error("Forbidden");
+
+    // 2. Call Groq via chatJSON
+    const { chatJSON } = await import("./ai-gateway.server");
+
+    const resumeParsed = (resume.parsed as any) || {};
+
+    const systemPrompt = `You are a senior placement coordinator and ATS specialist. Your task is to evaluate a candidate's resume for a target Domain and Role against a specific Job Description (JD).
+You must return a JSON object with:
+1. shortlist_score (0-100 integer representing candidate's overall readiness/probability of getting shortlisted for this job description).
+2. status (string: 'shortlisted' if score >= 80, 'borderline' if 60-79, 'not_shortlisted' if < 60).
+3. evaluation_verdict (string, 3-4 sentences of detailed evaluation reasoning on how well their experience, credentials, and skills match this specific job description, and if they are a strong fit).
+4. matched_skills (array of strings representing skills present in the resume that align well with target role and JD).
+5. missing_skills (array of strings representing critical keywords or skills from the JD that are missing or weak in the resume).
+6. suggested_certifications (array of strings, 3-4 professional certs like AWS, CFA, PMP, ITIL, CSM, etc. that would boost shortlising for this specific role).
+7. suggested_courses (array of strings, 3-4 college curriculum or online courses to bridge gaps).
+8. action_plan (array of strings, 3-5 specific, highly actionable ways they should modify their resume, e.g. "Add a certification section", "Rewrite Project X to include metrics", etc.).
+
+Be realistic and rigorous in your assessment.
+Return ONLY valid JSON matching this schema, with no additional text or formatting.`;
+
+    const userContent = `Target Domain: ${data.domain}
+Target Role: ${data.role}
+Job Description:
+${data.jdText}
+
+Resume parsed data:
+${JSON.stringify(resumeParsed, null, 2)}
+
+Resume raw text:
+${resume.raw_text || ""}
+
+Please perform the evaluation and return the JSON.`;
+
+    const result = await chatJSON<{
+      shortlist_score: number;
+      status: string;
+      evaluation_verdict: string;
+      matched_skills: string[];
+      missing_skills: string[];
+      suggested_certifications: string[];
+      suggested_courses: string[];
+      action_plan: string[];
+    }>({
+      system: systemPrompt,
+      messages: [{ role: "user", content: userContent }],
+      temperature: 0.2,
+    });
+
+    // 3. Save to database
+    const { data: row, error: insertError } = await supabase
+      .from("shortlist_evaluations")
+      .insert({
+        user_id: userId,
+        domain: data.domain,
+        role: data.role,
+        jd_text: data.jdText,
+        resume_id: data.resumeId,
+        shortlist_score: result.shortlist_score,
+        status: result.status,
+        evaluation_verdict: result.evaluation_verdict,
+        missing_skills: result.missing_skills,
+        matched_skills: result.matched_skills,
+        suggested_certifications: result.suggested_certifications,
+        suggested_courses: result.suggested_courses,
+        action_plan: result.action_plan,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Failed to insert shortlist evaluation:", insertError);
+      throw new Error(`Database error: ${insertError.message}`);
+    }
+
+    return row;
+  });
