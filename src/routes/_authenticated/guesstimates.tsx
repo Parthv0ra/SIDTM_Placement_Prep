@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { startGuesstimate, askCaseAssistant } from "@/lib/interview.functions";
+import { startGuesstimate } from "@/lib/interview.functions";
 import casebooks from "@/lib/casebook.json";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,34 +42,7 @@ function GuesstimatesPage() {
   const [selectedGuesstimate, setSelectedGuesstimate] = useState<string>("");
   const [guesstimateStarting, setGuesstimateStarting] = useState(false);
 
-  const [coachQuestion, setCoachQuestion] = useState("");
-  const [coachAnswer, setCoachAnswer] = useState("");
-  const [coachLoading, setCoachLoading] = useState(false);
 
-  const askCaseAssistantFn = useServerFn(askCaseAssistant);
-
-  async function handleAskCoach(qText?: string) {
-    const query = qText || coachQuestion;
-    if (!query.trim()) {
-      return toast.error("Please enter a question for the AI Case Coach.");
-    }
-    setCoachLoading(true);
-    try {
-      const response = await askCaseAssistantFn({
-        data: {
-          question: query,
-          contextCaseText: selectedCase ? `Title: ${selectedCase.title}\nQuestion: ${selectedCase.question}` : undefined
-        }
-      });
-      setCoachAnswer(response.answer);
-      if (!qText) setCoachQuestion(""); // clear input if typed manually
-      toast.success("Coach response ready!");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to get response from AI Coach");
-    } finally {
-      setCoachLoading(false);
-    }
-  }
 
   const selectedCaseRef = useRef<HTMLDivElement>(null);
 
@@ -227,8 +200,8 @@ function GuesstimatesPage() {
             </div>
 
             {/* Framework sidebar panel */}
-            <div className="md:col-span-1 space-y-6">
-              <Card>
+            <div className="md:col-span-1">
+              <Card className="h-full">
                 <CardHeader>
                   <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                     <Lightbulb className="h-4 w-4 text-amber-500" /> Estimation Guidelines
@@ -254,91 +227,6 @@ function GuesstimatesPage() {
                     </h4>
                     <p>Interviews test if your formula scales cleanly. Always write out your logical formula before picking assumptions or doing arithmetic!</p>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Case Coach Card */}
-              <Card className="border-primary/20 shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-1.5 text-primary">
-                    <Sparkles className="h-4 w-4 text-primary animate-pulse" /> AI Case Coach
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    {selectedCase 
-                      ? `Ask questions about "${selectedCase.title}" or general frameworks.`
-                      : "Ask questions about consulting frameworks, math, or segmentations."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <textarea
-                      value={coachQuestion}
-                      onChange={(e) => setCoachQuestion(e.target.value)}
-                      placeholder="Ask the coach... e.g. How do I calculate EV market size in Pune?"
-                      rows={3}
-                      className="w-full text-xs p-2.5 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                    <Button 
-                      onClick={() => handleAskCoach()} 
-                      disabled={coachLoading || !coachQuestion.trim()}
-                      className="w-full text-xs h-8"
-                      size="sm"
-                    >
-                      {coachLoading ? (
-                        <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Consulting coach...</>
-                      ) : (
-                        "Ask AI Coach"
-                      )}
-                    </Button>
-                  </div>
-
-                  {/* Quick Preset Pills */}
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] text-muted-foreground font-medium">Quick topics:</p>
-                    <div className="flex flex-wrap gap-1">
-                      <button
-                        onClick={() => handleAskCoach("How to estimate Pune population?")}
-                        disabled={coachLoading}
-                        className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                      >
-                        Pune Pop
-                      </button>
-                      <button
-                        onClick={() => handleAskCoach("Explain the profitability tree framework.")}
-                        disabled={coachLoading}
-                        className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                      >
-                        Profitability Tree
-                      </button>
-                      <button
-                        onClick={() => handleAskCoach("How to approach a market entry case study?")}
-                        disabled={coachLoading}
-                        className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                      >
-                        Market Entry
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Output Answer Box */}
-                  {coachAnswer && (
-                    <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2 mt-2">
-                      <div className="flex justify-between items-center pb-1 border-b border-primary/10">
-                        <span className="text-[10px] font-bold text-primary tracking-wider uppercase">Coach Answer</span>
-                        <Button 
-                          variant="ghost" 
-                          size="xs" 
-                          className="h-5 text-[9px] px-1.5"
-                          onClick={() => setCoachAnswer("")}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                      <div className="text-xs text-foreground font-normal leading-relaxed whitespace-pre-wrap max-h-[220px] overflow-y-auto pr-1">
-                        {coachAnswer}
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
