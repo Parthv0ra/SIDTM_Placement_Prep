@@ -105,21 +105,23 @@ function GuesstimateSession() {
     if (!scratchpad.trim()) {
       return toast.error("Please draft your drivers and calculations in the scratchpad.");
     }
-    if (!finalValue.trim()) {
-      return toast.error("Please enter your final numerical estimate.");
-    }
 
     setSubmitting(true);
     try {
       // 1. Create a dummy response row in database
       const { data: user } = await supabase.auth.getUser();
+      const chatLog = clarifyingChat.length > 0
+        ? `INTERVIEWER DISCUSSION CHAT LOG:\n${clarifyingChat.map(c => `${c.role === "candidate" ? "Candidate" : "Interviewer"}: ${c.text}`).join("\n")}\n\n`
+        : "";
+      const finalValText = finalValue.trim() || "N/A (Approach-only Case)";
+
       const { data: respRow, error: respErr } = await supabase
         .from("responses")
         .insert({
           session_id: id,
           question_id: question.id,
           user_id: user.user!.id,
-          transcript: `FINAL ESTIMATE: ${finalValue.trim()}\n\nSCRATCHPAD CALCULATIONS:\n${scratchpad.trim()}`,
+          transcript: `${chatLog}FINAL ESTIMATE: ${finalValText}\n\nSCRATCHPAD CALCULATIONS:\n${scratchpad.trim()}`,
         })
         .select()
         .single();
@@ -260,10 +262,10 @@ function GuesstimateSession() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                 <div className="space-y-1.5">
-                  <Label htmlFor="final-value">Final Estimated Number / Value</Label>
+                  <Label htmlFor="final-value">Final Estimated Number / Value (Optional)</Label>
                   <Input
                     id="final-value"
-                    placeholder="e.g. 5,000 phones/day or Rs. 12 Lakhs"
+                    placeholder="e.g. Rs. 12 Lakhs or leave blank for approach-only"
                     value={finalValue}
                     onChange={(e) => setFinalValue(e.target.value)}
                   />
