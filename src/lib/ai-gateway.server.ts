@@ -27,9 +27,10 @@ async function parseDocument(base64: string, mime: string): Promise<string> {
     const buffer = Buffer.from(base64, "base64");
     
     if (mime === "application/pdf" || mime.includes("pdf")) {
-      const pdf = (await import("pdf-parse/lib/pdf-parse.js")).default;
-      const result = await pdf(buffer);
-      return result.text || "";
+      const { getDocumentProxy, extractText } = await import("unpdf");
+      const pdf = await getDocumentProxy(new Uint8Array(buffer));
+      const { text } = await extractText(pdf, { mergePages: true });
+      return text || "";
     } else if (
       mime.includes("word") || 
       mime.includes("docx") || 
