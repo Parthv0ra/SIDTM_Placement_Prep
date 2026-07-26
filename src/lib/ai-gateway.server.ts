@@ -27,7 +27,7 @@ async function parseDocument(base64: string, mime: string): Promise<string> {
     const buffer = Buffer.from(base64, "base64");
     
     if (mime === "application/pdf" || mime.includes("pdf")) {
-      const pdf = (await import("pdf-parse")).default;
+      const pdf = (await import("pdf-parse/lib/pdf-parse.js")).default;
       const result = await pdf(buffer);
       return result.text || "";
     } else if (
