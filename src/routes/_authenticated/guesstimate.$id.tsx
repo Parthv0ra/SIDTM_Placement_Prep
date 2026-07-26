@@ -11,7 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles } from "lucide-react";
+import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles, Brain } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/guesstimate/$id")({
   component: GuesstimateSession,
@@ -38,32 +46,40 @@ function GuesstimateSession() {
   const [finalValue, setFinalValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const [coachQuestion, setCoachQuestion] = useState("");
-  const [coachAnswer, setCoachAnswer] = useState("");
-  const [coachLoading, setCoachLoading] = useState(false);
+  const [clarifyingOpen, setClarifyingOpen] = useState(false);
+  const [clarifyingQuestion, setClarifyingQuestion] = useState("");
+  const [clarifyingChat, setClarifyingChat] = useState<Array<{ role: "candidate" | "interviewer"; text: string }>>([]);
+  const [clarifyingLoading, setClarifyingLoading] = useState(false);
 
   const askCaseAssistantFn = useServerFn(askCaseAssistant);
 
-  async function handleAskCoach(qText?: string) {
-    const query = qText || coachQuestion;
-    if (!query.trim()) {
-      return toast.error("Please enter a question for the AI Case Coach.");
-    }
-    setCoachLoading(true);
+  async function handleAskClarifying(manualQuery?: string) {
+    const query = manualQuery || clarifyingQuestion;
+    if (!query.trim()) return;
+
+    // Open the popup modal instantly
+    setClarifyingOpen(true);
+    setClarifyingLoading(true);
+
+    // Append candidate question to chat log
+    const newChat = [...clarifyingChat, { role: "candidate" as const, text: query }];
+    setClarifyingChat(newChat);
+    setClarifyingQuestion("");
+
     try {
+      // Query the AI coach server function
       const response = await askCaseAssistantFn({
         data: {
-          question: query,
+          question: `Act as the case interviewer. Answer the candidate's clarifying question: "${query}". Keep the response realistic, short, and structured. Return raw text without json formats.`,
           contextCaseText: `Role: ${session?.role || "Consulting Candidate"}\nQuestion: ${question?.question_text || ""}`
         }
       });
-      setCoachAnswer(response.answer);
-      if (!qText) setCoachQuestion(""); // clear input if typed manually
-      toast.success("Coach response ready!");
+
+      setClarifyingChat([...newChat, { role: "interviewer" as const, text: response.answer }]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to get response from AI Coach");
+      toast.error("Failed to reach interviewer");
     } finally {
-      setCoachLoading(false);
+      setClarifyingLoading(false);
     }
   }
 
@@ -148,6 +164,34 @@ function GuesstimateSession() {
                 {question.question_text}
               </div>
 
+              {/* Clarifying Questions Section */}
+              <div className="p-4 rounded-lg border bg-secondary/15 space-y-2.5">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                  <span className="text-xs font-semibold text-foreground">Ask clarifying questions to the interviewer:</span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={clarifyingQuestion}
+                    onChange={(e) => setClarifyingQuestion(e.target.value)}
+                    placeholder="e.g. What is the geographical scope? Or what is the core business objective?"
+                    className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAskClarifying();
+                    }}
+                  />
+                  <Button 
+                    onClick={() => handleAskClarifying()} 
+                    disabled={!clarifyingQuestion.trim()} 
+                    size="sm" 
+                    className="text-xs h-8"
+                  >
+                    Ask Interviewer
+                  </Button>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="scratchpad" className="text-sm font-medium">Your Scratchpad Workspace</Label>
                 <Textarea
@@ -190,7 +234,7 @@ function GuesstimateSession() {
           </Card>
         </div>
 
-        <div className="md:col-span-1 space-y-6">
+        <div className="md:col-span-1 space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-1.5">
@@ -216,91 +260,99 @@ function GuesstimateSession() {
               </div>
             </CardContent>
           </Card>
-
-          {/* AI Case Coach Card */}
-          <Card className="border-primary/20 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold flex items-center gap-1.5 text-primary">
-                <Sparkles className="h-4 w-4 text-primary animate-pulse" /> AI Case Coach
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Ask questions about this specific problem or estimation frameworks.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <textarea
-                  value={coachQuestion}
-                  onChange={(e) => setCoachQuestion(e.target.value)}
-                  placeholder="Ask the coach... e.g. How do I start segmenting this user base?"
-                  rows={3}
-                  className="w-full text-xs p-2.5 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                <Button 
-                  onClick={() => handleAskCoach()} 
-                  disabled={coachLoading || !coachQuestion.trim()}
-                  className="w-full text-xs h-8"
-                  size="sm"
-                >
-                  {coachLoading ? (
-                    <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Consulting coach...</>
-                  ) : (
-                    "Ask AI Coach"
-                  )}
-                </Button>
-              </div>
-
-              {/* Quick Preset Pills */}
-              <div className="space-y-1.5">
-                <p className="text-[10px] text-muted-foreground font-medium">Quick topics:</p>
-                <div className="flex flex-wrap gap-1">
-                  <button
-                    onClick={() => handleAskCoach("How should I split the population for this specific problem?")}
-                    disabled={coachLoading}
-                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                  >
-                    Population Split
-                  </button>
-                  <button
-                    onClick={() => handleAskCoach("What assumptions are standard for this sector?")}
-                    disabled={coachLoading}
-                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                  >
-                    Assumptions Checklist
-                  </button>
-                  <button
-                    onClick={() => handleAskCoach("Give me a hints checklist for this question.")}
-                    disabled={coachLoading}
-                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
-                  >
-                    Hints Checklist
-                  </button>
-                </div>
-              </div>
-
-              {/* Output Answer Box */}
-              {coachAnswer && (
-                <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2 mt-2">
-                  <div className="flex justify-between items-center pb-1 border-b border-primary/10">
-                    <span className="text-[10px] font-bold text-primary tracking-wider uppercase">Coach Answer</span>
-                    <Button 
-                      variant="ghost" 
-                      size="xs" 
-                      className="h-5 text-[9px] px-1.5"
-                      onClick={() => setCoachAnswer("")}
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                  <div className="text-xs text-foreground font-normal leading-relaxed whitespace-pre-wrap max-h-[220px] overflow-y-auto pr-1">
-                    {coachAnswer}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
+
+      {/* Clarifying Questions Interviewer Dialog Popup Modal */}
+      <Dialog open={clarifyingOpen} onOpenChange={setClarifyingOpen}>
+        <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-6">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-sm font-semibold flex items-center gap-2 text-primary">
+              <Brain className="h-4.5 w-4.5 text-primary animate-pulse" /> Case Interviewer Chat
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Clarify parameters, objectives, or request additional facts/data about the case statement.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Chat Window */}
+          <div className="flex-1 overflow-y-auto my-4 pr-1 space-y-3 min-h-[220px] max-h-[350px]">
+            {clarifyingChat.length === 0 ? (
+              <div className="text-center py-8 text-xs text-muted-foreground">
+                No clarifying questions asked yet. Ask a question below.
+              </div>
+            ) : (
+              clarifyingChat.map((msg, index) => (
+                <div 
+                  key={index} 
+                  className={`flex flex-col ${msg.role === "candidate" ? "items-end" : "items-start"}`}
+                >
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">
+                    {msg.role === "candidate" ? "You (Candidate)" : "Interviewer"}
+                  </span>
+                  <div className={`p-2.5 rounded-lg text-xs leading-relaxed max-w-[85%] font-normal whitespace-pre-wrap ${
+                    msg.role === "candidate" 
+                      ? "bg-primary text-primary-foreground rounded-tr-none" 
+                      : "bg-secondary/40 text-foreground rounded-tl-none border"
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))
+            )}
+            {clarifyingLoading && (
+              <div className="flex justify-start items-center gap-2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                <span className="text-[10px] text-muted-foreground animate-pulse">Interviewer is replying...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Follow-up input */}
+          <div className="flex gap-2 pt-3 border-t">
+            <input
+              type="text"
+              value={clarifyingQuestion}
+              onChange={(e) => setClarifyingQuestion(e.target.value)}
+              placeholder="Ask follow-up clarifying question..."
+              className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
+              disabled={clarifyingLoading}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAskClarifying();
+              }}
+            />
+            <Button 
+              onClick={() => handleAskClarifying()} 
+              disabled={clarifyingLoading || !clarifyingQuestion.trim()} 
+              size="sm" 
+              className="text-xs h-8"
+            >
+              Send
+            </Button>
+          </div>
+
+          <DialogFooter className="mt-4 pt-3 border-t flex flex-row items-center justify-between sm:justify-between">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setClarifyingChat([]);
+                setClarifyingOpen(false);
+              }}
+              className="text-xs h-8"
+            >
+              Reset Chat
+            </Button>
+            <Button 
+              onClick={() => setClarifyingOpen(false)}
+              size="sm"
+              className="text-xs h-8"
+            >
+              Close & Solve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
