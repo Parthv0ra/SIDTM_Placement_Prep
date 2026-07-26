@@ -4,14 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { scoreResponse, finalizeSession } from "@/lib/interview.functions";
+import { scoreResponse, finalizeSession, askCaseAssistant } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight } from "lucide-react";
+import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/guesstimate/$id")({
   component: GuesstimateSession,
@@ -37,6 +37,35 @@ function GuesstimateSession() {
   const [scratchpad, setScratchpad] = useState("");
   const [finalValue, setFinalValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [coachQuestion, setCoachQuestion] = useState("");
+  const [coachAnswer, setCoachAnswer] = useState("");
+  const [coachLoading, setCoachLoading] = useState(false);
+
+  const askCaseAssistantFn = useServerFn(askCaseAssistant);
+
+  async function handleAskCoach(qText?: string) {
+    const query = qText || coachQuestion;
+    if (!query.trim()) {
+      return toast.error("Please enter a question for the AI Case Coach.");
+    }
+    setCoachLoading(true);
+    try {
+      const response = await askCaseAssistantFn({
+        data: {
+          question: query,
+          contextCaseText: `Role: ${session?.role || "Consulting Candidate"}\nQuestion: ${question?.question_text || ""}`
+        }
+      });
+      setCoachAnswer(response.answer);
+      if (!qText) setCoachQuestion(""); // clear input if typed manually
+      toast.success("Coach response ready!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to get response from AI Coach");
+    } finally {
+      setCoachLoading(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -161,9 +190,9 @@ function GuesstimateSession() {
           </Card>
         </div>
 
-        <div className="md:col-span-1 space-y-4">
+        <div className="md:col-span-1 space-y-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-1.5">
                 <Lightbulb className="h-4 w-5 text-amber-500" />
                 Case Prep Advice
@@ -185,6 +214,89 @@ function GuesstimateSession() {
               <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-amber-800 dark:text-amber-300">
                 <span className="font-semibold">Sanity Check Rule:</span> Compare your final number to global benchmarks. If you estimate Pune phone sales at 10 million a day (higher than Pune's population), your drivers are scaled incorrectly!
               </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Case Coach Card */}
+          <Card className="border-primary/20 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-1.5 text-primary">
+                <Sparkles className="h-4 w-4 text-primary animate-pulse" /> AI Case Coach
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Ask questions about this specific problem or estimation frameworks.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <textarea
+                  value={coachQuestion}
+                  onChange={(e) => setCoachQuestion(e.target.value)}
+                  placeholder="Ask the coach... e.g. How do I start segmenting this user base?"
+                  rows={3}
+                  className="w-full text-xs p-2.5 rounded-md border border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <Button 
+                  onClick={() => handleAskCoach()} 
+                  disabled={coachLoading || !coachQuestion.trim()}
+                  className="w-full text-xs h-8"
+                  size="sm"
+                >
+                  {coachLoading ? (
+                    <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Consulting coach...</>
+                  ) : (
+                    "Ask AI Coach"
+                  )}
+                </Button>
+              </div>
+
+              {/* Quick Preset Pills */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-muted-foreground font-medium">Quick topics:</p>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    onClick={() => handleAskCoach("How should I split the population for this specific problem?")}
+                    disabled={coachLoading}
+                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
+                  >
+                    Population Split
+                  </button>
+                  <button
+                    onClick={() => handleAskCoach("What assumptions are standard for this sector?")}
+                    disabled={coachLoading}
+                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
+                  >
+                    Assumptions Checklist
+                  </button>
+                  <button
+                    onClick={() => handleAskCoach("Give me a hints checklist for this question.")}
+                    disabled={coachLoading}
+                    className="text-[10px] bg-secondary/50 hover:bg-secondary text-secondary-foreground px-2 py-0.5 rounded transition-all text-left"
+                  >
+                    Hints Checklist
+                  </button>
+                </div>
+              </div>
+
+              {/* Output Answer Box */}
+              {coachAnswer && (
+                <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2 mt-2">
+                  <div className="flex justify-between items-center pb-1 border-b border-primary/10">
+                    <span className="text-[10px] font-bold text-primary tracking-wider uppercase">Coach Answer</span>
+                    <Button 
+                      variant="ghost" 
+                      size="xs" 
+                      className="h-5 text-[9px] px-1.5"
+                      onClick={() => setCoachAnswer("")}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                  <div className="text-xs text-foreground font-normal leading-relaxed whitespace-pre-wrap max-h-[220px] overflow-y-auto pr-1">
+                    {coachAnswer}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
