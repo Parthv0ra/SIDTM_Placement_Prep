@@ -46,7 +46,6 @@ function GuesstimateSession() {
   const [finalValue, setFinalValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const [clarifyingOpen, setClarifyingOpen] = useState(false);
   const [clarifyingQuestion, setClarifyingQuestion] = useState("");
   const [clarifyingChat, setClarifyingChat] = useState<Array<{ role: "candidate" | "interviewer"; text: string }>>([]);
   const [clarifyingLoading, setClarifyingLoading] = useState(false);
@@ -57,8 +56,6 @@ function GuesstimateSession() {
     const query = manualQuery || clarifyingQuestion;
     if (!query.trim()) return;
 
-    // Open the popup modal instantly
-    setClarifyingOpen(true);
     setClarifyingLoading(true);
 
     // Append candidate question to chat log
@@ -164,31 +161,84 @@ function GuesstimateSession() {
                 {question.question_text}
               </div>
 
-              {/* Clarifying Questions Section */}
-              <div className="p-4 rounded-lg border bg-secondary/15 space-y-2.5">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                  <span className="text-xs font-semibold text-foreground">Ask clarifying questions to the interviewer:</span>
+              {/* Clarifying Questions Section (Inline Interviewer Discussion) */}
+              <div className="p-4 rounded-lg border border-primary/20 bg-secondary/5 space-y-3">
+                <div className="flex justify-between items-center pb-1.5 border-b border-primary/10">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Interviewer Discussion Feed</span>
+                  </div>
+                  {clarifyingChat.length > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="xs" 
+                      className="h-5 text-[10px] px-1.5 text-muted-foreground hover:bg-transparent"
+                      onClick={() => setClarifyingChat([])}
+                    >
+                      Reset Discussion
+                    </Button>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={clarifyingQuestion}
-                    onChange={(e) => setClarifyingQuestion(e.target.value)}
-                    placeholder="e.g. What is the geographical scope? Or what is the core business objective?"
-                    className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleAskClarifying();
-                    }}
-                  />
-                  <Button 
-                    onClick={() => handleAskClarifying()} 
-                    disabled={!clarifyingQuestion.trim()} 
-                    size="sm" 
-                    className="text-xs h-8"
-                  >
-                    Ask Interviewer
-                  </Button>
+
+                {/* Inline Chat Log */}
+                {clarifyingChat.length > 0 && (
+                  <div className="max-h-[220px] overflow-y-auto pr-1 space-y-3 border-b border-dashed pb-3">
+                    {clarifyingChat.map((msg, index) => (
+                      <div 
+                        key={index} 
+                        className={`flex flex-col ${msg.role === "candidate" ? "items-end" : "items-start"}`}
+                      >
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">
+                          {msg.role === "candidate" ? "You (Candidate)" : "Interviewer"}
+                        </span>
+                        <div className={`p-2.5 rounded-lg text-xs leading-relaxed max-w-[85%] font-normal whitespace-pre-wrap ${
+                          msg.role === "candidate" 
+                            ? "bg-primary text-primary-foreground rounded-tr-none" 
+                            : "bg-secondary/40 text-foreground rounded-tl-none border border-secondary"
+                        }`}>
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                    {clarifyingLoading && (
+                      <div className="flex justify-start items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                        <span className="text-[10px] text-muted-foreground animate-pulse">Interviewer is replying...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Input row */}
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={clarifyingQuestion}
+                      onChange={(e) => setClarifyingQuestion(e.target.value)}
+                      placeholder="Ask a clarifying question... e.g. What is the geographical scope? Or what is the core objective?"
+                      className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
+                      disabled={clarifyingLoading}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAskClarifying();
+                      }}
+                    />
+                    <Button 
+                      onClick={() => handleAskClarifying()} 
+                      disabled={clarifyingLoading || !clarifyingQuestion.trim()} 
+                      size="sm" 
+                      className="text-xs h-8"
+                    >
+                      {clarifyingLoading ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> Replying...</>
+                      ) : (
+                        "Ask Interviewer"
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    Ask Clarifying Questions to gather key parameters before drafting your solution. The interviewer's answers will appear right here!
+                  </p>
                 </div>
               </div>
 
@@ -262,97 +312,6 @@ function GuesstimateSession() {
           </Card>
         </div>
       </div>
-
-      {/* Clarifying Questions Interviewer Dialog Popup Modal */}
-      <Dialog open={clarifyingOpen} onOpenChange={setClarifyingOpen}>
-        <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-6">
-          <DialogHeader className="pb-3 border-b">
-            <DialogTitle className="text-sm font-semibold flex items-center gap-2 text-primary">
-              <Brain className="h-4.5 w-4.5 text-primary animate-pulse" /> Case Interviewer Chat
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Clarify parameters, objectives, or request additional facts/data about the case statement.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Chat Window */}
-          <div className="flex-1 overflow-y-auto my-4 pr-1 space-y-3 min-h-[220px] max-h-[350px]">
-            {clarifyingChat.length === 0 ? (
-              <div className="text-center py-8 text-xs text-muted-foreground">
-                No clarifying questions asked yet. Ask a question below.
-              </div>
-            ) : (
-              clarifyingChat.map((msg, index) => (
-                <div 
-                  key={index} 
-                  className={`flex flex-col ${msg.role === "candidate" ? "items-end" : "items-start"}`}
-                >
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">
-                    {msg.role === "candidate" ? "You (Candidate)" : "Interviewer"}
-                  </span>
-                  <div className={`p-2.5 rounded-lg text-xs leading-relaxed max-w-[85%] font-normal whitespace-pre-wrap ${
-                    msg.role === "candidate" 
-                      ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-secondary/40 text-foreground rounded-tl-none border"
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))
-            )}
-            {clarifyingLoading && (
-              <div className="flex justify-start items-center gap-2">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                <span className="text-[10px] text-muted-foreground animate-pulse">Interviewer is replying...</span>
-              </div>
-            )}
-          </div>
-
-          {/* Follow-up input */}
-          <div className="flex gap-2 pt-3 border-t">
-            <input
-              type="text"
-              value={clarifyingQuestion}
-              onChange={(e) => setClarifyingQuestion(e.target.value)}
-              placeholder="Ask follow-up clarifying question..."
-              className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
-              disabled={clarifyingLoading}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAskClarifying();
-              }}
-            />
-            <Button 
-              onClick={() => handleAskClarifying()} 
-              disabled={clarifyingLoading || !clarifyingQuestion.trim()} 
-              size="sm" 
-              className="text-xs h-8"
-            >
-              Send
-            </Button>
-          </div>
-
-          <DialogFooter className="mt-4 pt-3 border-t flex flex-row items-center justify-between sm:justify-between">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => {
-                setClarifyingChat([]);
-                setClarifyingOpen(false);
-              }}
-              className="text-xs h-8"
-            >
-              Reset Chat
-            </Button>
-            <Button 
-              onClick={() => setClarifyingOpen(false)}
-              size="sm"
-              className="text-xs h-8"
-            >
-              Close & Solve
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AppShell>
   );
 }
