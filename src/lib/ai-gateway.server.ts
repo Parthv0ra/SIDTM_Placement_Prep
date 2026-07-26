@@ -1,5 +1,4 @@
 // Groq AI Gateway helper (server-only). Read GROQ_API_KEY inside handlers.
-import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1";
@@ -28,6 +27,11 @@ async function parseDocument(base64: string, mime: string): Promise<string> {
     const buffer = Buffer.from(base64, "base64");
     
     if (mime === "application/pdf" || mime.includes("pdf")) {
+      if (typeof globalThis !== 'undefined' && !globalThis.DOMMatrix) {
+        // @ts-ignore
+        globalThis.DOMMatrix = class DOMMatrix {};
+      }
+      const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
       const result = await parser.getText();
       await parser.destroy();
