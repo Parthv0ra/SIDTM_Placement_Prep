@@ -276,3 +276,39 @@ export async function chatWithFile<T = unknown>(opts: {
     temperature: 0.1, // low temperature for precise extraction
   });
 }
+
+export async function chatText(opts: {
+  model?: string;
+  system?: string;
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+  temperature?: number;
+}): Promise<string> {
+  const model = getGroqModel(opts.model);
+  const messages = [
+    ...(opts.system ? [{ role: "system" as const, content: opts.system }] : []),
+    ...opts.messages,
+  ];
+
+  const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getApiKey()}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: opts.temperature ?? 0.6,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Groq API ${res.status}: ${text}`);
+  }
+
+  const data = (await res.json()) as {
+    choices: Array<{ message: { content: string } }>;
+  };
+  return data.choices?.[0]?.message?.content ?? "";
+}

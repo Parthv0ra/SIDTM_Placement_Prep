@@ -632,3 +632,35 @@ Please perform the evaluation and return the JSON.`;
 
     return row;
   });
+
+export const askCaseAssistant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      question: z.string().min(1),
+      contextCaseText: z.string().optional()
+    }).parse(d)
+  )
+  .handler(async ({ data }) => {
+    const { chatText } = await import("./ai-gateway.server");
+
+    let systemPrompt = `You are an expert McKinsey/BCG Consulting Case Coach and Guesstimate Mentor. 
+Your goal is to help the candidate learn how to tackle guesstimates, structure case study problems, define formula math, and build segmentations.
+Provide highly structured, professional, and insightful advice. Use bullet points and clear headings. Keep answers relatively concise and highly actionable. Return raw markdown text.`;
+
+    let userPrompt = `I am practicing guesstimates and case studies. Here is my question:
+"${data.question}"`;
+
+    if (data.contextCaseText) {
+      userPrompt += `\n\nI am currently looking at this specific case study problem:
+"${data.contextCaseText}"`;
+    }
+
+    const response = await chatText({
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+      temperature: 0.7,
+    });
+
+    return { answer: response };
+  });
