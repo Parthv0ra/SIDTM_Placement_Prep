@@ -17,5 +17,10 @@ export default defineConfig({
     ssr: {
       external: ["pdf-parse", "pdf-parse/lib/pdf-parse.js"],
     },
+    build: {
+      rollupOptions: {
+        external: ["pdf-parse", "pdf-parse/lib/pdf-parse.js"],
+      },
+    },
   },
 });
