@@ -27,14 +27,8 @@ async function parseDocument(base64: string, mime: string): Promise<string> {
     const buffer = Buffer.from(base64, "base64");
     
     if (mime === "application/pdf" || mime.includes("pdf")) {
-      if (typeof globalThis !== 'undefined' && !globalThis.DOMMatrix) {
-        // @ts-ignore
-        globalThis.DOMMatrix = class DOMMatrix {};
-      }
-      const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const result = await parser.getText();
-      await parser.destroy();
+      const pdf = (await import("pdf-parse")).default;
+      const result = await pdf(buffer);
       return result.text || "";
     } else if (
       mime.includes("word") || 
