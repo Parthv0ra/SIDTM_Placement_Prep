@@ -14,6 +14,7 @@ PlacementPrep is an AI-powered mock interview practice platform designed specifi
     *   Standalone practice dashboard populated with 44 cases from **verified prep sources** (across Profitability, Market Entry, Pricing, Growth, and Miscellaneous frameworks).
     *   Smooth-scroll details panel and dynamic practice scratchpad environment.
     *   Quick estimation guidelines (population demographic breakdown drivers, device replacement lifecycle calculations, and formula templates).
+    *   **AI Voice Integration (Speech-to-Text):** Click-to-record voice input inside the clarifying questions feed. Captures local audio stream and transcribes it using high-accuracy **Groq Whisper** (`whisper-large-v3`) in real-time, working reliably across all modern desktop and mobile browsers.
 *   **Dual Resume Upload**: Upload resumes as PDF/DOCX or paste text directly. The AI performs an initial analysis, scoring quality and extracting key skills.
 *   **Job Description Extraction**: Drag and drop PDF, DOCX, or TXT JDs. The system extracts requirements using AI to compare with the candidate's profile.
 *   **Dynamic Interview Generation**: Automatically creates mock interviews matching the candidate's resume against the target company and role.
@@ -79,7 +80,7 @@ PlacementPrep is an AI-powered mock interview practice platform designed specifi
 ### Prerequisites
 
 *   [Bun](https://bun.sh/) installed on your machine (recommended, or `npm` / `pnpm` / `yarn`).
-*   A running **Supabase** instance and a **Gemini** API configuration.
+*   A running **Supabase** instance, a **Gemini** API key, and a **Groq** API key.
 
 ### Setup Steps
 
@@ -102,6 +103,7 @@ PlacementPrep is an AI-powered mock interview practice platform designed specifi
     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
     SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
     GEMINI_API_KEY=your_gemini_api_key
+    GROQ_API_KEY=your_groq_api_key
     ```
 
 4.  **Run Development Server**:
