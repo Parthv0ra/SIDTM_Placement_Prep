@@ -102,6 +102,8 @@ function GuesstimateSession() {
           setIsListening(false);
           if (event.error === "not-allowed") {
             toast.error("Microphone permission denied. Please allow microphone access.");
+          } else if (event.error === "network") {
+            toast.error("Speech recognition network error. Ensure you have a stable internet connection and that Google Speech servers are not blocked on your network.");
           } else if (event.error !== "aborted") {
             toast.error(`Voice input error: ${event.error}`);
           }
