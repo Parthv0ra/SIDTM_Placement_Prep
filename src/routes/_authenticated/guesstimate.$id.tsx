@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles, Brain } from "lucide-react";
+import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles, Brain, Mic, MicOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +49,76 @@ function GuesstimateSession() {
   const [clarifyingQuestion, setClarifyingQuestion] = useState("");
   const [clarifyingChat, setClarifyingChat] = useState<Array<{ role: "candidate" | "interviewer"; text: string }>>([]);
   const [clarifyingLoading, setClarifyingLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  function toggleListening() {
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error("Speech recognition is not supported in your browser. Try Google Chrome.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+    } else {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            setClarifyingQuestion((prev) => {
+              const cleanedPrev = prev.trim();
+              return cleanedPrev ? `${cleanedPrev} ${transcript}` : transcript;
+            });
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.error("Speech recognition error:", event.error);
+          setIsListening(false);
+          if (event.error === "not-allowed") {
+            toast.error("Microphone permission denied. Please allow microphone access.");
+          } else if (event.error !== "aborted") {
+            toast.error(`Voice input error: ${event.error}`);
+          }
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+        setIsListening(false);
+      }
+    }
+  }
 
   const askCaseAssistantFn = useServerFn(askCaseAssistant);
 
@@ -213,18 +283,37 @@ function GuesstimateSession() {
 
                 {/* Input row */}
                 <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={clarifyingQuestion}
-                      onChange={(e) => setClarifyingQuestion(e.target.value)}
-                      placeholder="Ask a clarifying question... e.g. What is the geographical scope? Or what is the core objective?"
-                      className="flex-1 text-xs px-3 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
-                      disabled={clarifyingLoading}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleAskClarifying();
-                      }}
-                    />
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={clarifyingQuestion}
+                        onChange={(e) => setClarifyingQuestion(e.target.value)}
+                        placeholder="Ask a clarifying question... e.g. What is the geographical scope? Or what is the core objective?"
+                        className="w-full text-xs pl-3 pr-10 py-1.5 rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
+                        disabled={clarifyingLoading}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAskClarifying();
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={toggleListening}
+                        disabled={clarifyingLoading}
+                        className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all duration-200 ${
+                          isListening
+                            ? "bg-destructive/10 text-destructive animate-pulse ring-2 ring-destructive/20"
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        }`}
+                        title={isListening ? "Stop listening" : "Ask with voice"}
+                      >
+                        {isListening ? (
+                          <MicOff className="h-3.5 w-3.5" />
+                        ) : (
+                          <Mic className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
                     <Button 
                       onClick={() => handleAskClarifying()} 
                       disabled={clarifyingLoading || !clarifyingQuestion.trim()} 
