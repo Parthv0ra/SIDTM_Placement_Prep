@@ -664,3 +664,17 @@ Provide highly structured, professional, and insightful advice. Use bullet point
 
     return { answer: response };
   });
+
+export const transcribeAudioInput = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      base64: z.string(),
+      mime: z.string(),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { transcribeAudio } = await import("./ai-gateway.server");
+    const transcript = await transcribeAudio(data.base64, data.mime);
+    return { transcript };
+  });

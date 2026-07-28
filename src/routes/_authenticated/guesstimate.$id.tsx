@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { scoreResponse, finalizeSession, askCaseAssistant } from "@/lib/interview.functions";
+import { scoreResponse, finalizeSession, askCaseAssistant, transcribeAudioInput } from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,73 +50,97 @@ function GuesstimateSession() {
   const [clarifyingChat, setClarifyingChat] = useState<Array<{ role: "candidate" | "interviewer"; text: string }>>([]);
   const [clarifyingLoading, setClarifyingLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
-  function toggleListening() {
+  const transcribeAudioInputFn = useServerFn(transcribeAudioInput);
+
+  async function toggleListening() {
     if (typeof window === "undefined") return;
 
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      toast.error("Speech recognition is not supported in your browser. Try Google Chrome.");
-      return;
-    }
-
     if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
       }
       setIsListening(false);
     } else {
+      audioChunksRef.current = [];
       try {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = "en-US";
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = stream;
 
-        recognition.onstart = () => {
-          setIsListening(true);
-        };
+        let mimeType = "audio/webm";
+        if (MediaRecorder.isTypeSupported("audio/webm")) {
+          mimeType = "audio/webm";
+        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+          mimeType = "audio/ogg";
+        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        }
 
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          if (transcript) {
-            setClarifyingQuestion((prev) => {
-              const cleanedPrev = prev.trim();
-              return cleanedPrev ? `${cleanedPrev} ${transcript}` : transcript;
-            });
+        const mediaRecorder = new MediaRecorder(stream, { mimeType });
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
           }
         };
 
-        recognition.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
-          setIsListening(false);
-          if (event.error === "not-allowed") {
-            toast.error("Microphone permission denied. Please allow microphone access.");
-          } else if (event.error === "network") {
-            toast.error("Speech recognition network error. Ensure you have a stable internet connection and that Google Speech servers are not blocked on your network.");
-          } else if (event.error !== "aborted") {
-            toast.error(`Voice input error: ${event.error}`);
-          }
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+          
+          stream.getTracks().forEach((track) => track.stop());
+          audioStreamRef.current = null;
+
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = async () => {
+            const base64data = (reader.result as string).split(",")[1];
+            setIsTranscribing(true);
+            try {
+              const res = await transcribeAudioInputFn({
+                data: {
+                  base64: base64data,
+                  mime: mimeType,
+                },
+              });
+              if (res.transcript && res.transcript.trim()) {
+                setClarifyingQuestion((prev) => {
+                  const cleanedPrev = prev.trim();
+                  return cleanedPrev ? `${cleanedPrev} ${res.transcript}` : res.transcript;
+                });
+              } else {
+                toast.error("Could not recognize any speech. Please try speaking closer to the microphone.");
+              }
+            } catch (err) {
+              console.error("Transcription failed:", err);
+              toast.error("Failed to transcribe speech. Check your network connection.");
+            } finally {
+              setIsTranscribing(false);
+            }
+          };
         };
 
-        recognition.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionRef.current = recognition;
-        recognition.start();
-      } catch (err) {
-        console.error("Failed to start speech recognition:", err);
+        mediaRecorder.start();
+        setIsListening(true);
+      } catch (err: any) {
+        console.error("Failed to start recording:", err);
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          toast.error("Microphone permission denied. Please allow microphone access.");
+        } else {
+          toast.error("Failed to access microphone. Please check your mic connection.");
+        }
         setIsListening(false);
       }
     }
@@ -301,7 +325,7 @@ function GuesstimateSession() {
                       <button
                         type="button"
                         onClick={toggleListening}
-                        disabled={clarifyingLoading}
+                        disabled={clarifyingLoading || isTranscribing}
                         className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all duration-200 ${
                           isListening
                             ? "bg-destructive/10 text-destructive animate-pulse ring-2 ring-destructive/20"
@@ -309,7 +333,9 @@ function GuesstimateSession() {
                         }`}
                         title={isListening ? "Stop listening" : "Ask with voice"}
                       >
-                        {isListening ? (
+                        {isTranscribing ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                        ) : isListening ? (
                           <MicOff className="h-3.5 w-3.5" />
                         ) : (
                           <Mic className="h-3.5 w-3.5" />
