@@ -3,7 +3,13 @@ import { AppShell } from "@/components/AppShell";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { parseResume, parsePastedResume, parseJdFile, startSession, startGuesstimate } from "@/lib/interview.functions";
+import {
+  parseResume,
+  parsePastedResume,
+  parseJdFile,
+  startSession,
+  startGuesstimate,
+} from "@/lib/interview.functions";
 import casebooks from "@/lib/casebook.json";
 import roleJds from "@/lib/role-jds.json";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,7 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Upload, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
@@ -22,21 +34,21 @@ export const Route = createFileRoute("/_authenticated/new")({
 
 const DOMAINS = ["BFSI", "Consulting", "IT/ITES", "Marketing", "Custom"] as const;
 const DOMAIN_ROLES_MAP: Record<string, string[]> = {
-  "BFSI": [
+  BFSI: [
     "Finance Transformation Consultant",
     "Finance Transformation GBS Consultant",
     "Enterprise Risk Consultant",
     "Digital Assurance (Associate – Assurance)",
-    "Custom"
+    "Custom",
   ],
-  "Consulting": [
+  Consulting: [
     "Management Consultant, Management Consulting Analyst",
     "Business Architecture Associate Manager",
     "Customer Strategy & Applied Design Consultant",
     "Supply Chain & Network Operations Consultant",
     "Digital Risk Consultant",
     "Associate – Consulting (Advisory)",
-    "Custom"
+    "Custom",
   ],
   "IT/ITES": [
     "Technology Consultant Analyst, Technology Consultant",
@@ -49,16 +61,14 @@ const DOMAIN_ROLES_MAP: Record<string, string[]> = {
     "Cyber Risk Consultant",
     "Management Trainee – Operations",
     "Emerging Solution Engineer (Pre-Sales Consulting)",
-    "Custom"
+    "Custom",
   ],
-  "Marketing": [
+  Marketing: [
     "Advertising, Marketing & Commerce Consultant",
     "Management Trainee – Product Management",
-    "Custom"
+    "Custom",
   ],
-  "Custom": [
-    "Custom"
-  ]
+  Custom: ["Custom"],
 };
 
 const ROLE_COURSES_MAP: Record<string, string[]> = {
@@ -74,7 +84,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Visual Analytics",
     "Generative AI Tools",
     "Supply Chain Management",
-    "Internet of Things"
+    "Internet of Things",
   ],
   "Technology Consultant Analyst, Technology Consultant": [
     "ICT Architectures and Frameworks",
@@ -87,7 +97,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Strategic Management",
     "Business Modeling and Planning",
     "Generative AI Tools",
-    "Supply Chain Management"
+    "Supply Chain Management",
   ],
   "Data Management Senior Analyst": [
     "Python for Data Science",
@@ -99,7 +109,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Governance Risk and Compliance",
     "Digital Regulations",
     "Cloud-based Solution Architecture",
-    "Business Statistics"
+    "Business Statistics",
   ],
   "Business Architecture Associate Manager": [
     "Information Systems for Telecom Business",
@@ -112,7 +122,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Marketing Analytics and CRM",
     "Data Mining for Decision Making",
     "OSS/BSS Frameworx",
-    "ICT Consulting"
+    "ICT Consulting",
   ],
   "Business Senior Analyst": [
     "Python for Data Science",
@@ -125,7 +135,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Strategic Management",
     "Marketing Analytics and CRM",
     "AI and ML for Business Management",
-    "Generative AI Tools"
+    "Generative AI Tools",
   ],
   "Business & System Integration Senior Analyst": [
     "Information Systems for Telecom Business",
@@ -138,7 +148,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Strategic Management",
     "Generative AI Tools",
     "OSS/BSS Frameworx",
-    "Data Mining for Decision Making"
+    "Data Mining for Decision Making",
   ],
   "Associate Technical Program Manager": [
     "Project Management",
@@ -148,7 +158,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Digital Technology Transformation",
     "Information Systems for Telecom Business",
     "Generative AI Tools",
-    "Business Statistics"
+    "Business Statistics",
   ],
   "Application & Data Modernization & Migration Consultant": [
     "Python for Data Science",
@@ -161,7 +171,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "AI and ML for Business Management",
     "Applications of AI and ML in Telecom",
     "Digital Technology Transformation",
-    "Information Systems for Telecom Business"
+    "Information Systems for Telecom Business",
   ],
   "Customer Strategy & Applied Design Consultant": [
     "Strategic Management",
@@ -174,7 +184,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Managing Pre-Sales",
     "Business Modeling and Planning",
     "ICT Consulting",
-    "Data Mining for Decision Making"
+    "Data Mining for Decision Making",
   ],
   "Advertising, Marketing & Commerce Consultant": [
     "Digital Marketing",
@@ -188,7 +198,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "ICT Architectures and Frameworks",
     "Product Management",
     "Strategic Management",
-    "Generative AI Tools"
+    "Generative AI Tools",
   ],
   "SAP Consultant": [
     "ICT Architectures and Frameworks",
@@ -200,7 +210,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "OSS/BSS Frameworx",
     "Supply Chain Management",
     "Business Modeling and Planning",
-    "Generative AI Tools"
+    "Generative AI Tools",
   ],
   "Supply Chain & Network Operations Consultant": [
     "Supply Chain Management",
@@ -212,7 +222,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Digital Technology Transformation",
     "Data Mining for Decision Making",
     "Visual Analytics",
-    "ICT Consulting"
+    "ICT Consulting",
   ],
   "Finance Transformation Consultant": [
     "Financial Management",
@@ -225,7 +235,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Generative AI Tools",
     "AI and ML for Business Management",
     "Strategic Management",
-    "Project Management"
+    "Project Management",
   ],
   "Finance Transformation GBS Consultant": [
     "Financial Management",
@@ -238,7 +248,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Generative AI Tools",
     "AI and ML for Business Management",
     "Strategic Management",
-    "Project Management"
+    "Project Management",
   ],
   "Digital Risk Consultant": [
     "Governance Risk and Compliance",
@@ -249,7 +259,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "ICT Architectures and Frameworks",
     "Cloud-based Solution Architecture",
     "Financial Risk Management",
-    "Digital Forensics"
+    "Digital Forensics",
   ],
   "Cyber Risk Consultant": [
     "Digital Forensics",
@@ -261,7 +271,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Advanced Cloud-Based Solution Architecture",
     "Digital Regulations",
     "Advanced Programming in Python",
-    "Information Systems for Telecom Business"
+    "Information Systems for Telecom Business",
   ],
   "Enterprise Risk Consultant": [
     "Governance Risk and Compliance",
@@ -272,7 +282,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "ICT Consulting",
     "Information Systems for Telecom Business",
     "Project Management",
-    "Digital Regulations"
+    "Digital Regulations",
   ],
   "Management Trainee – Product Management": [
     "Product Management",
@@ -285,7 +295,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Services and Technology Trends in Telecom (STTT)",
     "Convergence of Telecom Networks",
     "Generative AI Tools",
-    "Visual Analytics"
+    "Visual Analytics",
   ],
   "Management Trainee – Operations": [
     "Introduction to Telecom Technologies",
@@ -296,7 +306,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Project Management",
     "Supply Chain Management",
     "Principles and Practices of Management",
-    "Business Communication"
+    "Business Communication",
   ],
   "Digital Assurance (Associate – Assurance)": [
     "Governance Risk and Compliance",
@@ -308,7 +318,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Block Chain Technology",
     "Network Concepts and Components",
     "Digital Regulations",
-    "Financial Risk Management"
+    "Financial Risk Management",
   ],
   "Associate – Consulting (Advisory)": [
     "Strategic Management",
@@ -321,7 +331,7 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "Digital Technology Transformation",
     "Supply Chain Management",
     "ICT Consulting",
-    "Generative AI Tools"
+    "Generative AI Tools",
   ],
   "Emerging Solution Engineer (Pre-Sales Consulting)": [
     "Managing Pre-Sales",
@@ -333,17 +343,23 @@ const ROLE_COURSES_MAP: Record<string, string[]> = {
     "ICT Architectures and Frameworks",
     "Strategic Management",
     "Generative AI Tools",
-    "Business Communication"
-  ]
+    "Business Communication",
+  ],
 };
 
 const isCourseCovered = (courseName: string, parsedSkills: string[]) => {
-  const normalizedSkills = (parsedSkills ?? []).map(s => s.toLowerCase());
-  const words = courseName.toLowerCase().replace(/and|for|in|of|to|the|&/g, "").split(/\s+/).filter(w => w.length > 2);
-  return words.some(w => normalizedSkills.some(s => s.includes(w)));
+  const normalizedSkills = (parsedSkills ?? []).map((s) => s.toLowerCase());
+  const words = courseName
+    .toLowerCase()
+    .replace(/and|for|in|of|to|the|&/g, "")
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+  return words.some((w) => normalizedSkills.some((s) => s.includes(w)));
 };
 
-const GUESSTIMATES = casebooks.filter((c: any) => c.category === "guesstimate" || c.category === "case_study");
+const GUESSTIMATES = casebooks.filter(
+  (c: any) => c.category === "guesstimate" || c.category === "case_study",
+);
 
 function NewInterview() {
   const router = useRouter();
@@ -380,26 +396,30 @@ function NewInterview() {
     try {
       const { data: user } = await supabase.auth.getUser();
       const uid = user.user!.id;
-      
-      const { data: row, error } = await supabase.from("resumes").insert({
-        user_id: uid,
-        file_path: "pasted",
-        file_name: "Pasted Resume Text",
-        raw_text: pastedResumeText
-      }).select().single();
-      
+
+      const { data: row, error } = await supabase
+        .from("resumes")
+        .insert({
+          user_id: uid,
+          file_path: "pasted",
+          file_name: "Pasted Resume Text",
+          raw_text: pastedResumeText,
+        })
+        .select()
+        .single();
+
       if (error) throw new Error(error.message);
-      
+
       setResumeId(row.id);
       toast.info("Analyzing your pasted resume with AI…");
-      
+
       const p = await parsePastedResumeFn({
         data: {
           resumeId: row.id,
-          rawText: pastedResumeText
-        }
+          rawText: pastedResumeText,
+        },
       });
-      
+
       setParsed(p);
       toast.success("Resume parsed successfully!");
     } catch (e) {
@@ -454,7 +474,11 @@ function NewInterview() {
 
   const processJdFile = async (selectedFile: File) => {
     const nameLower = selectedFile.name.toLowerCase();
-    if (!nameLower.endsWith(".pdf") && !nameLower.endsWith(".docx") && !nameLower.endsWith(".txt")) {
+    if (
+      !nameLower.endsWith(".pdf") &&
+      !nameLower.endsWith(".docx") &&
+      !nameLower.endsWith(".txt")
+    ) {
       toast.error("Please upload a PDF, DOCX, or TXT file.");
       return;
     }
@@ -524,9 +548,15 @@ function NewInterview() {
       const path = `${uid}/${Date.now()}-${file.name.replace(/[^a-z0-9.\-_]/gi, "_")}`;
       const { error: upErr } = await supabase.storage.from("resumes").upload(path, file);
       if (upErr) throw new Error(upErr.message);
-      const { data: row, error } = await supabase.from("resumes").insert({
-        user_id: uid, file_path: path, file_name: file.name,
-      }).select().single();
+      const { data: row, error } = await supabase
+        .from("resumes")
+        .insert({
+          user_id: uid,
+          file_path: path,
+          file_name: file.name,
+        })
+        .select()
+        .single();
       if (error) throw new Error(error.message);
       setResumeId(row.id);
       toast.info("Analyzing your resume with AI…");
@@ -566,7 +596,9 @@ function NewInterview() {
     if (jd.trim().length < 30) return toast.error("Paste a longer job description.");
     setStarting(true);
     try {
-      const { sessionId } = await startFn({ data: { resumeId, jdText: jd, company: finalDomain, role: finalRole } });
+      const { sessionId } = await startFn({
+        data: { resumeId, jdText: jd, company: finalDomain, role: finalRole },
+      });
       toast.success("Interview ready.");
       router.navigate({ to: "/interview/$id", params: { id: sessionId } });
     } catch (e) {
@@ -576,14 +608,14 @@ function NewInterview() {
     }
   }
 
-  async function handleStartGuesstimate(g: typeof GUESSTIMATES[number]) {
+  async function handleStartGuesstimate(g: (typeof GUESSTIMATES)[number]) {
     setGuesstimateStarting(true);
     try {
       const { sessionId } = await startGuesstimateFn({
         data: {
           questionText: g.question,
-          title: g.title
-        }
+          title: g.title,
+        },
       });
       toast.success("Guesstimate practice ready!");
       router.navigate({ to: "/guesstimate/$id", params: { id: sessionId } });
@@ -595,8 +627,15 @@ function NewInterview() {
   }
 
   return (
-    <AppShell title="Placement Prep Hub" subtitle="Practice role-specific mock interviews or solve logical guesstimates.">
-      <Tabs value={practiceMode} onValueChange={(val: any) => setPracticeMode(val)} className="w-full mb-6">
+    <AppShell
+      title="Placement Prep Hub"
+      subtitle="Practice role-specific mock interviews or solve logical guesstimates."
+    >
+      <Tabs
+        value={practiceMode}
+        onValueChange={(val: any) => setPracticeMode(val)}
+        className="w-full mb-6"
+      >
         <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
           <TabsTrigger value="interview">Mock Interview (Webcam/Audio)</TabsTrigger>
           <TabsTrigger value="guesstimate">Guesstimate & Case Practice</TabsTrigger>
@@ -604,328 +643,446 @@ function NewInterview() {
 
         <TabsContent value="interview" className="mt-6">
           <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">1. Resume</CardTitle>
-            <CardDescription>PDF preferred, or paste the text content directly.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Tabs value={resumeInputMode} onValueChange={setResumeInputMode} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="file">Upload File</TabsTrigger>
-                <TabsTrigger value="text">Paste Text</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="file" className="space-y-3 mt-3">
-                <label
-                  onDragEnter={handleResumeDrag}
-                  onDragOver={handleResumeDrag}
-                  onDragLeave={handleResumeDrag}
-                  onDrop={handleResumeDrop}
-                  className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-                    isResumeDragActive
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-secondary/40 hover:bg-secondary"
-                  }`}
-                >
-                  <Upload className={`h-6 w-6 transition-transform ${isResumeDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`} />
-                  <span className="text-sm">{file ? file.name : "Click or drag & drop PDF or DOCX"}</span>
-                  <Input type="file" accept=".pdf,.docx" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                </label>
-                <Button className="w-full" onClick={handleUpload} disabled={!file || uploading}>
-                  {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing…</> : "Upload & analyze"}
-                </Button>
-              </TabsContent>
-              
-              <TabsContent value="text" className="space-y-3 mt-3">
-                <Textarea
-                  rows={6}
-                  value={pastedResumeText}
-                  onChange={(e) => setPastedResumeText(e.target.value)}
-                  placeholder="Paste your raw resume text here (experience, skills, projects, etc.)..."
-                  className="w-full"
-                />
-                <Button className="w-full" onClick={handlePastedResumeSubmit} disabled={!pastedResumeText || uploading}>
-                  {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing…</> : "Analyze resume"}
-                </Button>
-              </TabsContent>
-            </Tabs>
-            
-            {parsed && (
-              <div className="rounded-md border bg-secondary/30 p-3 text-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-primary font-medium">
-                    <CheckCircle2 className="h-4 w-4" /> Quality: {parsed.quality_score}/100
-                  </div>
-                  {parsed.quality_score < 70 && (
-                    <span className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                      Blocked: Under 70
-                    </span>
-                  )}
-                </div>
-                {parsed.quality_score < 70 && (
-                  <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive space-y-1">
-                    <div className="font-semibold flex items-center gap-1">
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Action Required: Quantification Gate
-                    </div>
-                    <p className="text-muted-foreground leading-normal">
-                      Your resume quality score is below 70 due to achievements lacking metrics. You must quantify your bullet points with concrete numbers, percentages, or metrics and re-upload before you can start an interview.
-                    </p>
-                  </div>
-                )}
-                <p className="text-muted-foreground">{parsed.summary}</p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {(parsed.skills ?? []).slice(0, 10).map((s: string) => (
-                    <span key={s} className="rounded-full bg-secondary px-2 py-0.5 text-xs">{s}</span>
-                  ))}
-                </div>
-
-                {parsed.certifications && parsed.certifications.length > 0 && (
-                  <div className="mt-3 border-t border-border/60 pt-3 space-y-1">
-                    <div className="font-semibold text-xs text-foreground flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                      Certifications Claimed:
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {parsed.certifications.map((c: string) => (
-                        <span key={c} className="rounded-md bg-violet-500/10 text-violet-600 px-2 py-0.5 text-xs font-medium border border-violet-500/20">{c}</span>
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground leading-normal mt-1">
-                      ⚠️ Certification Viva Active: You will be tested on these certification concepts during the interview to verify depth of knowledge.
-                    </p>
-                  </div>
-                )}
-
-                {parsed.suggestions && parsed.suggestions.length > 0 && (
-                  <div className="mt-3 border-t border-border/60 pt-3">
-                    <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      Improvements
-                    </div>
-                    <ul className="space-y-1.5 text-xs text-muted-foreground">
-                      {parsed.suggestions.map((s: string, idx: number) => (
-                        <li key={idx} className="flex gap-2 items-start">
-                          <span className="text-amber-500 font-medium select-none">{idx + 1}.</span>
-                          <span>{s}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">2. Target role & JD</CardTitle>
-            <CardDescription>Select or type your target domain and role, then paste or drop the JD.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label>Domain</Label>
-                <Select value={domain} onValueChange={handleDomainChange}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>
-                    {DOMAINS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {domain === "Custom" && <Input className="mt-2" placeholder="Domain name" value={domainCustom} onChange={(e) => setDomainCustom(e.target.value)} />}
-              </div>
-              <div>
-                <Label>Role</Label>
-                <Select value={role} onValueChange={handleRoleChange} disabled={!domain}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder={domain ? "Select" : "Choose domain first"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(DOMAIN_ROLES_MAP[domain] || []).map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {role === "Custom" && <Input className="mt-2" placeholder="Role" value={roleCustom} onChange={(e) => setRoleCustom(e.target.value)} />}
-              </div>
-            </div>
-
-            {role && ROLE_COURSES_MAP[role] && (
-              <div className="mt-4 border-t border-border/60 pt-3 space-y-2">
-                <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  SIDTM Curriculum Mapping for this Role:
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                  {ROLE_COURSES_MAP[role].map((c) => {
-                    const covered = parsed ? isCourseCovered(c, parsed.skills) : false;
-                    return (
-                      <div key={c} className="flex items-center gap-1.5 text-xs text-muted-foreground p-1 rounded-md bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                        {covered ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        ) : (
-                          <span className="w-3.5 h-3.5 rounded-full border border-amber-500/40 bg-amber-500/10 flex items-center justify-center text-[9px] font-bold text-amber-600 shrink-0">!</span>
-                        )}
-                        <span className={covered ? "text-foreground font-medium" : "text-muted-foreground"}>{c}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Job description</Label>
-              <label
-                onDragEnter={handleJdDrag}
-                onDragOver={handleJdDrag}
-                onDragLeave={handleJdDrag}
-                onDrop={handleJdDrop}
-                className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
-                  isJdDragActive
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-secondary/40 hover:bg-secondary"
-                }`}
-              >
-                {extractingJd ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span>Extracting JD text using AI...</span>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className={`h-5 w-5 transition-transform ${isJdDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`} />
-                    <span className="text-xs text-muted-foreground">
-                      {jdFile ? `Selected: ${jdFile.name}` : "Click or drag & drop JD file (PDF, DOCX, TXT) to extract text"}
-                    </span>
-                    <Input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleJdFileChange} />
-                  </>
-                )}
-              </label>
-              <Textarea
-                rows={7}
-                value={jd}
-                onChange={(e) => setJd(e.target.value)}
-                placeholder="Or paste/edit the full JD text here..."
-                className="mt-1"
-              />
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={handleStart} 
-              disabled={starting || (parsed && parsed.quality_score < 70)}
-            >
-              {starting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating questions…</> : 
-               (parsed && parsed.quality_score < 70) ? "Resume Quality Gate Active (Under 70)" : "Generate interview"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-      </TabsContent>
-
-      <TabsContent value="guesstimate" className="mt-6">
-        {/* Domain Filter Badges */}
-        <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by Domain:</p>
-          <div className="flex flex-wrap gap-1.5">
-            {["All", ...Array.from(new Set(GUESSTIMATES.map((g: any) => g.domain || "Consulting")))].map((domain) => (
-              <Button
-                key={domain}
-                variant={selectedCaseDomain === domain ? "default" : "outline"}
-                size="xs"
-                className="h-7 text-xs rounded-full px-3.5"
-                onClick={() => {
-                  setSelectedCaseDomain(domain);
-                  setSelectedGuesstimate(""); // Reset selection on filter change
-                }}
-              >
-                {domain}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 max-h-[480px] overflow-y-auto pr-2">
-              {GUESSTIMATES.filter((g: any) => {
-                if (selectedCaseDomain === "All") return true;
-                return (g.domain || "Consulting") === selectedCaseDomain;
-              }).map((g) => (
-                <Card 
-                  key={g.id} 
-                  className={`cursor-pointer border transition-all hover:border-primary/50 hover:shadow-md ${
-                    selectedGuesstimate === g.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
-                  }`}
-                  onClick={() => setSelectedGuesstimate(g.id)}
-                  onDoubleClick={() => handleStartGuesstimate(g)}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-semibold leading-snug">{g.title}</CardTitle>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
-                        {g.domain || "Consulting"}
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                        {g.category === "case_study" ? "Case Study" : "Guesstimate"}
-                      </span>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-
-            {selectedGuesstimate && (
-              <Card className="border-primary/30">
-                <CardHeader className="pb-2 bg-primary/5 border-b">
-                  <CardTitle className="text-sm text-primary">Selected Case</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4 space-y-4">
-                  <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                    {GUESSTIMATES.find(g => g.id === selectedGuesstimate)?.question}
-                  </p>
-                  <Button 
-                    className="w-full" 
-                    disabled={guesstimateStarting}
-                    onClick={() => {
-                      const g = GUESSTIMATES.find(x => x.id === selectedGuesstimate);
-                      if (g) handleStartGuesstimate(g);
-                    }}
-                  >
-                    {guesstimateStarting ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparing scratchpad…</>
-                    ) : (
-                      "Start Case Practice Workspace"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          <div className="md:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-semibold">Logical Breakdown Drivers</CardTitle>
-                <CardDescription className="text-xs">Frameworks for guesstimating at SIDTM</CardDescription>
+                <CardTitle className="text-base">1. Resume</CardTitle>
+                <CardDescription>
+                  PDF preferred, or paste the text content directly.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground space-y-4 leading-relaxed font-normal">
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1">Population & Demographics</h4>
-                  <p>Start with total geographic population (e.g. Pune ~4M, India ~1.4B) and segment by age, gender, rural vs urban, income level, or digital literacy.</p>
+              <CardContent className="space-y-3">
+                <Tabs value={resumeInputMode} onValueChange={setResumeInputMode} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="file">Upload File</TabsTrigger>
+                    <TabsTrigger value="text">Paste Text</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="file" className="space-y-3 mt-3">
+                    <label
+                      onDragEnter={handleResumeDrag}
+                      onDragOver={handleResumeDrag}
+                      onDragLeave={handleResumeDrag}
+                      onDrop={handleResumeDrop}
+                      className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                        isResumeDragActive
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-secondary/40 hover:bg-secondary"
+                      }`}
+                    >
+                      <Upload
+                        className={`h-6 w-6 transition-transform ${isResumeDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`}
+                      />
+                      <span className="text-sm">
+                        {file ? file.name : "Click or drag & drop PDF or DOCX"}
+                      </span>
+                      <Input
+                        type="file"
+                        accept=".pdf,.docx"
+                        className="hidden"
+                        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                    <Button className="w-full" onClick={handleUpload} disabled={!file || uploading}>
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing…
+                        </>
+                      ) : (
+                        "Upload & analyze"
+                      )}
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="text" className="space-y-3 mt-3">
+                    <Textarea
+                      rows={6}
+                      value={pastedResumeText}
+                      onChange={(e) => setPastedResumeText(e.target.value)}
+                      placeholder="Paste your raw resume text here (experience, skills, projects, etc.)..."
+                      className="w-full"
+                    />
+                    <Button
+                      className="w-full"
+                      onClick={handlePastedResumeSubmit}
+                      disabled={!pastedResumeText || uploading}
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing…
+                        </>
+                      ) : (
+                        "Analyze resume"
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+
+                {parsed && (
+                  <div className="rounded-md border bg-secondary/30 p-3 text-sm space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-primary font-medium">
+                        <CheckCircle2 className="h-4 w-4" /> Quality: {parsed.quality_score}/100
+                      </div>
+                      {parsed.quality_score < 70 && (
+                        <span className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                          Blocked: Under 70
+                        </span>
+                      )}
+                    </div>
+                    {parsed.quality_score < 70 && (
+                      <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive space-y-1">
+                        <div className="font-semibold flex items-center gap-1">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Action Required:
+                          Quantification Gate
+                        </div>
+                        <p className="text-muted-foreground leading-normal">
+                          Your resume quality score is below 70 due to achievements lacking metrics.
+                          You must quantify your bullet points with concrete numbers, percentages,
+                          or metrics and re-upload before you can start an interview.
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-muted-foreground">{parsed.summary}</p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {(parsed.skills ?? []).slice(0, 10).map((s: string) => (
+                        <span key={s} className="rounded-full bg-secondary px-2 py-0.5 text-xs">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+
+                    {parsed.certifications && parsed.certifications.length > 0 && (
+                      <div className="mt-3 border-t border-border/60 pt-3 space-y-1">
+                        <div className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                          Certifications Claimed:
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {parsed.certifications.map((c: string) => (
+                            <span
+                              key={c}
+                              className="rounded-md bg-violet-500/10 text-violet-600 px-2 py-0.5 text-xs font-medium border border-violet-500/20"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-normal mt-1">
+                          ⚠️ Certification Viva Active: You will be tested on these certification
+                          concepts during the interview to verify depth of knowledge.
+                        </p>
+                      </div>
+                    )}
+
+                    {parsed.suggestions && parsed.suggestions.length > 0 && (
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          Improvements
+                        </div>
+                        <ul className="space-y-1.5 text-xs text-muted-foreground">
+                          {parsed.suggestions.map((s: string, idx: number) => (
+                            <li key={idx} className="flex gap-2 items-start">
+                              <span className="text-amber-500 font-medium select-none">
+                                {idx + 1}.
+                              </span>
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">2. Target role & JD</CardTitle>
+                <CardDescription>
+                  Select or type your target domain and role, then paste or drop the JD.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>Domain</Label>
+                    <Select value={domain} onValueChange={handleDomainChange}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DOMAINS.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {d}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {domain === "Custom" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="Domain name"
+                        value={domainCustom}
+                        onChange={(e) => setDomainCustom(e.target.value)}
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <Label>Role</Label>
+                    <Select value={role} onValueChange={handleRoleChange} disabled={!domain}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder={domain ? "Select" : "Choose domain first"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(DOMAIN_ROLES_MAP[domain] || []).map((r) => (
+                          <SelectItem key={r} value={r}>
+                            {r}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {role === "Custom" && (
+                      <Input
+                        className="mt-2"
+                        placeholder="Role"
+                        value={roleCustom}
+                        onChange={(e) => setRoleCustom(e.target.value)}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1">Replacement & Lifespan Levers</h4>
-                  <p>For sales estimation (like phones sold daily), calculate replacement rate: total active user base divided by the average device lifespan (e.g. 2 years = 730 days).</p>
+
+                {role && ROLE_COURSES_MAP[role] && (
+                  <div className="mt-4 border-t border-border/60 pt-3 space-y-2">
+                    <div className="font-semibold text-xs text-foreground mb-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                      SIDTM Curriculum Mapping for this Role:
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                      {ROLE_COURSES_MAP[role].map((c) => {
+                        const covered = parsed ? isCourseCovered(c, parsed.skills) : false;
+                        return (
+                          <div
+                            key={c}
+                            className="flex items-center gap-1.5 text-xs text-muted-foreground p-1 rounded-md bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                          >
+                            {covered ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                            ) : (
+                              <span className="w-3.5 h-3.5 rounded-full border border-amber-500/40 bg-amber-500/10 flex items-center justify-center text-[9px] font-bold text-amber-600 shrink-0">
+                                !
+                              </span>
+                            )}
+                            <span
+                              className={
+                                covered ? "text-foreground font-medium" : "text-muted-foreground"
+                              }
+                            >
+                              {c}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Job description</Label>
+                  <label
+                    onDragEnter={handleJdDrag}
+                    onDragOver={handleJdDrag}
+                    onDragLeave={handleJdDrag}
+                    onDrop={handleJdDrop}
+                    className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center transition-colors ${
+                      isJdDragActive
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-secondary/40 hover:bg-secondary"
+                    }`}
+                  >
+                    {extractingJd ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <span>Extracting JD text using AI...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload
+                          className={`h-5 w-5 transition-transform ${isJdDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {jdFile
+                            ? `Selected: ${jdFile.name}`
+                            : "Click or drag & drop JD file (PDF, DOCX, TXT) to extract text"}
+                        </span>
+                        <Input
+                          type="file"
+                          accept=".pdf,.docx,.txt"
+                          className="hidden"
+                          onChange={handleJdFileChange}
+                        />
+                      </>
+                    )}
+                  </label>
+                  <Textarea
+                    rows={7}
+                    value={jd}
+                    onChange={(e) => setJd(e.target.value)}
+                    placeholder="Or paste/edit the full JD text here..."
+                    className="mt-1"
+                  />
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1">Logical Formulas</h4>
-                  <p>Interviews test if your formula scales cleanly. Always write out your logical formula before picking assumptions or doing arithmetic!</p>
-                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleStart}
+                  disabled={starting || (parsed && parsed.quality_score < 70)}
+                >
+                  {starting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating questions…
+                    </>
+                  ) : parsed && parsed.quality_score < 70 ? (
+                    "Resume Quality Gate Active (Under 70)"
+                  ) : (
+                    "Generate interview"
+                  )}
+                </Button>
               </CardContent>
             </Card>
           </div>
-        </div>
-      </TabsContent>
+        </TabsContent>
+
+        <TabsContent value="guesstimate" className="mt-6">
+          {/* Domain Filter Badges */}
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by Domain:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "All",
+                ...Array.from(new Set(GUESSTIMATES.map((g: any) => g.domain || "Consulting"))),
+              ].map((domain) => (
+                <Button
+                  key={domain}
+                  variant={selectedCaseDomain === domain ? "default" : "outline"}
+                  size="xs"
+                  className="h-7 text-xs rounded-full px-3.5"
+                  onClick={() => {
+                    setSelectedCaseDomain(domain);
+                    setSelectedGuesstimate(""); // Reset selection on filter change
+                  }}
+                >
+                  {domain}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="md:col-span-2 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 max-h-[480px] overflow-y-auto pr-2">
+                {GUESSTIMATES.filter((g: any) => {
+                  if (selectedCaseDomain === "All") return true;
+                  return (g.domain || "Consulting") === selectedCaseDomain;
+                }).map((g) => (
+                  <Card
+                    key={g.id}
+                    className={`cursor-pointer border transition-all hover:border-primary/50 hover:shadow-md ${
+                      selectedGuesstimate === g.id
+                        ? "border-primary bg-primary/5 ring-1 ring-primary"
+                        : "border-border"
+                    }`}
+                    onClick={() => setSelectedGuesstimate(g.id)}
+                    onDoubleClick={() => handleStartGuesstimate(g)}
+                  >
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-semibold leading-snug">
+                        {g.title}
+                      </CardTitle>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                          {g.domain || "Consulting"}
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                          {g.category === "case_study" ? "Case Study" : "Guesstimate"}
+                        </span>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+
+              {selectedGuesstimate && (
+                <Card className="border-primary/30">
+                  <CardHeader className="pb-2 bg-primary/5 border-b">
+                    <CardTitle className="text-sm text-primary">Selected Case</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-4">
+                    <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                      {GUESSTIMATES.find((g) => g.id === selectedGuesstimate)?.question}
+                    </p>
+                    <Button
+                      className="w-full"
+                      disabled={guesstimateStarting}
+                      onClick={() => {
+                        const g = GUESSTIMATES.find((x) => x.id === selectedGuesstimate);
+                        if (g) handleStartGuesstimate(g);
+                      }}
+                    >
+                      {guesstimateStarting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparing scratchpad…
+                        </>
+                      ) : (
+                        "Start Case Practice Workspace"
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            <div className="md:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-semibold">Logical Breakdown Drivers</CardTitle>
+                  <CardDescription className="text-xs">
+                    Frameworks for guesstimating at SIDTM
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs text-muted-foreground space-y-4 leading-relaxed font-normal">
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">
+                      Population & Demographics
+                    </h4>
+                    <p>
+                      Start with total geographic population (e.g. Pune ~4M, India ~1.4B) and
+                      segment by age, gender, rural vs urban, income level, or digital literacy.
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">
+                      Replacement & Lifespan Levers
+                    </h4>
+                    <p>
+                      For sales estimation (like phones sold daily), calculate replacement rate:
+                      total active user base divided by the average device lifespan (e.g. 2 years =
+                      730 days).
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Logical Formulas</h4>
+                    <p>
+                      Interviews test if your formula scales cleanly. Always write out your logical
+                      formula before picking assumptions or doing arithmetic!
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
     </AppShell>
   );

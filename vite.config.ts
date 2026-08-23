@@ -8,9 +8,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    plugins: [
-      basicSsl(),
-    ],
+    plugins: [basicSsl()],
     server: {
       https: true,
     },

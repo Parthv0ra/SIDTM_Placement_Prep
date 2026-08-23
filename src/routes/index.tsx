@@ -15,7 +15,9 @@ function Index() {
           <div className="flex items-center gap-2">
             <GraduationCap className="h-6 w-6 text-primary" />
             <span className="text-lg font-semibold tracking-tight">PlacementPrep</span>
-            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">SIDTM</span>
+            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+              SIDTM
+            </span>
           </div>
           <Button asChild size="sm">
             <Link to="/auth">Sign in</Link>
@@ -32,8 +34,9 @@ function Index() {
               Land your dream placement with data-backed practice.
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Upload your resume, target a company and role, and take live mock interviews.
-              Get a multi-dimensional scorecard, personalized feedback, and track your readiness over time.
+              Upload your resume, target a company and role, and take live mock interviews. Get a
+              multi-dimensional scorecard, personalized feedback, and track your readiness over
+              time.
             </p>
             <div className="mt-6 flex gap-3">
               <Button asChild size="lg">
@@ -43,17 +46,33 @@ function Index() {
                 <Link to="/auth">Faculty login</Link>
               </Button>
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">Available to students with an @sidtm.edu.in email.</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Available to students with an @sidtm.edu.in email.
+            </p>
           </div>
           <div className="grid gap-4">
-            <Feature icon={<Video className="h-5 w-5" />} title="Live video mock interviews" body="Webcam + mic recording with per-question timers and transcription." />
-            <Feature icon={<BarChart3 className="h-5 w-5" />} title="Multi-dimensional scoring" body="Relevance, communication, structure, fluency, confidence — every attempt." />
-            <Feature icon={<ShieldCheck className="h-5 w-5" />} title="Resume + JD matching" body="Gap analysis and personalized question sets tailored to each role." />
+            <Feature
+              icon={<Video className="h-5 w-5" />}
+              title="Live video mock interviews"
+              body="Webcam + mic recording with per-question timers and transcription."
+            />
+            <Feature
+              icon={<BarChart3 className="h-5 w-5" />}
+              title="Multi-dimensional scoring"
+              body="Relevance, communication, structure, fluency, confidence — every attempt."
+            />
+            <Feature
+              icon={<ShieldCheck className="h-5 w-5" />}
+              title="Resume + JD matching"
+              body="Gap analysis and personalized question sets tailored to each role."
+            />
           </div>
         </div>
       </section>
       <footer className="border-t bg-card">
-        <div className="mx-auto max-w-6xl px-6 py-6 text-xs text-muted-foreground">© SIDTM Placement Cell</div>
+        <div className="mx-auto max-w-6xl px-6 py-6 text-xs text-muted-foreground">
+          © SIDTM Placement Cell
+        </div>
       </footer>
     </div>
   );
@@ -62,7 +81,10 @@ function Index() {
 function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div className="rounded-xl border bg-card p-5 shadow-sm">
-      <div className="flex items-center gap-2 text-primary">{icon}<span className="text-sm font-medium text-foreground">{title}</span></div>
+      <div className="flex items-center gap-2 text-primary">
+        {icon}
+        <span className="text-sm font-medium text-foreground">{title}</span>
+      </div>
       <p className="mt-2 text-sm text-muted-foreground">{body}</p>
     </div>
   );

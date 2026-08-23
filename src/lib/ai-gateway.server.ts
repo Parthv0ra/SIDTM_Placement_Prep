@@ -12,34 +12,33 @@ function getApiKey() {
 }
 
 function getGroqModel(requestedModel?: string) {
+  const defaultModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const default8bModel = process.env.GROQ_MODEL_8B || "llama-3.1-8b-instant";
+
   if (!requestedModel) {
-    return "llama-3.3-70b-versatile";
+    return defaultModel;
   }
   const model = requestedModel.toLowerCase();
   if (model.includes("gemini") || model.includes("flash") || model.includes("8b")) {
-    return "llama-3.1-8b-instant";
+    return default8bModel;
   }
-  return "llama-3.3-70b-versatile";
+  return defaultModel;
 }
 
 async function parseDocument(base64: string, mime: string): Promise<string> {
   try {
     const buffer = Buffer.from(base64, "base64");
-    
+
     if (mime === "application/pdf" || mime.includes("pdf")) {
       const { getDocumentProxy, extractText } = await import("unpdf");
       const pdf = await getDocumentProxy(new Uint8Array(buffer));
       const { text } = await extractText(pdf, { mergePages: true });
       return text || "";
-    } else if (
-      mime.includes("word") || 
-      mime.includes("docx") || 
-      mime.includes("officedocument")
-    ) {
+    } else if (mime.includes("word") || mime.includes("docx") || mime.includes("officedocument")) {
       const result = await mammoth.extractRawText({ buffer });
       return result.value || "";
     }
-    
+
     throw new Error(`Unsupported document mime type: ${mime}`);
   } catch (error) {
     console.error("Local document parsing failed:", error);
@@ -51,19 +50,19 @@ function escapeJSONStrings(jsonStr: string): string {
   let inString = false;
   let escaped = false;
   let result = "";
-  
+
   for (let i = 0; i < jsonStr.length; i++) {
     const char = jsonStr[i];
     if (char === '"' && !escaped) {
       inString = !inString;
       result += char;
-    } else if (char === '\\' && inString) {
+    } else if (char === "\\" && inString) {
       escaped = !escaped;
       result += char;
     } else {
       escaped = false;
-      if (inString && (char === '\n' || char === '\r')) {
-        result += '\\n';
+      if (inString && (char === "\n" || char === "\r")) {
+        result += "\\n";
       } else {
         result += char;
       }
@@ -73,52 +72,63 @@ function escapeJSONStrings(jsonStr: string): string {
 }
 
 function removeTrailingCommas(jsonStr: string): string {
-  return jsonStr.replace(/,\s*([}\]])/g, '$1');
+  return jsonStr.replace(/,\s*([}\]])/g, "$1");
 }
 
 function parseTextJSON(raw: string): any {
   let cleaned = raw.trim();
   if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+    cleaned = cleaned
+      .replace(/^```json\s*/i, "")
+      .replace(/```$/, "")
+      .trim();
   }
-  
-  if (!cleaned.startsWith('{') || !cleaned.endsWith('}')) {
+
+  if (!cleaned.startsWith("{") || !cleaned.endsWith("}")) {
     return null;
   }
-  
+
   const textKeyIndex = cleaned.indexOf('"text"');
   if (textKeyIndex === -1) return null;
-  
-  const colonIndex = cleaned.indexOf(':', textKeyIndex);
+
+  const colonIndex = cleaned.indexOf(":", textKeyIndex);
   if (colonIndex === -1) return null;
-  
+
   const firstQuoteIndex = cleaned.indexOf('"', colonIndex);
   if (firstQuoteIndex === -1) return null;
-  
+
   const valueStart = firstQuoteIndex + 1;
   const lastQuoteIndex = cleaned.lastIndexOf('"');
   if (lastQuoteIndex === -1 || lastQuoteIndex <= firstQuoteIndex) return null;
-  
+
   const afterLastQuote = cleaned.substring(lastQuoteIndex + 1).trim();
-  if (afterLastQuote !== '}') {
+  if (afterLastQuote !== "}") {
     return null;
   }
-  
+
   const rawTextValue = cleaned.substring(valueStart, lastQuoteIndex);
-  
+
   const unescapedValue = rawTextValue.replace(/\\(.)/g, (match, char) => {
     switch (char) {
-      case 'n': return '\n';
-      case 'r': return '\r';
-      case 't': return '\t';
-      case 'b': return '\b';
-      case 'f': return '\f';
-      case '"': return '"';
-      case '\\': return '\\';
-      default: return char;
+      case "n":
+        return "\n";
+      case "r":
+        return "\r";
+      case "t":
+        return "\t";
+      case "b":
+        return "\b";
+      case "f":
+        return "\f";
+      case '"':
+        return '"';
+      case "\\":
+        return "\\";
+      default:
+        return char;
     }
   });
-  
+
   return { text: unescapedValue };
 }
 
@@ -127,12 +137,12 @@ function extractFirstJSONObjectOrArray(str: string): string {
   let inString = false;
   let escaped = false;
   let startIndex = -1;
-  
+
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
-    
+
     if (inString) {
-      if (char === '\\') {
+      if (char === "\\") {
         escaped = !escaped;
       } else if (char === '"' && !escaped) {
         inString = false;
@@ -141,26 +151,26 @@ function extractFirstJSONObjectOrArray(str: string): string {
       }
       continue;
     }
-    
+
     if (char === '"') {
       inString = true;
       escaped = false;
       continue;
     }
-    
-    if (char === '{' || char === '[') {
+
+    if (char === "{" || char === "[") {
       if (depth === 0) {
         startIndex = i;
       }
       depth++;
-    } else if (char === '}' || char === ']') {
+    } else if (char === "}" || char === "]") {
       depth--;
       if (depth === 0 && startIndex !== -1) {
         return str.substring(startIndex, i + 1);
       }
     }
   }
-  
+
   return str;
 }
 
@@ -195,9 +205,9 @@ export async function chatJSON<T = unknown>(opts: {
   const model = getGroqModel(opts.model);
   const messages = [
     ...(opts.system ? [{ role: "system" as const, content: opts.system }] : []),
-    ...opts.messages.map(msg => ({
+    ...opts.messages.map((msg) => ({
       role: msg.role,
-      content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content)
+      content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content),
     })),
   ];
 
@@ -230,10 +240,14 @@ export async function chatJSON<T = unknown>(opts: {
 export async function transcribeAudio(base64: string, mime: string): Promise<string> {
   // Turn base64 into a Blob for multipart upload
   const bin = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-  const ext = mime.includes("mp4") || mime.includes("m4a") ? "m4a"
-    : mime.includes("wav") ? "wav"
-    : mime.includes("mp3") ? "mp3"
-    : "webm";
+  const ext =
+    mime.includes("mp4") || mime.includes("m4a")
+      ? "m4a"
+      : mime.includes("wav")
+        ? "wav"
+        : mime.includes("mp3")
+          ? "mp3"
+          : "webm";
   const form = new FormData();
   form.append("model", "whisper-large-v3");
   form.append("file", new Blob([bin], { type: mime }), `response.${ext}`);
@@ -270,9 +284,7 @@ export async function chatWithFile<T = unknown>(opts: {
   return chatJSON<T>({
     model: opts.model,
     system: opts.system,
-    messages: [
-      { role: "user", content: userContent }
-    ],
+    messages: [{ role: "user", content: userContent }],
     temperature: 0.1, // low temperature for precise extraction
   });
 }

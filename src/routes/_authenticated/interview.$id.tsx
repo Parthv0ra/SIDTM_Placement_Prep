@@ -47,7 +47,9 @@ function LiveInterview() {
   // Eye and Face Tracking States
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
   const [warnings, setWarnings] = useState(0);
-  const [currentInfractionType, setCurrentInfractionType] = useState<"none" | "out-of-frame" | "looking-away">("none");
+  const [currentInfractionType, setCurrentInfractionType] = useState<
+    "none" | "out-of-frame" | "looking-away"
+  >("none");
   const [terminated, setTerminated] = useState(false);
 
   const faceMeshRef = useRef<any>(null);
@@ -174,10 +176,13 @@ function LiveInterview() {
       const rightGazeRatio = (rightIris.x - rightInner.x) / (rightOuter.x - rightInner.x);
 
       // Define Head turned infraction thresholds
-      const headTurned = yawRatio < 0.32 || yawRatio > 0.68 || pitchRatio < 0.34 || pitchRatio > 0.68;
+      const headTurned =
+        yawRatio < 0.32 || yawRatio > 0.68 || pitchRatio < 0.34 || pitchRatio > 0.68;
 
       // Define Gaze shifted infraction thresholds
-      const gazeShifted = (leftGazeRatio < 0.35 && rightGazeRatio < 0.35) || (leftGazeRatio > 0.65 && rightGazeRatio > 0.65);
+      const gazeShifted =
+        (leftGazeRatio < 0.35 && rightGazeRatio < 0.35) ||
+        (leftGazeRatio > 0.65 && rightGazeRatio > 0.65);
 
       if (headTurned || gazeShifted) {
         infraction = true;
@@ -198,9 +203,12 @@ function LiveInterview() {
             if (nextW >= 3) {
               handleTerminateInterview();
             } else {
-              toast.error(`Camera Warning ${nextW}/3: Please stay focused and look at the screen.`, {
-                duration: 4000,
-              });
+              toast.error(
+                `Camera Warning ${nextW}/3: Please stay focused and look at the screen.`,
+                {
+                  duration: 4000,
+                },
+              );
             }
             return nextW;
           });
@@ -231,7 +239,9 @@ function LiveInterview() {
         toast.error("Camera/mic permission required.");
       }
     })();
-    return () => { streamRef.current?.getTracks().forEach((t) => t.stop()); };
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
   }, []);
 
   const questions = data?.questions ?? [];
@@ -241,7 +251,9 @@ function LiveInterview() {
   function startRec() {
     if (!streamRef.current) return;
     chunksRef.current = [];
-    const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus") ? "video/webm;codecs=vp9,opus" : "video/webm";
+    const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+      ? "video/webm;codecs=vp9,opus"
+      : "video/webm";
     const mr = new MediaRecorder(streamRef.current, { mimeType: mime });
     mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
     mr.onstop = handleStop;
@@ -251,7 +263,10 @@ function LiveInterview() {
     setSeconds(PER_QUESTION_SECONDS);
     timerRef.current = setInterval(() => {
       setSeconds((s) => {
-        if (s <= 1) { stopRec(); return 0; }
+        if (s <= 1) {
+          stopRec();
+          return 0;
+        }
         return s - 1;
       });
     }, 1000);
@@ -273,22 +288,32 @@ function LiveInterview() {
       const { data: user } = await supabase.auth.getUser();
       const uid = user.user!.id;
       const path = `${uid}/${id}/q${idx}-${Date.now()}.webm`;
-      const { error: upErr } = await supabase.storage.from("recordings").upload(path, blob, { contentType: "video/webm" });
+      const { error: upErr } = await supabase.storage
+        .from("recordings")
+        .upload(path, blob, { contentType: "video/webm" });
       if (upErr) throw new Error(upErr.message);
 
       const duration = PER_QUESTION_SECONDS - seconds;
-      const { data: resp, error: rErr } = await supabase.from("responses").insert({
-        user_id: uid,
-        session_id: id,
-        question_id: current.id,
-        recording_path: path,
-        duration_sec: duration,
-        scores: {},
-      }).select().single();
+      const { data: resp, error: rErr } = await supabase
+        .from("responses")
+        .insert({
+          user_id: uid,
+          session_id: id,
+          question_id: current.id,
+          recording_path: path,
+          duration_sec: duration,
+          scores: {},
+        })
+        .select()
+        .single();
       if (rErr || !resp) throw new Error(rErr?.message ?? "Could not save response");
       await scoreFn({ data: { responseId: resp.id } });
 
-      setFinished((f) => { const nf = [...f]; nf[idx] = true; return nf; });
+      setFinished((f) => {
+        const nf = [...f];
+        nf[idx] = true;
+        return nf;
+      });
 
       if (idx + 1 < total) {
         setIdx(idx + 1);
@@ -316,7 +341,8 @@ function LiveInterview() {
             </div>
             <h2 className="text-xl font-bold text-foreground">Interview Disqualified</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              This session was automatically stopped because you looked away from the camera or moved out of the frame 3 times.
+              This session was automatically stopped because you looked away from the camera or
+              moved out of the frame 3 times.
             </p>
             <Button className="w-full mt-2" onClick={() => router.navigate({ to: "/dashboard" })}>
               Back to Dashboard
@@ -327,7 +353,12 @@ function LiveInterview() {
     );
   }
 
-  if (isLoading) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
   if (!current) return <div className="p-6">No questions in this session.</div>;
 
   return (
@@ -335,13 +366,16 @@ function LiveInterview() {
       <div className="mx-auto max-w-4xl px-4 py-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Question {idx + 1} of {total} · {current.category}</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Question {idx + 1} of {total} · {current.category}
+            </p>
           </div>
           <div className="font-mono text-lg tabular-nums text-primary">
-            {String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}
+            {String(Math.floor(seconds / 60)).padStart(2, "0")}:
+            {String(seconds % 60).padStart(2, "0")}
           </div>
         </div>
-        <Progress value={((idx) / total) * 100} className="mb-6 h-1" />
+        <Progress value={(idx / total) * 100} className="mb-6 h-1" />
 
         <Card>
           <CardContent className="p-6">
@@ -351,18 +385,31 @@ function LiveInterview() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-[2fr_1fr]">
           <div className="relative overflow-hidden rounded-lg border bg-black aspect-video w-full flex items-center justify-center">
-            <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
-            {recording && <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-destructive px-2 py-1 text-xs font-medium text-destructive-foreground"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> REC</span>}
-            
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+            {recording && (
+              <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-destructive px-2 py-1 text-xs font-medium text-destructive-foreground">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> REC
+              </span>
+            )}
+
             {recording && currentInfractionType !== "none" && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-xs text-center p-4">
                 <div className="text-white space-y-2 max-w-xs">
                   <AlertTriangle className="h-8 w-8 text-destructive mx-auto animate-bounce" />
                   <p className="text-sm font-bold text-destructive uppercase tracking-wider">
-                    {currentInfractionType === "out-of-frame" ? "Face Not Detected" : "Please Look at Camera"}
+                    {currentInfractionType === "out-of-frame"
+                      ? "Face Not Detected"
+                      : "Please Look at Camera"}
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Make sure you are centered in frame and looking at the screen. Warnings: {warnings}/3
+                    Make sure you are centered in frame and looking at the screen. Warnings:{" "}
+                    {warnings}/3
                   </p>
                 </div>
               </div>
@@ -371,7 +418,15 @@ function LiveInterview() {
           <div className="flex flex-col gap-3">
             {!recording ? (
               <Button size="lg" onClick={startRec} disabled={processing}>
-                {processing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : <><Mic className="mr-2 h-4 w-4" /> Start answer</>}
+                {processing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…
+                  </>
+                ) : (
+                  <>
+                    <Mic className="mr-2 h-4 w-4" /> Start answer
+                  </>
+                )}
               </Button>
             ) : (
               <Button size="lg" variant="destructive" onClick={stopRec}>
@@ -389,12 +444,20 @@ function LiveInterview() {
             )}
 
             <div className="rounded-md border bg-secondary/40 p-3 text-xs text-muted-foreground">
-              One-shot recording per question. Speak clearly, use the STAR structure for behavioural answers.
+              One-shot recording per question. Speak clearly, use the STAR structure for behavioural
+              answers.
             </div>
             <ul className="space-y-1 text-xs">
               {questions.map((q, i) => (
-                <li key={q.id} className={`flex items-center gap-2 ${i === idx ? "text-foreground" : "text-muted-foreground"}`}>
-                  {finished[i] ? <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> : <span className="h-3.5 w-3.5 rounded-full border" />}
+                <li
+                  key={q.id}
+                  className={`flex items-center gap-2 ${i === idx ? "text-foreground" : "text-muted-foreground"}`}
+                >
+                  {finished[i] ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <span className="h-3.5 w-3.5 rounded-full border" />
+                  )}
                   Q{i + 1} · {q.category}
                 </li>
               ))}

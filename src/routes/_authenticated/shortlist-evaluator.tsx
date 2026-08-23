@@ -4,14 +4,25 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { evaluateShortlist, parseResume, parsePastedResume, parseJdFile } from "@/lib/interview.functions";
+import {
+  evaluateShortlist,
+  parseResume,
+  parsePastedResume,
+  parseJdFile,
+} from "@/lib/interview.functions";
 import roleJds from "@/lib/role-jds.json";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -33,7 +44,7 @@ import {
   Check,
   X,
   Sparkles,
-  Info
+  Info,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/shortlist-evaluator")({
@@ -42,21 +53,21 @@ export const Route = createFileRoute("/_authenticated/shortlist-evaluator")({
 
 const DOMAINS = ["BFSI", "Consulting", "IT/ITES", "Marketing", "Custom"] as const;
 const DOMAIN_ROLES_MAP: Record<string, string[]> = {
-  "BFSI": [
+  BFSI: [
     "Finance Transformation Consultant",
     "Finance Transformation GBS Consultant",
     "Enterprise Risk Consultant",
     "Digital Assurance (Associate – Assurance)",
-    "Custom"
+    "Custom",
   ],
-  "Consulting": [
+  Consulting: [
     "Management Consultant, Management Consulting Analyst",
     "Business Architecture Associate Manager",
     "Customer Strategy & Applied Design Consultant",
     "Supply Chain & Network Operations Consultant",
     "Digital Risk Consultant",
     "Associate – Consulting (Advisory)",
-    "Custom"
+    "Custom",
   ],
   "IT/ITES": [
     "Technology Consultant Analyst, Technology Consultant",
@@ -69,16 +80,14 @@ const DOMAIN_ROLES_MAP: Record<string, string[]> = {
     "Cyber Risk Consultant",
     "Management Trainee – Operations",
     "Emerging Solution Engineer (Pre-Sales Consulting)",
-    "Custom"
+    "Custom",
   ],
-  "Marketing": [
+  Marketing: [
     "Advertising, Marketing & Commerce Consultant",
     "Management Trainee – Product Management",
-    "Custom"
+    "Custom",
   ],
-  "Custom": [
-    "Custom"
-  ]
+  Custom: ["Custom"],
 };
 
 const LOADING_STEPS = [
@@ -87,7 +96,7 @@ const LOADING_STEPS = [
   "Mapping skills against industry standards...",
   "Simulating ATS filters for the job profile...",
   "Calculating shortlist probabilities & matching keyword gaps...",
-  "Formulating actionable recommendations & certifications..."
+  "Formulating actionable recommendations & certifications...",
 ];
 
 function ShortlistEvaluatorPage() {
@@ -139,7 +148,7 @@ function ShortlistEvaluatorPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
   });
 
   const { data: evaluations, isLoading: evalsLoading } = useQuery({
@@ -151,7 +160,7 @@ function ShortlistEvaluatorPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
   });
 
   // Automatically select the latest resume if exists
@@ -213,7 +222,11 @@ function ShortlistEvaluatorPage() {
 
   const processJdFile = async (selectedFile: File) => {
     const nameLower = selectedFile.name.toLowerCase();
-    if (!nameLower.endsWith(".pdf") && !nameLower.endsWith(".docx") && !nameLower.endsWith(".txt")) {
+    if (
+      !nameLower.endsWith(".pdf") &&
+      !nameLower.endsWith(".docx") &&
+      !nameLower.endsWith(".txt")
+    ) {
       toast.error("Please upload a PDF, DOCX, or TXT file.");
       return;
     }
@@ -315,11 +328,15 @@ function ShortlistEvaluatorPage() {
         const { error: upErr } = await supabase.storage.from("resumes").upload(path, file);
         if (upErr) throw new Error(upErr.message);
 
-        const { data: row, error } = await supabase.from("resumes").insert({
-          user_id: uid,
-          file_path: path,
-          file_name: file.name,
-        }).select().single();
+        const { data: row, error } = await supabase
+          .from("resumes")
+          .insert({
+            user_id: uid,
+            file_path: path,
+            file_name: file.name,
+          })
+          .select()
+          .single();
         if (error) throw new Error(error.message);
 
         // Run server parser
@@ -343,20 +360,24 @@ function ShortlistEvaluatorPage() {
         const { data: user } = await supabase.auth.getUser();
         const uid = user.user!.id;
 
-        const { data: row, error } = await supabase.from("resumes").insert({
-          user_id: uid,
-          file_path: "pasted",
-          file_name: "Pasted Resume Text",
-          raw_text: pastedText
-        }).select().single();
+        const { data: row, error } = await supabase
+          .from("resumes")
+          .insert({
+            user_id: uid,
+            file_path: "pasted",
+            file_name: "Pasted Resume Text",
+            raw_text: pastedText,
+          })
+          .select()
+          .single();
         if (error) throw new Error(error.message);
 
         // Run server parser
         await parsePastedResumeFn({
           data: {
             resumeId: row.id,
-            rawText: pastedText
-          }
+            rawText: pastedText,
+          },
         });
         qc.invalidateQueries({ queryKey: ["resumes"] });
         return row.id;
@@ -376,7 +397,8 @@ function ShortlistEvaluatorPage() {
 
     if (!finalDomain) return toast.error("Please select or specify a domain.");
     if (!finalRole) return toast.error("Please select or specify a role.");
-    if (jdText.trim().length < 30) return toast.error("Please provide a longer Job Description (min 30 chars).");
+    if (jdText.trim().length < 30)
+      return toast.error("Please provide a longer Job Description (min 30 chars).");
 
     setScanning(true);
     setScanResult(null);
@@ -395,8 +417,8 @@ function ShortlistEvaluatorPage() {
           resumeId: rId,
           domain: finalDomain,
           role: finalRole,
-          jdText: jdText
-        }
+          jdText: jdText,
+        },
       });
 
       setScanResult(res);
@@ -411,7 +433,8 @@ function ShortlistEvaluatorPage() {
   };
 
   const getScoreColorClass = (score: number) => {
-    if (score >= 80) return "text-emerald-500 stroke-emerald-500 border-emerald-500/20 bg-emerald-500/5";
+    if (score >= 80)
+      return "text-emerald-500 stroke-emerald-500 border-emerald-500/20 bg-emerald-500/5";
     if (score >= 60) return "text-amber-500 stroke-amber-500 border-amber-500/20 bg-amber-500/5";
     return "text-destructive stroke-destructive border-destructive/20 bg-destructive/5";
   };
@@ -419,16 +442,31 @@ function ShortlistEvaluatorPage() {
   const getStatusBadge = (status: string) => {
     const s = status.toLowerCase();
     if (s === "shortlisted" || s === "shortlist") {
-      return <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Shortlisted</Badge>;
+      return (
+        <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+          Shortlisted
+        </Badge>
+      );
     }
     if (s === "borderline") {
-      return <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20">Borderline</Badge>;
+      return (
+        <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20">
+          Borderline
+        </Badge>
+      );
     }
-    return <Badge className="bg-destructive/10 text-destructive border border-destructive/20">Not Shortlisted</Badge>;
+    return (
+      <Badge className="bg-destructive/10 text-destructive border border-destructive/20">
+        Not Shortlisted
+      </Badge>
+    );
   };
 
   return (
-    <AppShell title="Shortlist Evaluator & Advisor" subtitle="Evaluate if your resume is shortlisted for a target role based on its Job Description, and get credential gap advice.">
+    <AppShell
+      title="Shortlist Evaluator & Advisor"
+      subtitle="Evaluate if your resume is shortlisted for a target role based on its Job Description, and get credential gap advice."
+    >
       <div className="flex gap-4 border-b pb-4 mb-6">
         <Button
           variant={activeTab === "evaluate" ? "default" : "ghost"}
@@ -458,7 +496,9 @@ function ShortlistEvaluatorPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <Briefcase className="h-4 w-4 text-primary" /> Target Profile & Domain
                 </CardTitle>
-                <CardDescription>Select the sector and specific role you want to evaluate your resume against.</CardDescription>
+                <CardDescription>
+                  Select the sector and specific role you want to evaluate your resume against.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -470,7 +510,9 @@ function ShortlistEvaluatorPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {DOMAINS.map((d) => (
-                          <SelectItem key={d} value={d}>{d}</SelectItem>
+                          <SelectItem key={d} value={d}>
+                            {d}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -492,7 +534,9 @@ function ShortlistEvaluatorPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {(DOMAIN_ROLES_MAP[domain] || []).map((r) => (
-                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                          <SelectItem key={r} value={r}>
+                            {r}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -514,7 +558,10 @@ function ShortlistEvaluatorPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" /> Job Description
                 </CardTitle>
-                <CardDescription>Specify the target requirements. You can upload a JD file or edit the plain text below.</CardDescription>
+                <CardDescription>
+                  Specify the target requirements. You can upload a JD file or edit the plain text
+                  below.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <label
@@ -535,11 +582,20 @@ function ShortlistEvaluatorPage() {
                     </div>
                   ) : (
                     <>
-                      <Upload className={`h-5 w-5 transition-transform ${isJdDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`} />
+                      <Upload
+                        className={`h-5 w-5 transition-transform ${isJdDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`}
+                      />
                       <span className="text-xs text-muted-foreground">
-                        {jdFile ? `Selected: ${jdFile.name}` : "Click or drag & drop JD file (PDF, DOCX, TXT) to auto-extract text"}
+                        {jdFile
+                          ? `Selected: ${jdFile.name}`
+                          : "Click or drag & drop JD file (PDF, DOCX, TXT) to auto-extract text"}
                       </span>
-                      <Input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleJdFileChange} />
+                      <Input
+                        type="file"
+                        accept=".pdf,.docx,.txt"
+                        className="hidden"
+                        onChange={handleJdFileChange}
+                      />
                     </>
                   )}
                 </label>
@@ -563,10 +619,16 @@ function ShortlistEvaluatorPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" /> Resume Source
                 </CardTitle>
-                <CardDescription>Use an existing resume from your profile history or upload/paste a new one.</CardDescription>
+                <CardDescription>
+                  Use an existing resume from your profile history or upload/paste a new one.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Tabs value={resumeSource} onValueChange={(val: any) => setResumeSource(val)} className="w-full">
+                <Tabs
+                  value={resumeSource}
+                  onValueChange={(val: any) => setResumeSource(val)}
+                  className="w-full"
+                >
                   <TabsList className="grid w-full grid-cols-2 max-w-sm mb-4">
                     <TabsTrigger value="existing" disabled={!resumes || resumes.length === 0}>
                       Select Existing ({resumes?.length ?? 0})
@@ -591,7 +653,11 @@ function ShortlistEvaluatorPage() {
                   </TabsContent>
 
                   <TabsContent value="new" className="space-y-4">
-                    <Tabs value={resumeInputMode} onValueChange={setResumeInputMode} className="w-full">
+                    <Tabs
+                      value={resumeInputMode}
+                      onValueChange={setResumeInputMode}
+                      className="w-full"
+                    >
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="file">Upload PDF/DOCX</TabsTrigger>
                         <TabsTrigger value="text">Paste Plain Text</TabsTrigger>
@@ -609,9 +675,18 @@ function ShortlistEvaluatorPage() {
                               : "border-border bg-secondary/40 hover:bg-secondary"
                           }`}
                         >
-                          <Upload className={`h-8 w-8 transition-transform ${isResumeDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`} />
-                          <span className="text-sm font-medium">{file ? file.name : "Click or drag & drop PDF/DOCX"}</span>
-                          <Input type="file" accept=".pdf,.docx" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                          <Upload
+                            className={`h-8 w-8 transition-transform ${isResumeDragActive ? "scale-110 text-primary" : "text-muted-foreground"}`}
+                          />
+                          <span className="text-sm font-medium">
+                            {file ? file.name : "Click or drag & drop PDF/DOCX"}
+                          </span>
+                          <Input
+                            type="file"
+                            accept=".pdf,.docx"
+                            className="hidden"
+                            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                          />
                         </label>
                       </TabsContent>
 
@@ -636,7 +711,9 @@ function ShortlistEvaluatorPage() {
               <div>
                 <CardHeader>
                   <CardTitle className="text-base">Ready to evaluate?</CardTitle>
-                  <CardDescription>We will parse your resume against the provided Job Description details.</CardDescription>
+                  <CardDescription>
+                    We will parse your resume against the provided Job Description details.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <div className="rounded-md border p-3 bg-secondary/20 space-y-2.5">
@@ -654,13 +731,18 @@ function ShortlistEvaluatorPage() {
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-muted-foreground">Resume source:</span>
-                      <span className="font-semibold">{resumeSource === "existing" ? "Existing" : "New Input"}</span>
+                      <span className="font-semibold">
+                        {resumeSource === "existing" ? "Existing" : "New Input"}
+                      </span>
                     </div>
                   </div>
 
                   <div className="text-xs text-muted-foreground bg-amber-500/5 border border-amber-500/10 rounded-md p-3 flex gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <span>Evaluation results are simulated by AI using industry benchmark keywords and target recruiting parameters.</span>
+                    <span>
+                      Evaluation results are simulated by AI using industry benchmark keywords and
+                      target recruiting parameters.
+                    </span>
                   </div>
                 </CardContent>
               </div>
@@ -672,9 +754,14 @@ function ShortlistEvaluatorPage() {
                   onClick={handleStartEvaluation}
                 >
                   {uploading ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</>
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
+                    </>
                   ) : (
-                    <><FileCheck className="h-4 w-4" /> Run Shortlist Scan <ArrowRight className="h-4 w-4" /></>
+                    <>
+                      <FileCheck className="h-4 w-4" /> Run Shortlist Scan{" "}
+                      <ArrowRight className="h-4 w-4" />
+                    </>
                   )}
                 </Button>
               </div>
@@ -690,11 +777,17 @@ function ShortlistEvaluatorPage() {
             <Loader2 className="h-10 w-10 text-primary animate-spin mb-6" />
             <h3 className="text-lg font-semibold mb-2">Analyzing Resume Shortlist Probability</h3>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              Please wait while our AI simulates recruiters screening your resume against the Job Description.
+              Please wait while our AI simulates recruiters screening your resume against the Job
+              Description.
             </p>
             <div className="w-full space-y-2">
-              <Progress value={((loadingStepIdx + 1) / LOADING_STEPS.length) * 100} className="h-2" />
-              <p className="text-xs font-mono text-primary animate-pulse">{LOADING_STEPS[loadingStepIdx]}</p>
+              <Progress
+                value={((loadingStepIdx + 1) / LOADING_STEPS.length) * 100}
+                className="h-2"
+              />
+              <p className="text-xs font-mono text-primary animate-pulse">
+                {LOADING_STEPS[loadingStepIdx]}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -714,10 +807,14 @@ function ShortlistEvaluatorPage() {
             {/* Shortlist Score Dial */}
             <Card className="md:col-span-1 flex flex-col items-center justify-center p-6 text-center">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Shortlist Eligibility Score</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  Shortlist Eligibility Score
+                </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                <div className={`relative flex items-center justify-center w-36 h-36 rounded-full border-4 ${getScoreColorClass(scanResult.shortlist_score)} mb-4`}>
+                <div
+                  className={`relative flex items-center justify-center w-36 h-36 rounded-full border-4 ${getScoreColorClass(scanResult.shortlist_score)} mb-4`}
+                >
                   <div className="text-center">
                     <span className="text-4xl font-bold">{scanResult.shortlist_score}</span>
                     <span className="text-xs block text-muted-foreground">out of 100</span>
@@ -742,7 +839,9 @@ function ShortlistEvaluatorPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 border rounded-lg bg-secondary/10">
-                    <span className="text-xs text-muted-foreground block">Target Sector / Domain</span>
+                    <span className="text-xs text-muted-foreground block">
+                      Target Sector / Domain
+                    </span>
                     <span className="font-semibold text-sm">{scanResult.domain}</span>
                   </div>
                   <div className="p-3 border rounded-lg bg-secondary/10">
@@ -769,12 +868,16 @@ function ShortlistEvaluatorPage() {
               <CardTitle className="text-base flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" /> AI Recruiter Verdict
               </CardTitle>
-              <CardDescription>Detailed feedback on your resume suitability for this specific role and JD.</CardDescription>
+              <CardDescription>
+                Detailed feedback on your resume suitability for this specific role and JD.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-xl border p-5 bg-primary/[0.01] shadow-sm flex items-start gap-3">
                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <p className="text-sm text-foreground leading-relaxed">{scanResult.evaluation_verdict}</p>
+                <p className="text-sm text-foreground leading-relaxed">
+                  {scanResult.evaluation_verdict}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -787,18 +890,24 @@ function ShortlistEvaluatorPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" /> Keywords & Skills Analysis
                 </CardTitle>
-                <CardDescription>Matched keywords vs. critical missing skills for ATS filters.</CardDescription>
+                <CardDescription>
+                  Matched keywords vs. critical missing skills for ATS filters.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2.5">
                     <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide flex items-center gap-1">
-                      <Check className="h-4 w-4" /> Matched ({scanResult.matched_skills?.length ?? 0})
+                      <Check className="h-4 w-4" /> Matched (
+                      {scanResult.matched_skills?.length ?? 0})
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {(scanResult.matched_skills as string[])?.length > 0 ? (
                         (scanResult.matched_skills as string[]).map((s) => (
-                          <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/5 text-emerald-600 border border-emerald-500/10 font-medium">
+                          <span
+                            key={s}
+                            className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/5 text-emerald-600 border border-emerald-500/10 font-medium"
+                          >
                             {s}
                           </span>
                         ))
@@ -810,17 +919,23 @@ function ShortlistEvaluatorPage() {
 
                   <div className="space-y-2.5 border-l pl-4">
                     <span className="text-xs font-semibold text-destructive uppercase tracking-wide flex items-center gap-1">
-                      <AlertTriangle className="h-4 w-4 text-destructive" /> Missing ({scanResult.missing_skills?.length ?? 0})
+                      <AlertTriangle className="h-4 w-4 text-destructive" /> Missing (
+                      {scanResult.missing_skills?.length ?? 0})
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {(scanResult.missing_skills as string[])?.length > 0 ? (
                         (scanResult.missing_skills as string[]).map((s) => (
-                          <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-destructive/5 text-destructive border border-destructive/10 font-medium">
+                          <span
+                            key={s}
+                            className="text-[10px] px-2 py-0.5 rounded bg-destructive/5 text-destructive border border-destructive/10 font-medium"
+                          >
                             {s}
                           </span>
                         ))
                       ) : (
-                        <span className="text-xs text-emerald-600">No missing skills detected!</span>
+                        <span className="text-xs text-emerald-600">
+                          No missing skills detected!
+                        </span>
                       )}
                     </div>
                   </div>
@@ -835,12 +950,15 @@ function ShortlistEvaluatorPage() {
                   <CardTitle className="text-base flex items-center gap-2">
                     <Award className="h-4 w-4 text-primary" /> Recommended Path
                   </CardTitle>
-                  <CardDescription>Professional certifications and curriculum courses to add.</CardDescription>
+                  <CardDescription>
+                    Professional certifications and curriculum courses to add.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <span className="text-xs font-semibold text-foreground flex items-center gap-1.5 mb-2">
-                      <Award className="h-3.5 w-3.5 text-primary shrink-0" /> Recommended Certifications
+                      <Award className="h-3.5 w-3.5 text-primary shrink-0" /> Recommended
+                      Certifications
                     </span>
                     <ul className="space-y-1 text-xs text-muted-foreground list-disc pl-4">
                       {(scanResult.suggested_certifications as string[]).map((c, i) => (
@@ -870,7 +988,9 @@ function ShortlistEvaluatorPage() {
               <CardTitle className="text-base flex items-center gap-2">
                 <FileCheck className="h-4 w-4 text-primary" /> Resume Action Plan
               </CardTitle>
-              <CardDescription>Actionable edits to boost your resume score and bypass screening filters.</CardDescription>
+              <CardDescription>
+                Actionable edits to boost your resume score and bypass screening filters.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -909,9 +1029,14 @@ function ShortlistEvaluatorPage() {
             ) : (
               <div className="divide-y">
                 {evaluations.map((ev) => (
-                  <div key={ev.id} className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div
+                    key={ev.id}
+                    className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                  >
                     <div className="space-y-1">
-                      <h4 className="font-semibold text-sm">{ev.domain} — {ev.role}</h4>
+                      <h4 className="font-semibold text-sm">
+                        {ev.domain} — {ev.role}
+                      </h4>
                       <p className="text-xs text-muted-foreground line-clamp-2 max-w-[500px]">
                         JD: {ev.jd_text}
                       </p>

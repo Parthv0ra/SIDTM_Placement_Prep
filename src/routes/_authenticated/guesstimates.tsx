@@ -21,7 +21,7 @@ import {
   Brain,
   CheckCircle2,
   FileText,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/guesstimates")({
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/guesstimates")({
 });
 
 const GUESSTIMATES = casebooks.filter(
-  (c: any) => c.category === "guesstimate" || c.category === "case_study"
+  (c: any) => c.category === "guesstimate" || c.category === "case_study",
 );
 
 function GuesstimatesPage() {
@@ -41,10 +41,6 @@ function GuesstimatesPage() {
   const [selectedCaseDomain, setSelectedCaseDomain] = useState<string>("All");
   const [selectedGuesstimate, setSelectedGuesstimate] = useState<string>("");
   const [guesstimateStarting, setGuesstimateStarting] = useState(false);
-
-
-
-
 
   const selectedCaseRef = useRef<HTMLDivElement>(null);
 
@@ -67,17 +63,17 @@ function GuesstimatesPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
   });
 
-  async function handleStartGuesstimate(g: typeof GUESSTIMATES[number]) {
+  async function handleStartGuesstimate(g: (typeof GUESSTIMATES)[number]) {
     setGuesstimateStarting(true);
     try {
       const { sessionId } = await startGuesstimateFn({
         data: {
           questionText: g.question,
-          title: g.title
-        }
+          title: g.title,
+        },
       });
       toast.success("Guesstimate practice ready!");
       qc.invalidateQueries({ queryKey: ["previousGuesstimates"] });
@@ -89,11 +85,14 @@ function GuesstimatesPage() {
     }
   }
 
-  const selectedCase = GUESSTIMATES.find(g => g.id === selectedGuesstimate);
+  const selectedCase = GUESSTIMATES.find((g) => g.id === selectedGuesstimate);
 
   return (
     <>
-      <AppShell title="Guesstimate & Case Practice" subtitle="Solve analytical cases, construct driver logic, and test estimations.">
+      <AppShell
+        title="Guesstimate & Case Practice"
+        subtitle="Solve analytical cases, construct driver logic, and test estimations."
+      >
         <div className="flex gap-4 border-b pb-4 mb-6">
           <Button
             variant={activeTab === "practice" ? "default" : "ghost"}
@@ -107,7 +106,8 @@ function GuesstimatesPage() {
             onClick={() => setActiveTab("history")}
             size="sm"
           >
-            <History className="mr-1.5 h-4 w-4" /> My Practice Runs ({previousSessions?.length ?? 0})
+            <History className="mr-1.5 h-4 w-4" /> My Practice Runs ({previousSessions?.length ?? 0}
+            )
           </Button>
         </div>
 
@@ -115,9 +115,14 @@ function GuesstimatesPage() {
           <div className="space-y-6">
             {/* Domain Filter Badges */}
             <div>
-              <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by Sector / Domain:</p>
+              <p className="text-xs text-muted-foreground mb-2 font-medium">
+                Filter by Sector / Domain:
+              </p>
               <div className="flex flex-wrap gap-1.5">
-                {["All", ...Array.from(new Set(GUESSTIMATES.map((g: any) => g.domain || "Consulting")))].map((domain) => (
+                {[
+                  "All",
+                  ...Array.from(new Set(GUESSTIMATES.map((g: any) => g.domain || "Consulting"))),
+                ].map((domain) => (
                   <Button
                     key={domain}
                     variant={selectedCaseDomain === domain ? "default" : "outline"}
@@ -149,13 +154,17 @@ function GuesstimatesPage() {
                       <Card
                         key={g.id}
                         className={`cursor-pointer border transition-all hover:border-primary/50 hover:shadow-md ${
-                          selectedGuesstimate === g.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                          selectedGuesstimate === g.id
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-border"
                         }`}
                         onClick={() => setSelectedGuesstimate(g.id)}
                         onDoubleClick={() => handleStartGuesstimate(g)}
                       >
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-semibold leading-snug">{g.title}</CardTitle>
+                          <CardTitle className="text-sm font-semibold leading-snug">
+                            {g.title}
+                          </CardTitle>
                           <div className="mt-2 flex flex-wrap gap-1">
                             <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
                               {g.domain || "Consulting"}
@@ -180,7 +189,9 @@ function GuesstimatesPage() {
                     </CardHeader>
                     <CardContent className="pt-4 space-y-4">
                       <div>
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Problem Statement</span>
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Problem Statement
+                        </span>
                         <p className="text-sm font-medium leading-relaxed text-foreground mt-1.5">
                           {selectedCase.question}
                         </p>
@@ -193,9 +204,14 @@ function GuesstimatesPage() {
                         onClick={() => handleStartGuesstimate(selectedCase)}
                       >
                         {guesstimateStarting ? (
-                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparing scratchpad…</>
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparing scratchpad…
+                          </>
                         ) : (
-                          <><Sparkles className="h-4 w-4" /> Start Case Practice Workspace <ArrowRight className="h-4 w-4" /></>
+                          <>
+                            <Sparkles className="h-4 w-4" /> Start Case Practice Workspace{" "}
+                            <ArrowRight className="h-4 w-4" />
+                          </>
                         )}
                       </Button>
                     </CardContent>
@@ -210,26 +226,38 @@ function GuesstimatesPage() {
                     <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                       <Lightbulb className="h-4 w-4 text-amber-500" /> Estimation Guidelines
                     </CardTitle>
-                    <CardDescription className="text-xs">Frameworks for guesstimating at SIDTM</CardDescription>
+                    <CardDescription className="text-xs">
+                      Frameworks for guesstimating at SIDTM
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-4 leading-relaxed font-normal">
                     <div className="p-2.5 rounded-lg border bg-secondary/10">
                       <h4 className="font-semibold text-foreground mb-1 flex items-center gap-1">
                         <TrendingUp className="h-3.5 w-3.5 text-primary" /> Population Segment
                       </h4>
-                      <p>Start with total geographic population (e.g. Pune ~4M, India ~1.4B) and segment by age, gender, rural vs urban, income level, or digital literacy.</p>
+                      <p>
+                        Start with total geographic population (e.g. Pune ~4M, India ~1.4B) and
+                        segment by age, gender, rural vs urban, income level, or digital literacy.
+                      </p>
                     </div>
                     <div className="p-2.5 rounded-lg border bg-secondary/10">
                       <h4 className="font-semibold text-foreground mb-1 flex items-center gap-1">
                         <History className="h-3.5 w-3.5 text-primary" /> Replacement Lifecycle
                       </h4>
-                      <p>For sales estimation (like devices sold daily), calculate replacement rate: total active user base divided by the average device lifespan (e.g. 2 years = 730 days).</p>
+                      <p>
+                        For sales estimation (like devices sold daily), calculate replacement rate:
+                        total active user base divided by the average device lifespan (e.g. 2 years
+                        = 730 days).
+                      </p>
                     </div>
                     <div className="p-2.5 rounded-lg border bg-secondary/10">
                       <h4 className="font-semibold text-foreground mb-1 flex items-center gap-1">
                         <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Formula Blueprint
                       </h4>
-                      <p>Interviews test if your formula scales cleanly. Always write out your logical formula before picking assumptions or doing arithmetic!</p>
+                      <p>
+                        Interviews test if your formula scales cleanly. Always write out your
+                        logical formula before picking assumptions or doing arithmetic!
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -245,7 +273,9 @@ function GuesstimatesPage() {
               <CardTitle className="text-base flex items-center gap-2">
                 <History className="h-4 w-4 text-primary" /> Practice History
               </CardTitle>
-              <CardDescription className="text-xs">Review your previously submitted solutions and placements scores.</CardDescription>
+              <CardDescription className="text-xs">
+                Review your previously submitted solutions and placements scores.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {historyLoading ? (
@@ -261,7 +291,10 @@ function GuesstimatesPage() {
                   {previousSessions.map((session) => {
                     const score = (session.scorecards as any)?.overall_score;
                     return (
-                      <div key={session.id} className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div
+                        key={session.id}
+                        className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                      >
                         <div>
                           <h4 className="font-semibold text-sm flex items-center gap-1.5">
                             <Calculator className="h-3.5 w-3.5 text-muted-foreground" />
@@ -281,11 +314,7 @@ function GuesstimatesPage() {
                               <span className="text-[10px] text-muted-foreground">readiness</span>
                             </div>
                           )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                          >
+                          <Button variant="outline" size="sm" asChild>
                             <a
                               href={
                                 session.status === "completed"
@@ -293,7 +322,9 @@ function GuesstimatesPage() {
                                   : `/guesstimate/${session.id}`
                               }
                             >
-                              {session.status === "completed" ? "View Scorecard" : "Resume Workspace"}
+                              {session.status === "completed"
+                                ? "View Scorecard"
+                                : "Resume Workspace"}
                             </a>
                           </Button>
                         </div>

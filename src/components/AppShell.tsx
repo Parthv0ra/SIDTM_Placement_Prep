@@ -1,11 +1,30 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, LayoutDashboard, PlusCircle, History, Shield, LogOut, ClipboardCheck, Calculator } from "lucide-react";
+import {
+  GraduationCap,
+  LayoutDashboard,
+  PlusCircle,
+  History,
+  Shield,
+  LogOut,
+  ClipboardCheck,
+  Calculator,
+} from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function AppShell({ children, title, subtitle, action }: { children: ReactNode; title?: string; subtitle?: string; action?: ReactNode }) {
+export function AppShell({
+  children,
+  title,
+  subtitle,
+  action,
+}: {
+  children: ReactNode;
+  title?: string;
+  subtitle?: string;
+  action?: ReactNode;
+}) {
   const router = useRouter();
   const qc = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
@@ -13,9 +32,12 @@ export function AppShell({ children, title, subtitle, action }: { children: Reac
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
-    supabase.from("user_roles").select("role").then(({ data }) => {
-      setIsAdmin(!!data?.some((r) => r.role === "admin" || r.role === "faculty"));
-    });
+    supabase
+      .from("user_roles")
+      .select("role")
+      .then(({ data }) => {
+        setIsAdmin(!!data?.some((r) => r.role === "admin" || r.role === "faculty"));
+      });
   }, []);
 
   async function signOut() {
@@ -36,16 +58,33 @@ export function AppShell({ children, title, subtitle, action }: { children: Reac
           </div>
         </div>
         <nav className="flex-1 space-y-1 px-3">
-          <NavItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" />
-          <NavItem to="/shortlist-evaluator" icon={<ClipboardCheck className="h-4 w-4" />} label="Shortlist Evaluator" />
-          <NavItem to="/guesstimates" icon={<Calculator className="h-4 w-4" />} label="Guesstimates & Cases" />
+          <NavItem
+            to="/dashboard"
+            icon={<LayoutDashboard className="h-4 w-4" />}
+            label="Dashboard"
+          />
+          <NavItem
+            to="/shortlist-evaluator"
+            icon={<ClipboardCheck className="h-4 w-4" />}
+            label="Shortlist Evaluator"
+          />
+          <NavItem
+            to="/guesstimates"
+            icon={<Calculator className="h-4 w-4" />}
+            label="Guesstimates & Cases"
+          />
           <NavItem to="/new" icon={<PlusCircle className="h-4 w-4" />} label="New Interview" />
           <NavItem to="/history" icon={<History className="h-4 w-4" />} label="History" />
           {isAdmin && <NavItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin" />}
         </nav>
         <div className="border-t border-sidebar-border p-3">
           <p className="truncate px-2 pb-2 text-xs text-sidebar-foreground/70">{email}</p>
-          <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent" onClick={signOut}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+            onClick={signOut}
+          >
             <LogOut className="mr-2 h-4 w-4" /> Sign out
           </Button>
         </div>
@@ -54,7 +93,9 @@ export function AppShell({ children, title, subtitle, action }: { children: Reac
         <header className="border-b bg-card print:border-b-0 print:bg-transparent">
           <div className="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between gap-4">
             <div>
-              {title && <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>}
+              {title && (
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+              )}
               {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             {action && <div className="flex-shrink-0 print:hidden">{action}</div>}

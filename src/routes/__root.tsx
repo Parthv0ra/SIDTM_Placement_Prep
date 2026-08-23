@@ -79,10 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "PlacementPrep — AI Mock Interviews for SIDTM" },
-      { name: "description", content: "AI-powered resume review, mock interviews, and personalized scorecards for SIDTM students preparing for placements." },
+      {
+        name: "description",
+        content:
+          "AI-powered resume review, mock interviews, and personalized scorecards for SIDTM students preparing for placements.",
+      },
       { name: "author", content: "SIDTM Placement Cell" },
       { property: "og:title", content: "PlacementPrep — AI Mock Interviews for SIDTM" },
-      { property: "og:description", content: "Upload your resume, target a role, take an AI-driven mock interview, and get a data-backed readiness score." },
+      {
+        property: "og:description",
+        content:
+          "Upload your resume, target a role, take an AI-driven mock interview, and get a data-backed readiness score.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -129,7 +137,9 @@ function RootComponent() {
       });
       return () => data.subscription.unsubscribe();
     });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [router, queryClient]);
 
   return (

@@ -4,14 +4,29 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { scoreResponse, finalizeSession, askCaseAssistant, transcribeAudioInput } from "@/lib/interview.functions";
+import {
+  scoreResponse,
+  finalizeSession,
+  askCaseAssistant,
+  transcribeAudioInput,
+} from "@/lib/interview.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Calculator, Lightbulb, CheckCircle2, ChevronRight, Sparkles, Brain, Mic, MicOff } from "lucide-react";
+import {
+  Loader2,
+  Calculator,
+  Lightbulb,
+  CheckCircle2,
+  ChevronRight,
+  Sparkles,
+  Brain,
+  Mic,
+  MicOff,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,7 +62,9 @@ function GuesstimateSession() {
   const [submitting, setSubmitting] = useState(false);
 
   const [clarifyingQuestion, setClarifyingQuestion] = useState("");
-  const [clarifyingChat, setClarifyingChat] = useState<Array<{ role: "candidate" | "interviewer"; text: string }>>([]);
+  const [clarifyingChat, setClarifyingChat] = useState<
+    Array<{ role: "candidate" | "interviewer"; text: string }>
+  >([]);
   const [clarifyingLoading, setClarifyingLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -99,7 +116,7 @@ function GuesstimateSession() {
 
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-          
+
           stream.getTracks().forEach((track) => track.stop());
           audioStreamRef.current = null;
 
@@ -121,7 +138,9 @@ function GuesstimateSession() {
                   return cleanedPrev ? `${cleanedPrev} ${res.transcript}` : res.transcript;
                 });
               } else {
-                toast.error("Could not recognize any speech. Please try speaking closer to the microphone.");
+                toast.error(
+                  "Could not recognize any speech. Please try speaking closer to the microphone.",
+                );
               }
             } catch (err) {
               console.error("Transcription failed:", err);
@@ -164,8 +183,8 @@ function GuesstimateSession() {
       const response = await askCaseAssistantFn({
         data: {
           question: `Act as the case interviewer. Answer the candidate's clarifying question: "${query}". Keep the response realistic, short, and structured. Return raw text without json formats.`,
-          contextCaseText: `Role: ${session?.role || "Consulting Candidate"}\nQuestion: ${question?.question_text || ""}`
-        }
+          contextCaseText: `Role: ${session?.role || "Consulting Candidate"}\nQuestion: ${question?.question_text || ""}`,
+        },
       });
 
       setClarifyingChat([...newChat, { role: "interviewer" as const, text: response.answer }]);
@@ -206,9 +225,10 @@ function GuesstimateSession() {
     try {
       // 1. Create a dummy response row in database
       const { data: user } = await supabase.auth.getUser();
-      const chatLog = clarifyingChat.length > 0
-        ? `INTERVIEWER DISCUSSION CHAT LOG:\n${clarifyingChat.map(c => `${c.role === "candidate" ? "Candidate" : "Interviewer"}: ${c.text}`).join("\n")}\n\n`
-        : "";
+      const chatLog =
+        clarifyingChat.length > 0
+          ? `INTERVIEWER DISCUSSION CHAT LOG:\n${clarifyingChat.map((c) => `${c.role === "candidate" ? "Candidate" : "Interviewer"}: ${c.text}`).join("\n")}\n\n`
+          : "";
       const finalValText = finalValue.trim() || "N/A (Approach-only Case)";
 
       const { data: respRow, error: respErr } = await supabase
@@ -244,7 +264,10 @@ function GuesstimateSession() {
   }
 
   return (
-    <AppShell title={`Case Practice · ${session.role}`} subtitle="Draft your breakdown, state your assumptions, and compute your final estimate.">
+    <AppShell
+      title={`Case Practice · ${session.role}`}
+      subtitle="Draft your breakdown, state your assumptions, and compute your final estimate."
+    >
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
           <Card>
@@ -264,12 +287,14 @@ function GuesstimateSession() {
                 <div className="flex justify-between items-center pb-1.5 border-b border-primary/10">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Interviewer Discussion Feed</span>
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                      Interviewer Discussion Feed
+                    </span>
                   </div>
                   {clarifyingChat.length > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="xs" 
+                    <Button
+                      variant="ghost"
+                      size="xs"
                       className="h-5 text-[10px] px-1.5 text-muted-foreground hover:bg-transparent"
                       onClick={() => setClarifyingChat([])}
                     >
@@ -282,18 +307,20 @@ function GuesstimateSession() {
                 {clarifyingChat.length > 0 && (
                   <div className="max-h-[220px] overflow-y-auto pr-1 space-y-3 border-b border-dashed pb-3">
                     {clarifyingChat.map((msg, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className={`flex flex-col ${msg.role === "candidate" ? "items-end" : "items-start"}`}
                       >
                         <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">
                           {msg.role === "candidate" ? "You (Candidate)" : "Interviewer"}
                         </span>
-                        <div className={`p-2.5 rounded-lg text-xs leading-relaxed max-w-[85%] font-normal whitespace-pre-wrap ${
-                          msg.role === "candidate" 
-                            ? "bg-primary text-primary-foreground rounded-tr-none" 
-                            : "bg-secondary/40 text-foreground rounded-tl-none border border-secondary"
-                        }`}>
+                        <div
+                          className={`p-2.5 rounded-lg text-xs leading-relaxed max-w-[85%] font-normal whitespace-pre-wrap ${
+                            msg.role === "candidate"
+                              ? "bg-primary text-primary-foreground rounded-tr-none"
+                              : "bg-secondary/40 text-foreground rounded-tl-none border border-secondary"
+                          }`}
+                        >
                           {msg.text}
                         </div>
                       </div>
@@ -301,7 +328,9 @@ function GuesstimateSession() {
                     {clarifyingLoading && (
                       <div className="flex justify-start items-center gap-2">
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                        <span className="text-[10px] text-muted-foreground animate-pulse">Interviewer is replying...</span>
+                        <span className="text-[10px] text-muted-foreground animate-pulse">
+                          Interviewer is replying...
+                        </span>
                       </div>
                     )}
                   </div>
@@ -342,27 +371,32 @@ function GuesstimateSession() {
                         )}
                       </button>
                     </div>
-                    <Button 
-                      onClick={() => handleAskClarifying()} 
-                      disabled={clarifyingLoading || !clarifyingQuestion.trim()} 
-                      size="sm" 
+                    <Button
+                      onClick={() => handleAskClarifying()}
+                      disabled={clarifyingLoading || !clarifyingQuestion.trim()}
+                      size="sm"
                       className="text-xs h-8"
                     >
                       {clarifyingLoading ? (
-                        <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> Replying...</>
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> Replying...
+                        </>
                       ) : (
                         "Ask Interviewer"
                       )}
                     </Button>
                   </div>
                   <p className="text-[10px] text-muted-foreground">
-                    Ask Clarifying Questions to gather key parameters before drafting your solution. The interviewer's answers will appear right here!
+                    Ask Clarifying Questions to gather key parameters before drafting your solution.
+                    The interviewer's answers will appear right here!
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="scratchpad" className="text-sm font-medium">Your Scratchpad Workspace</Label>
+                <Label htmlFor="scratchpad" className="text-sm font-medium">
+                  Your Scratchpad Workspace
+                </Label>
                 <Textarea
                   id="scratchpad"
                   rows={12}
@@ -390,7 +424,8 @@ function GuesstimateSession() {
                 <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
                   {submitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Evaluating with AI Placement Coach...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Evaluating with AI Placement
+                      Coach...
                     </>
                   ) : (
                     <>
@@ -413,19 +448,36 @@ function GuesstimateSession() {
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-4 leading-relaxed">
               <div>
-                <h4 className="font-semibold text-foreground mb-1">1. Don't worry about exact facts</h4>
-                <p>Interviewer wants to see your **logical breakdown** (drivers) rather than a perfectly correct population or market value. Logical consistency is everything.</p>
+                <h4 className="font-semibold text-foreground mb-1">
+                  1. Don't worry about exact facts
+                </h4>
+                <p>
+                  Interviewer wants to see your **logical breakdown** (drivers) rather than a
+                  perfectly correct population or market value. Logical consistency is everything.
+                </p>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-1">2. Use round numbers for calculations</h4>
-                <p>Round Pune's population to 40 Lakhs (4 million) or India's population to 140 Crore (1.4 billion) to keep calculations simple and speed up mental math.</p>
+                <h4 className="font-semibold text-foreground mb-1">
+                  2. Use round numbers for calculations
+                </h4>
+                <p>
+                  Round Pune's population to 40 Lakhs (4 million) or India's population to 140 Crore
+                  (1.4 billion) to keep calculations simple and speed up mental math.
+                </p>
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-1">3. Document assumptions clearly</h4>
-                <p>Instead of jumping to a number, say "Assuming the average lifespan of a smartphone is 2 years, the daily replacement rate is population / (2 * 365)..."</p>
+                <h4 className="font-semibold text-foreground mb-1">
+                  3. Document assumptions clearly
+                </h4>
+                <p>
+                  Instead of jumping to a number, say "Assuming the average lifespan of a smartphone
+                  is 2 years, the daily replacement rate is population / (2 * 365)..."
+                </p>
               </div>
               <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-amber-800 dark:text-amber-300">
-                <span className="font-semibold">Sanity Check Rule:</span> Compare your final number to global benchmarks. If you estimate Pune phone sales at 10 million a day (higher than Pune's population), your drivers are scaled incorrectly!
+                <span className="font-semibold">Sanity Check Rule:</span> Compare your final number
+                to global benchmarks. If you estimate Pune phone sales at 10 million a day (higher
+                than Pune's population), your drivers are scaled incorrectly!
               </div>
             </CardContent>
           </Card>

@@ -44,7 +44,8 @@ function AuthPage() {
     }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email, password,
+      email,
+      password,
       options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
     });
     setLoading(false);
@@ -56,13 +57,18 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/"
+          className="mb-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
           <GraduationCap className="h-5 w-5 text-primary" /> PlacementPrep · SIDTM
         </Link>
         <Card>
           <CardHeader>
             <CardTitle>Welcome</CardTitle>
-            <CardDescription>Use your @sidtm.edu.in email to access the placement platform.</CardDescription>
+            <CardDescription>
+              Use your @sidtm.edu.in email to access the placement platform.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin">
@@ -71,10 +77,19 @@ function AuthPage() {
                 <TabsTrigger value="signup">Sign up</TabsTrigger>
               </TabsList>
               <TabsContent value="signin">
-                <AuthForm submitLabel="Sign in" loading={loading} onSubmit={(e, p) => onSignIn(e, p)} />
+                <AuthForm
+                  submitLabel="Sign in"
+                  loading={loading}
+                  onSubmit={(e, p) => onSignIn(e, p)}
+                />
               </TabsContent>
               <TabsContent value="signup">
-                <AuthForm submitLabel="Create account" loading={loading} withName onSubmit={(e, p, n) => onSignUp(e, p, n ?? "")} />
+                <AuthForm
+                  submitLabel="Create account"
+                  loading={loading}
+                  withName
+                  onSubmit={(e, p, n) => onSignUp(e, p, n ?? "")}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -85,15 +100,26 @@ function AuthPage() {
 }
 
 function AuthForm({
-  onSubmit, submitLabel, loading, withName,
-}: { onSubmit: (email: string, password: string, name?: string) => void; submitLabel: string; loading: boolean; withName?: boolean }) {
+  onSubmit,
+  submitLabel,
+  loading,
+  withName,
+}: {
+  onSubmit: (email: string, password: string, name?: string) => void;
+  submitLabel: string;
+  loading: boolean;
+  withName?: boolean;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   return (
     <form
       className="space-y-3 pt-4"
-      onSubmit={(e) => { e.preventDefault(); onSubmit(email, password, name); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(email, password, name);
+      }}
     >
       {withName && (
         <div className="space-y-1.5">
@@ -103,13 +129,29 @@ function AuthForm({
       )}
       <div className="space-y-1.5">
         <Label htmlFor="email">College email</Label>
-        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@sidtm.edu.in" required />
+        <Input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@sidtm.edu.in"
+          required
+        />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+        />
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>{loading ? "Please wait…" : submitLabel}</Button>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Please wait…" : submitLabel}
+      </Button>
     </form>
   );
 }
