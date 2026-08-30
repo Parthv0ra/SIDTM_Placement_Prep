@@ -45,8 +45,8 @@ export const parseResume = createServerFn({ method: "POST" })
       summary: string;
     }>({
       system:
-        "You are an expert resume reviewer. Extract structured info from the attached resume and evaluate quality on a 0-100 scale based on clarity, quantified achievements (especially checking if accomplishments are quantified with metrics/numbers), relevance, and completeness. Dock the quality score significantly (e.g., -5 points per unquantified item) for achievements lacking numbers/percentages. Respond ONLY with JSON matching the schema.",
-      prompt: `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100; explicitly list unquantified points), summary (2-3 sentences).`,
+        "You are an expert resume reviewer. Extract structured info from the attached resume and evaluate quality on a 0-100 scale. Use this balanced rubric: 85-100 = excellent (strong quantified achievements, clear structure, highly relevant skills); 70-84 = good (solid content with some areas to improve); 55-69 = average (decent but missing key elements); below 55 = needs significant work. A resume with relevant education, skills, and project experience from a graduate student should generally score 65-80. Only dock minor points (-1 to -2 each) for unquantified achievements, not major penalties. Respond ONLY with JSON matching the schema.",
+      prompt: `Extract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int, remember: a competent student resume should score 65-80 baseline), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score; mention unquantified points as improvement areas), summary (2-3 sentences).`,
       filename: resume.file_name,
       mime: resume.file_name.toLowerCase().endsWith(".pdf")
         ? "application/pdf"
@@ -108,11 +108,11 @@ export const parsePastedResume = createServerFn({ method: "POST" })
       summary: string;
     }>({
       system:
-        "You are an expert resume reviewer. Extract structured info from the provided resume text and evaluate quality on a 0-100 scale based on clarity, quantified achievements (especially checking if accomplishments are quantified with metrics/numbers), relevance, and completeness. Dock the quality score significantly (e.g., -5 points per unquantified item) for achievements lacking numbers/percentages. Respond ONLY with JSON matching the schema.",
+        "You are an expert resume reviewer. Extract structured info from the provided resume text and evaluate quality on a 0-100 scale. Use this balanced rubric: 85-100 = excellent (strong quantified achievements, clear structure, highly relevant skills); 70-84 = good (solid content with some areas to improve); 55-69 = average (decent but missing key elements); below 55 = needs significant work. A resume with relevant education, skills, and project experience from a graduate student should generally score 65-80. Only dock minor points (-1 to -2 each) for unquantified achievements, not major penalties. Respond ONLY with JSON matching the schema.",
       messages: [
         {
           role: "user",
-          content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score to at least 90/100; explicitly list unquantified points), summary (2-3 sentences).`,
+          content: `Resume text:\n"""\n${data.rawText}\n"""\n\nExtract fields as JSON with keys: full_name, email, phone, skills (string[]), projects [{name,description}], education [{degree,institution,year}], experience [{title,company,duration,description}], certifications (string[] of professional certs like AWS, ITIL, etc. if any), quality_score (0-100 int, remember: a competent student resume should score 65-80 baseline), suggestions (string[] containing 4-6 highly specific, actionable recommendations on how to improve this resume's details, layout, or content to increase the quality/ATS score; mention unquantified points as improvement areas), summary (2-3 sentences).`,
         },
       ],
     });
@@ -228,11 +228,11 @@ ${seedTech ? `- Technical question: "${seedTech}"\n` : ""}${seedHr ? `- Behavior
       }>;
     }>({
       system:
-        "You are a senior placement coach. Given a resume and target job description (JD) within a specific Domain, produce a match analysis and a personalized set of 6 interview questions (mix of technical, behavioral (STAR), role-specific, and resume-specific). Return JSON only.",
+        "You are a senior placement coach and hiring panel lead who writes sharp, non-generic interview questions that test problem-solving, not recall. You never ask textbook-definition questions like 'What is X?', and you never ask about location/relocation preference, salary/compensation expectations, notice period, or availability — those are handled elsewhere in the process. Every question must be anchored in specifics: a technology/skill/project named in the resume, or a realistic scenario in this domain and role. Each question should force the candidate to reason through a problem live — describe their approach, trade-offs, and decisions — not recite a definition or restate a resume line. Return JSON only.",
       messages: [
         {
           role: "user",
-          content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }. Note: The questions array MUST have a total of 6 questions: 2 technical, 1 behavioral, 1 role-specific, and 2 resume-specific questions that ask directly about details in their projects, experience, or achievements listed in their resume parsed JSON.${certPrompt}${seedPrompt}`,
+          content: `Target Domain: ${data.company}\nRole: ${data.role}\n\nResume (parsed JSON):\n${JSON.stringify(resume.parsed ?? {}, null, 2)}\n\nJob Description:\n${data.jdText}\n\nWrite 6 interview questions per these rules. IMPORTANT: write each question as a natural interview question would sound — never write meta-phrases like "the JD mentions..." or "based on your resume..." or "your certification in X shows...". Just ask the question directly as an interviewer would, using the specific skill/technology/scenario itself.\n- 2 technical: present a realistic problem or scenario built around a specific technology/tool/concept relevant to this role and domain, and ask the candidate to walk through HOW they would approach and solve it (design choices, trade-offs, steps, edge cases) — never an isolated "what is X" definition question.\n- 1 behavioral (STAR-style): pose a realistic work situation similar to what's implied by the candidate's actual experience/projects, and ask them to walk through how they handled or would handle it.\n- 1 role-specific: present a business scenario relevant to this role and domain (impact on cost, customers, revenue, stakeholders) and ask them to reason through how they'd approach it — frame it as a scenario, not a reference to the JD.\n- 2 resume-specific: ask them to go deeper on a specific project/experience/achievement they listed — the decisions they made, why, trade-offs considered, and how they'd approach it differently or extend it now. Phrase it as if you already know their background (which you do), not as "your resume says...".\nDo NOT include any question about location, relocation, salary, compensation, notice period, or availability.\n\nReturn JSON: { match_score:0-100 int, matched_skills:string[], missing_skills:string[], keywords:string[], gap_analysis: string (2-3 sentences), questions:[6 items with keys text, category (one of technical|behavioral|role-specific|resume-specific), time_limit_sec (60-180)] }.${certPrompt}${seedPrompt}`,
         },
       ],
     });
@@ -272,6 +272,86 @@ ${seedTech ? `- Technical question: "${seedTech}"\n` : ""}${seedHr ? `- Behavior
     return { sessionId: session.id };
   });
 
+// ---------- Shared: download a recording and run STT on it ----------
+async function transcribeRecording(supabase: any, recordingPath: string): Promise<string> {
+  const { data: file } = await supabase.storage.from("recordings").download(recordingPath);
+  if (!file) throw new Error("Recording download failed");
+  const buf = new Uint8Array(await file.arrayBuffer());
+  let bin = "";
+  for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+  const base64 = btoa(bin);
+  const mime = file.type || "audio/webm";
+
+  const { transcribeAudio } = await import("./ai-gateway.server");
+  return transcribeAudio(base64, mime);
+}
+
+// ---------- Transcribe a response so the candidate can review/correct it before scoring ----------
+export const transcribeResponse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ responseId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: resp } = await supabase
+      .from("responses")
+      .select("*")
+      .eq("id", data.responseId)
+      .single();
+    if (!resp || resp.user_id !== userId) throw new Error("Response not found");
+
+    let transcript = resp.transcript || "";
+    if (resp.recording_path && !transcript) {
+      transcript = await transcribeRecording(supabase, resp.recording_path);
+      await supabase.from("responses").update({ transcript }).eq("id", resp.id);
+    }
+
+    return { transcript };
+  });
+
+// ---------- Save a candidate's manual correction to their transcript before scoring ----------
+export const updateResponseTranscript = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ responseId: z.string().uuid(), transcript: z.string() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: resp } = await supabase
+      .from("responses")
+      .select("id,user_id")
+      .eq("id", data.responseId)
+      .single();
+    if (!resp || resp.user_id !== userId) throw new Error("Response not found");
+
+    await supabase
+      .from("responses")
+      .update({ transcript: data.transcript })
+      .eq("id", data.responseId);
+
+    return { ok: true };
+  });
+
+// ---------- Discard a response so the candidate can re-record the same question ----------
+export const discardResponse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ responseId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: resp } = await supabase
+      .from("responses")
+      .select("id,user_id,recording_path")
+      .eq("id", data.responseId)
+      .single();
+    if (!resp || resp.user_id !== userId) throw new Error("Response not found");
+
+    if (resp.recording_path) {
+      await supabase.storage.from("recordings").remove([resp.recording_path]);
+    }
+    await supabase.from("responses").delete().eq("id", data.responseId);
+
+    return { ok: true };
+  });
+
 // ---------- Score a single response (transcribe + score) ----------
 export const scoreResponse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -294,18 +374,7 @@ export const scoreResponse = createServerFn({ method: "POST" })
     let transcript = resp.transcript || "";
 
     if (resp.recording_path && !transcript) {
-      const { data: file } = await supabase.storage
-        .from("recordings")
-        .download(resp.recording_path);
-      if (!file) throw new Error("Recording download failed");
-      const buf = new Uint8Array(await file.arrayBuffer());
-      let bin = "";
-      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-      const base64 = btoa(bin);
-      const mime = file.type || "audio/webm";
-
-      const { transcribeAudio } = await import("./ai-gateway.server");
-      transcript = await transcribeAudio(base64, mime);
+      transcript = await transcribeRecording(supabase, resp.recording_path);
     }
 
     const { chatJSON } = await import("./ai-gateway.server");
@@ -338,12 +407,12 @@ export const scoreResponse = createServerFn({ method: "POST" })
         ? `\n\nOfficial Casebook Reference Solution:\n"""${casebookItem.solution_approach}"""`
         : "";
       promptSystem =
-        "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Evaluate how logically they structured their formula, how explicit their driver assumptions are, and how proper/targeted their clarifying questions to the interviewer were. Return JSON only.";
-      promptUser = `Guesstimate Case: ${q?.question_text}${casebookHelp}\n\nStudent Scratchpad & Interviewer Chat:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores: driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback comparing their drivers, assumptions, and math/clarifying questions directly to the official casebook solution). If the solution transcript has 'FINAL ESTIMATE: N/A' or does not contain a final number (indicating an approach-focused case), score the 'sanity_check' dimension based on the logical consistency of their driver values and their clarifying questions instead of docking points for a missing final number.`;
+        "You are an expert consultant and interviewer scoring a Guesstimate / Case response on multiple dimensions (0-100 integers). Score to genuinely discriminate quality — use the full 0-100 range rather than clustering everyone in the middle: 85-100 = exceptional structure and rigor, 70-84 = solid with minor gaps, 50-69 = a workable attempt with real gaps in logic or assumptions, 25-49 = weak/shallow, below 25 = little to no valid approach shown. Evaluate how logically they structured their formula, how explicit and defensible their driver assumptions are, and how proper/targeted their clarifying questions to the interviewer were — a vague or generic answer should score noticeably lower than one with clear, specific reasoning. Return JSON only.";
+      promptUser = `Guesstimate Case: ${q?.question_text}${casebookHelp}\n\nStudent Scratchpad & Interviewer Chat:\n"""${transcript}"""\n\nReturn JSON with integer 0-100 scores that genuinely reflect the quality and rigor of the approach (don't default to a middling score — reward specific, well-justified reasoning and penalize vague or generic answers): driver_breakdown, assumptions, sanity_check, overall_logic, structure, technical_accuracy, feedback (2-3 sentences of actionable feedback comparing their drivers, assumptions, and math/clarifying questions directly to the official casebook solution). If the solution transcript has 'FINAL ESTIMATE: N/A' or does not contain a final number (indicating an approach-focused case), score the 'sanity_check' dimension based on the logical consistency of their driver values and their clarifying questions instead of docking points for a missing final number.`;
     } else if (isBehavioral) {
       promptSystem =
-        "You are an expert interviewer scoring a behavioral interview response. Specifically analyze the candidate's transcript for the STAR framework structure signature (Situation, Task, Action, Result) and professional vocabulary. Return JSON only.";
-      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON: {
+        "You are an expert interviewer scoring a behavioral interview response. Score to genuinely discriminate quality — use the full 0-100 range rather than clustering everyone in the middle: 85-100 = exceptional (specific, quantified, structured), 70-84 = solid with minor gaps, 50-69 = adequate but generic or thin on specifics, 25-49 = weak/vague, below 25 = irrelevant or no real content. Specifically analyze the candidate's transcript for the STAR framework structure signature (Situation, Task, Action, Result), concrete specifics vs generic filler, and professional vocabulary — a generic, low-detail answer should score noticeably lower than one with clear, specific detail. Return JSON only.";
+      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with scores that genuinely reflect answer quality (don't default to a middling score — reward specific, structured answers and penalize vague or generic ones): {
         relevance: 0-100,
         domain_framework_knowledge: 0-100,
         general_technical_accuracy: 0-100,
@@ -358,10 +427,10 @@ export const scoreResponse = createServerFn({ method: "POST" })
       }`;
     } else {
       promptSystem =
-        "You are an expert interviewer scoring a technical or role-specific interview response. Specifically evaluate domain framework depth (eTOM, ITIL, BSS/OSS, Cloud, etc. where applicable) and general technical correctness. Return JSON only.";
-      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON: {
+        "You are an expert interviewer scoring a technical or role-specific interview response. Score to genuinely discriminate quality — use the full 0-100 range rather than clustering everyone in the middle: 85-100 = exceptional depth and correctness with a clear reasoning process, 70-84 = solid with minor gaps, 50-69 = a workable attempt but shallow or missing key reasoning, 25-49 = weak/incorrect in important ways, below 25 = little to no valid content. Specifically evaluate whether the candidate walked through a clear approach/trade-offs (not just a definition or restated fact), domain framework depth (eTOM, ITIL, BSS/OSS, Cloud, etc. where applicable), and general technical correctness — a shallow or generic answer should score noticeably lower than one demonstrating real reasoning. Return JSON only.";
+      promptUser = `Target Domain: ${session?.company} — Role: ${session?.role}\nCategory: ${q?.category}\nQuestion: ${q?.question_text}\nDuration: ${resp.duration_sec ?? "?"}s\n\nCandidate transcript:\n"""${transcript}"""\n\nReturn JSON with scores that genuinely reflect answer quality (don't default to a middling score — reward a clear, well-reasoned approach and penalize vague, generic, or definition-only answers): {
         relevance: 0-100,
-        domain_framework_knowledge: 0-100 (rate specifically on awareness of eTOM, ITIL, SD-WAN, BSS/OSS, etc. relevant to target domain),
+        domain_framework_knowledge: 0-100 (rate specifically on awareness of eTOM, ITIL, SD-WAN, BSS/OSS, etc. relevant to target domain; if not applicable to this domain, score based on general domain knowledge instead),
         general_technical_accuracy: 0-100,
         communication: 0-100,
         fluency: 0-100,

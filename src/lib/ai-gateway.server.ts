@@ -15,14 +15,24 @@ function getGroqModel(requestedModel?: string) {
   const defaultModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
   const default8bModel = process.env.GROQ_MODEL_8B || "llama-3.1-8b-instant";
 
-  if (!requestedModel) {
-    return defaultModel;
+  let resolved = defaultModel;
+  if (requestedModel) {
+    const model = requestedModel.toLowerCase();
+    if (model.includes("gemini") || model.includes("flash") || model.includes("8b")) {
+      resolved = default8bModel;
+    } else {
+      resolved = requestedModel;
+    }
   }
-  const model = requestedModel.toLowerCase();
-  if (model.includes("gemini") || model.includes("flash") || model.includes("8b")) {
-    return default8bModel;
+
+  // Map unavailable models to available ones on the user's Groq key
+  if (resolved === "llama-3.3-70b-versatile") {
+    return "openai/gpt-oss-120b";
   }
-  return defaultModel;
+  if (resolved === "llama-3.1-8b-instant") {
+    return "openai/gpt-oss-20b";
+  }
+  return resolved;
 }
 
 async function parseDocument(base64: string, mime: string): Promise<string> {
@@ -201,6 +211,7 @@ export async function chatJSON<T = unknown>(opts: {
   system?: string;
   messages: Array<{ role: "system" | "user" | "assistant"; content: unknown }>;
   temperature?: number;
+  max_tokens?: number;
 }): Promise<T> {
   const model = getGroqModel(opts.model);
   const messages = [
@@ -211,30 +222,56 @@ export async function chatJSON<T = unknown>(opts: {
     })),
   ];
 
-  const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getApiKey()}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      response_format: { type: "json_object" },
-      temperature: opts.temperature ?? 0.4,
-    }),
-  });
+  const MAX_RETRIES = 3;
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Groq API ${res.status}: ${text}`);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApiKey()}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        response_format: { type: "json_object" },
+        temperature: opts.temperature ?? 0.4,
+        max_tokens: opts.max_tokens ?? 4096,
+      }),
+    });
+
+    if (res.status === 429 && attempt < MAX_RETRIES) {
+      const body = await res.text().catch(() => "");
+      // Try to extract wait time from the error message (e.g. "Please try again in 47.75s")
+      const waitMatch = body.match(/try again in ([\d.]+)s/i);
+      const retryAfterHeader = res.headers.get("retry-after");
+      let waitSec = waitMatch
+        ? parseFloat(waitMatch[1])
+        : retryAfterHeader
+          ? parseFloat(retryAfterHeader)
+          : 15 * (attempt + 1); // fallback: 15s, 30s, 45s
+      // Cap wait to 90s max, add 2s buffer
+      waitSec = Math.min(waitSec + 2, 90);
+      console.warn(
+        `Groq 429 rate limit hit (attempt ${attempt + 1}/${MAX_RETRIES}). Waiting ${waitSec.toFixed(1)}s before retry...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+      continue;
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Groq API ${res.status}: ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    const raw = data.choices?.[0]?.message?.content ?? "{}";
+    return safeParseJSON<T>(raw);
   }
 
-  const data = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
-  const raw = data.choices?.[0]?.message?.content ?? "{}";
-  return safeParseJSON<T>(raw);
+  throw new Error("Groq API rate limit: max retries exceeded. Please wait a minute and try again.");
 }
 
 export async function transcribeAudio(base64: string, mime: string): Promise<string> {
@@ -294,6 +331,7 @@ export async function chatText(opts: {
   system?: string;
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
   temperature?: number;
+  max_tokens?: number;
 }): Promise<string> {
   const model = getGroqModel(opts.model);
   const messages = [
@@ -301,26 +339,50 @@ export async function chatText(opts: {
     ...opts.messages,
   ];
 
-  const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getApiKey()}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: opts.temperature ?? 0.6,
-    }),
-  });
+  const MAX_RETRIES = 3;
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Groq API ${res.status}: ${text}`);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const res = await fetch(`${GROQ_API_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApiKey()}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: opts.temperature ?? 0.6,
+        max_tokens: opts.max_tokens ?? 4096,
+      }),
+    });
+
+    if (res.status === 429 && attempt < MAX_RETRIES) {
+      const body = await res.text().catch(() => "");
+      const waitMatch = body.match(/try again in ([\d.]+)s/i);
+      const retryAfterHeader = res.headers.get("retry-after");
+      let waitSec = waitMatch
+        ? parseFloat(waitMatch[1])
+        : retryAfterHeader
+          ? parseFloat(retryAfterHeader)
+          : 15 * (attempt + 1);
+      waitSec = Math.min(waitSec + 2, 90);
+      console.warn(
+        `Groq 429 rate limit hit (attempt ${attempt + 1}/${MAX_RETRIES}). Waiting ${waitSec.toFixed(1)}s before retry...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+      continue;
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Groq API ${res.status}: ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    return data.choices?.[0]?.message?.content ?? "";
   }
 
-  const data = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
-  return data.choices?.[0]?.message?.content ?? "";
+  throw new Error("Groq API rate limit: max retries exceeded. Please wait a minute and try again.");
 }

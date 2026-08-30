@@ -798,7 +798,19 @@ function ShortlistEvaluatorPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Shortlist Evaluation Report</h2>
-            <Button variant="outline" size="sm" onClick={() => setScanResult(null)}>
+            <Button variant="outline" size="sm" onClick={() => {
+              setScanResult(null);
+              setFile(null);
+              setPastedText("");
+              setResumeSource("new");
+              setResumeInputMode("file");
+              setDomain("");
+              setDomainCustom("");
+              setRole("");
+              setRoleCustom("");
+              setJdText("");
+              setJdFile(null);
+            }}>
               Start New Evaluation
             </Button>
           </div>

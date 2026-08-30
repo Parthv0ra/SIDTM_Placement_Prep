@@ -3,11 +3,18 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { scoreResponse, finalizeSession } from "@/lib/interview.functions";
+import {
+  scoreResponse,
+  finalizeSession,
+  transcribeResponse,
+  updateResponseTranscript,
+  discardResponse,
+} from "@/lib/interview.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Mic, Square, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Mic, Square, Loader2, CheckCircle2, AlertTriangle, RotateCcw, Send } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/interview/$id")({
@@ -15,12 +22,16 @@ export const Route = createFileRoute("/_authenticated/interview/$id")({
 });
 
 const PER_QUESTION_SECONDS = 120;
+const MAX_RETAKES = 2;
 
 function LiveInterview() {
   const { id } = Route.useParams();
   const router = useRouter();
   const scoreFn = useServerFn(scoreResponse);
   const finalizeFn = useServerFn(finalizeSession);
+  const transcribeFn = useServerFn(transcribeResponse);
+  const updateTranscriptFn = useServerFn(updateResponseTranscript);
+  const discardFn = useServerFn(discardResponse);
 
   const { data, isLoading } = useQuery({
     queryKey: ["session", id],
@@ -38,6 +49,9 @@ function LiveInterview() {
   const [processing, setProcessing] = useState(false);
   const [seconds, setSeconds] = useState(PER_QUESTION_SECONDS);
   const [finished, setFinished] = useState<boolean[]>([]);
+  const [reviewingResponseId, setReviewingResponseId] = useState<string | null>(null);
+  const [transcriptDraft, setTranscriptDraft] = useState("");
+  const [retakes, setRetakes] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -307,13 +321,34 @@ function LiveInterview() {
         .select()
         .single();
       if (rErr || !resp) throw new Error(rErr?.message ?? "Could not save response");
-      await scoreFn({ data: { responseId: resp.id } });
+
+      const { transcript } = await transcribeFn({ data: { responseId: resp.id } });
+      setReviewingResponseId(resp.id);
+      setTranscriptDraft(transcript);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not transcribe your answer");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  async function handleConfirmAnswer() {
+    if (!reviewingResponseId) return;
+    setProcessing(true);
+    try {
+      await updateTranscriptFn({
+        data: { responseId: reviewingResponseId, transcript: transcriptDraft },
+      });
+      await scoreFn({ data: { responseId: reviewingResponseId } });
 
       setFinished((f) => {
         const nf = [...f];
         nf[idx] = true;
         return nf;
       });
+      setReviewingResponseId(null);
+      setTranscriptDraft("");
+      setRetakes(0);
 
       if (idx + 1 < total) {
         setIdx(idx + 1);
@@ -326,6 +361,22 @@ function LiveInterview() {
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not score response");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  async function handleReRecord() {
+    if (!reviewingResponseId) return;
+    setProcessing(true);
+    try {
+      await discardFn({ data: { responseId: reviewingResponseId } });
+      setReviewingResponseId(null);
+      setTranscriptDraft("");
+      setRetakes((r) => r + 1);
+      setSeconds(PER_QUESTION_SECONDS);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not discard recording");
     } finally {
       setProcessing(false);
     }
@@ -416,11 +467,11 @@ function LiveInterview() {
             )}
           </div>
           <div className="flex flex-col gap-3">
-            {!recording ? (
+            {!reviewingResponseId && (!recording ? (
               <Button size="lg" onClick={startRec} disabled={processing}>
                 {processing ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Transcribing…
                   </>
                 ) : (
                   <>
@@ -430,9 +481,9 @@ function LiveInterview() {
               </Button>
             ) : (
               <Button size="lg" variant="destructive" onClick={stopRec}>
-                <Square className="mr-2 h-4 w-4" /> Stop & submit
+                <Square className="mr-2 h-4 w-4" /> Stop & review
               </Button>
-            )}
+            ))}
 
             {recording && (
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive flex items-center justify-between">
@@ -443,10 +494,12 @@ function LiveInterview() {
               </div>
             )}
 
-            <div className="rounded-md border bg-secondary/40 p-3 text-xs text-muted-foreground">
-              One-shot recording per question. Speak clearly, use the STAR structure for behavioural
-              answers.
-            </div>
+            {!reviewingResponseId && (
+              <div className="rounded-md border bg-secondary/40 p-3 text-xs text-muted-foreground">
+                Speak clearly, use the STAR structure for behavioural answers. You can re-record up
+                to {MAX_RETAKES} times per question if something goes wrong.
+              </div>
+            )}
             <ul className="space-y-1 text-xs">
               {questions.map((q, i) => (
                 <li
@@ -464,6 +517,49 @@ function LiveInterview() {
             </ul>
           </div>
         </div>
+
+        {reviewingResponseId && (
+          <Card className="mt-6 border-primary/30">
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">Review your answer before submitting</p>
+                <p className="text-xs text-muted-foreground">
+                  {retakes >= MAX_RETAKES ? "No re-records left" : `${MAX_RETAKES - retakes} re-record(s) left`}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This is what was heard. Fix any transcription mistakes, then submit for scoring — or
+                re-record if you want to answer again.
+              </p>
+              <Textarea
+                value={transcriptDraft}
+                onChange={(e) => setTranscriptDraft(e.target.value)}
+                rows={6}
+                className="text-sm"
+                placeholder="No speech detected — try re-recording."
+              />
+              <div className="flex gap-2">
+                <Button onClick={handleConfirmAnswer} disabled={processing} className="gap-2">
+                  {processing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  Confirm & score
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleReRecord}
+                  disabled={processing || retakes >= MAX_RETAKES}
+                  className="gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Re-record
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
