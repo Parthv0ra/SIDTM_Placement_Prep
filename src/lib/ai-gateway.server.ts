@@ -11,6 +11,12 @@ function getApiKey() {
   return key;
 }
 
+// gpt-oss models spend a lot of hidden tokens "thinking" before answering.
+// Capping reasoning effort keeps the JSON schema/quality but cuts latency substantially.
+function isGptOssModel(model: string): boolean {
+  return model.startsWith("openai/gpt-oss");
+}
+
 function getGroqModel(requestedModel?: string) {
   const defaultModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
   const default8bModel = process.env.GROQ_MODEL_8B || "llama-3.1-8b-instant";
@@ -212,6 +218,7 @@ export async function chatJSON<T = unknown>(opts: {
   messages: Array<{ role: "system" | "user" | "assistant"; content: unknown }>;
   temperature?: number;
   max_tokens?: number;
+  reasoningEffort?: "low" | "medium" | "high";
 }): Promise<T> {
   const model = getGroqModel(opts.model);
   const messages = [
@@ -236,7 +243,8 @@ export async function chatJSON<T = unknown>(opts: {
         messages,
         response_format: { type: "json_object" },
         temperature: opts.temperature ?? 0.4,
-        max_tokens: opts.max_tokens ?? 4096,
+        max_tokens: opts.max_tokens ?? 2048,
+        ...(isGptOssModel(model) ? { reasoning_effort: opts.reasoningEffort ?? "low" } : {}),
       }),
     });
 
@@ -332,6 +340,7 @@ export async function chatText(opts: {
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
   temperature?: number;
   max_tokens?: number;
+  reasoningEffort?: "low" | "medium" | "high";
 }): Promise<string> {
   const model = getGroqModel(opts.model);
   const messages = [
@@ -352,7 +361,8 @@ export async function chatText(opts: {
         model,
         messages,
         temperature: opts.temperature ?? 0.6,
-        max_tokens: opts.max_tokens ?? 4096,
+        max_tokens: opts.max_tokens ?? 2048,
+        ...(isGptOssModel(model) ? { reasoning_effort: opts.reasoningEffort ?? "low" } : {}),
       }),
     });
 

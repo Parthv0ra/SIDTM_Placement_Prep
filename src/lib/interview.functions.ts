@@ -308,29 +308,6 @@ export const transcribeResponse = createServerFn({ method: "POST" })
     return { transcript };
   });
 
-// ---------- Save a candidate's manual correction to their transcript before scoring ----------
-export const updateResponseTranscript = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ responseId: z.string().uuid(), transcript: z.string() }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { data: resp } = await supabase
-      .from("responses")
-      .select("id,user_id")
-      .eq("id", data.responseId)
-      .single();
-    if (!resp || resp.user_id !== userId) throw new Error("Response not found");
-
-    await supabase
-      .from("responses")
-      .update({ transcript: data.transcript })
-      .eq("id", data.responseId);
-
-    return { ok: true };
-  });
-
 // ---------- Discard a response so the candidate can re-record the same question ----------
 export const discardResponse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -359,6 +336,7 @@ export const scoreResponse = createServerFn({ method: "POST" })
     z
       .object({
         responseId: z.string().uuid(),
+        transcript: z.string().optional(),
       })
       .parse(d),
   )
@@ -371,7 +349,7 @@ export const scoreResponse = createServerFn({ method: "POST" })
       .single();
     if (!resp || resp.user_id !== userId) throw new Error("Response not found");
 
-    let transcript = resp.transcript || "";
+    let transcript = data.transcript ?? resp.transcript ?? "";
 
     if (resp.recording_path && !transcript) {
       transcript = await transcribeRecording(supabase, resp.recording_path);

@@ -7,7 +7,6 @@ import {
   scoreResponse,
   finalizeSession,
   transcribeResponse,
-  updateResponseTranscript,
   discardResponse,
 } from "@/lib/interview.functions";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,6 @@ function LiveInterview() {
   const scoreFn = useServerFn(scoreResponse);
   const finalizeFn = useServerFn(finalizeSession);
   const transcribeFn = useServerFn(transcribeResponse);
-  const updateTranscriptFn = useServerFn(updateResponseTranscript);
   const discardFn = useServerFn(discardResponse);
 
   const { data, isLoading } = useQuery({
@@ -336,10 +334,9 @@ function LiveInterview() {
     if (!reviewingResponseId) return;
     setProcessing(true);
     try {
-      await updateTranscriptFn({
+      await scoreFn({
         data: { responseId: reviewingResponseId, transcript: transcriptDraft },
       });
-      await scoreFn({ data: { responseId: reviewingResponseId } });
 
       setFinished((f) => {
         const nf = [...f];
