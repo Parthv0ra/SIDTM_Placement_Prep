@@ -710,7 +710,7 @@ export const getAdminDashboardData = createServerFn({ method: "POST" })
     const isStaff = roles?.some((r) => r.role === "admin" || r.role === "faculty") ?? false;
 
     if (!isStaff) {
-      return { isStaff: false, sessions: [], scorecards: [] };
+      return { isStaff: false, sessions: [], scorecards: [], profiles: [] };
     }
 
     // 2. Fetch all sessions, profiles, and scorecards as admin (bypassing RLS)
@@ -736,6 +736,7 @@ export const getAdminDashboardData = createServerFn({ method: "POST" })
       isStaff: true,
       sessions: enrichedSessions,
       scorecards: scorecards ?? [],
+      profiles: profiles ?? [],
     };
   });
 

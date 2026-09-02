@@ -69,6 +69,17 @@ function Admin() {
     }
   > = {};
 
+  data.profiles.forEach((p: any) => {
+    studentMap[p.id] = {
+      id: p.id,
+      name: p.full_name ?? p.email ?? "Unknown",
+      email: p.email ?? "—",
+      sessions: [],
+      scorecards: [],
+      avgReadiness: 0,
+    };
+  });
+
   data.sessions.forEach((s: any) => {
     const userId = s.user_id;
     const profile = s.profiles;
